@@ -1,1 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C程序设计基础 · 概述课：AI时代，这些基础为什么更重要</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html, body {
+    height: 100%;
+    font-family: "微软雅黑", "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    overflow: hidden;
+  }
+
+  body {
+    background: radial-gradient(circle at 18% 8%, #1b2534 0%, #0d1117 58%);
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 56px 80px;
+  }
+  .slide.active { display: flex; }
+
+  /* ===== 标题 ===== */
+  .slide-title {
+    font-size: 42px;
+    font-weight: 700;
+    color: #e6edf3;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+  }
+  .slide-title .accent { color: #58a6ff; }
+  .slide-title .warn   { color: #f0883e; }
+
+  .lead {
+    font-size: 28px;
+    line-height: 1.7;
+    color: #c9d1d9;
+    margin-bottom: 22px;
+  }
+  .text {
+    font-size: 24px;
+    line-height: 1.85;
+    color: #aab4c0;
+  }
+  .small {
+    font-size: 20px;
+    line-height: 1.7;
+    color: #7d8590;
+  }
+
+  .hl-blue   { color: #58a6ff; font-weight: 700; }
+  .hl-green  { color: #3fb950; font-weight: 700; }
+  .hl-orange { color: #f0883e; font-weight: 700; }
+  .hl-red    { color: #f85149; font-weight: 700; }
+
+  /* ===== 封面 ===== */
+  .cover { text-align: left; max-width: 1200px; }
+  .cover-kicker {
+    font-size: 24px;
+    color: #58a6ff;
+    letter-spacing: 6px;
+    margin-bottom: 28px;
+    font-weight: 700;
+  }
+  .cover h1 {
+    font-size: 60px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #e6edf3;
+    margin-bottom: 30px;
+  }
+  .cover h1 .grad {
+    background: linear-gradient(90deg, #58a6ff, #3fb950);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .cover-line {
+    width: 120px;
+    height: 5px;
+    background: linear-gradient(90deg, #58a6ff, #3fb950);
+    border-radius: 3px;
+    margin-bottom: 30px;
+  }
+  .cover-sub {
+    font-size: 26px;
+    color: #8b949e;
+    line-height: 1.7;
+  }
+
+  /* ===== 卡片 ===== */
+  .card-grid {
+    display: grid;
+    gap: 24px;
+    width: 100%;
+  }
+  .card-grid.c2 { grid-template-columns: repeat(2, 1fr); }
+  .card-grid.c3 { grid-template-columns: repeat(3, 1fr); }
+
+  .card {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 30px 28px;
+  }
+  .card .card-icon {
+    font-size: 36px;
+    margin-bottom: 14px;
+    display: block;
+  }
+  .card h3 {
+    font-size: 25px;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 12px;
+  }
+  .card p {
+    font-size: 22px;
+    line-height: 1.7;
+    color: #aab4c0;
+  }
+  .card.green h3 { color: #3fb950; }
+  .card.orange h3 { color: #f0883e; }
+  .card.purple h3 { color: #bc8cff; }
+
+  /* ===== 两栏 ===== */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    width: 100%;
+  }
+  .panel {
+    border-radius: 18px;
+    padding: 30px 28px;
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 6px solid #58a6ff;
+  }
+  .panel.green  { border-left-color: #3fb950; }
+  .panel.orange { border-left-color: #f0883e; }
+  .panel.red    { border-left-color: #f85149; }
+  .panel h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .panel.green  h3 { color: #3fb950; }
+  .panel.orange h3 { color: #f0883e; }
+  .panel.red    h3 { color: #f85149; }
+  .panel ul { list-style: none; }
+  .panel li {
+    font-size: 22px;
+    line-height: 1.8;
+    color: #aab4c0;
+    padding-left: 26px;
+    position: relative;
+    margin-bottom: 8px;
+  }
+  .panel li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: #58a6ff;
+    font-weight: 700;
+  }
+  .panel.green  li::before { color: #3fb950; }
+  .panel.orange li::before { color: #f0883e; }
+  .panel.red    li::before { color: #f85149; }
+
+  /* ===== 代码框 ===== */
+  .code-box {
+    background: #161b22;
+    border: 1px solid rgba(88, 166, 255, 0.25);
+    border-radius: 14px;
+    padding: 22px 26px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 23px;
+    line-height: 1.7;
+    color: #c9d1d9;
+    margin-bottom: 18px;
+  }
+  .code-box .label {
+    font-family: "微软雅黑", "Microsoft YaHei", sans-serif;
+    font-size: 20px;
+    color: #7d8590;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .code-box.bad  { border-color: rgba(248, 81, 73, 0.45); }
+  .code-box.good { border-color: rgba(63, 185, 80, 0.45); }
+  .code-box.bad  .text-line { color: #f85149; }
+  .code-box.good .text-line { color: #3fb950; }
+
+  /* ===== 编号列表 ===== */
+  .num-list { list-style: none; counter-reset: n; width: 100%; }
+  .num-list li {
+    counter-increment: n;
+    position: relative;
+    padding: 18px 0 18px 72px;
+    font-size: 24px;
+    line-height: 1.75;
+    color: #c9d1d9;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .num-list li:last-child { border-bottom: none; }
+  .num-list li::before {
+    content: counter(n);
+    position: absolute;
+    left: 0;
+    top: 18px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f6feb, #3fb950);
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== 引用 ===== */
+  .quote {
+    border-left: 6px solid #bc8cff;
+    padding: 6px 0 6px 28px;
+    margin: 20px 0;
+    font-size: 26px;
+    line-height: 1.8;
+    color: #c9d1d9;
+  }
+  .quote-src {
+    display: block;
+    margin-top: 12px;
+    font-size: 20px;
+    color: #7d8590;
+  }
+
+  /* ===== 大结论 ===== */
+  .big-statement {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.65;
+    color: #e6edf3;
+    text-align: center;
+  }
+  .big-statement .hl-green { color: #3fb950; }
+
+  /* ===== 标签 ===== */
+  .tag-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .tag {
+    font-size: 22px;
+    padding: 10px 24px;
+    border-radius: 30px;
+    background: rgba(88, 166, 255, 0.12);
+    border: 1px solid rgba(88, 166, 255, 0.4);
+    color: #58a6ff;
+    font-weight: 700;
+  }
+  .tag.green {
+    background: rgba(63, 185, 80, 0.12);
+    border-color: rgba(63, 185, 80, 0.4);
+    color: #3fb950;
+  }
+  .tag.orange {
+    background: rgba(240, 136, 62, 0.12);
+    border-color: rgba(240, 136, 62, 0.4);
+    color: #f0883e;
+  }
+
+  /* ===== 表格 ===== */
+  .cmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+  .cmp-table thead th {
+    font-size: 23px;
+    font-weight: 700;
+    color: #58a6ff;
+    text-align: left;
+    padding: 16px 22px;
+    background: rgba(88, 166, 255, 0.08);
+    border-bottom: 2px solid rgba(88, 166, 255, 0.3);
+  }
+  .cmp-table thead th:first-child { border-radius: 14px 0 0 0; }
+  .cmp-table thead th:last-child  { border-radius: 0 14px 0 0; }
+  .cmp-table tbody td {
+    font-size: 21px;
+    line-height: 1.6;
+    color: #c9d1d9;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .cmp-table tbody tr:last-child td { border-bottom: none; }
+  .cmp-table tbody tr.highlight-row {
+    background: rgba(240, 136, 62, 0.08);
+  }
+  .cmp-table tbody tr.highlight-row td {
+    color: #f0883e;
+    font-weight: 700;
+  }
+  .cmp-table .tool-name {
+    color: #e6edf3;
+    font-weight: 700;
+  }
+
+  /* ===== 步骤条 ===== */
+  .step-flow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+  .step-item {
+    background: rgba(88, 166, 255, 0.1);
+    border: 1px solid rgba(88, 166, 255, 0.35);
+    border-radius: 12px;
+    padding: 14px 22px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #58a6ff;
+  }
+  .step-arrow {
+    font-size: 24px;
+    color: #3fb950;
+    font-weight: 700;
+  }
+
+  /* ===== 结束页 ===== */
+  .end-title {
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 30px;
+  }
+  .end-title .grad {
+    background: linear-gradient(90deg, #58a6ff, #3fb950);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .end-sub {
+    font-size: 26px;
+    color: #8b949e;
+    line-height: 1.8;
+  }
+  .end-sub code {
+    font-family: "Consolas", "Courier New", monospace;
+    color: #3fb950;
+    background: rgba(63, 185, 80, 0.1);
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+
+  /* ===== 导航 ===== */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #58a6ff, #3fb950);
+    transition: width 0.3s ease;
+    z-index: 200;
+  }
+  .page-num {
+    position: fixed;
+    bottom: 26px; left: 38px;
+    font-size: 20px;
+    color: #4d5560;
+    z-index: 100;
+  }
+  .nav {
+    position: fixed;
+    bottom: 22px; right: 34px;
+    display: flex;
+    gap: 14px;
+    z-index: 100;
+  }
+  .nav button {
+    font-family: "微软雅黑", "Microsoft YaHei", sans-serif;
+    font-size: 20px;
+    padding: 12px 28px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #c9d1d9;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav button:hover {
+    background: rgba(88, 166, 255, 0.2);
+    border-color: #58a6ff;
+    color: #ffffff;
+  }
+
+  @media (max-width: 900px) {
+    .slide { padding: 36px 24px; }
+    .cover h1 { font-size: 38px; }
+    .slide-title { font-size: 30px; }
+    .big-statement { font-size: 28px; }
+    .card-grid.c2, .card-grid.c3, .two-col { grid-template-columns: 1fr; }
+    .card p, .panel li, .text { font-size: 20px; }
+    .cmp-table thead th, .cmp-table tbody td { font-size: 20px; padding: 12px 14px; }
+    .step-flow { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<!-- ==================== 1 封面 ==================== -->
+<div class="slide active">
+  <div class="cover">
+    <div class="cover-kicker">C 程序设计基础 · 概述课</div>
+    <h1>AI 时代，<br>这些基础<span class="grad">为什么更重要</span>？</h1>
+    <div class="cover-line"></div>
+    <p class="cover-sub">进制 · 编码 · 补码 · 浮点数 · 算法 · 第一个 C 程序</p>
+  </div>
+</div>
+
+<!-- ==================== 2 今天讲什么 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">今天讲<span class="accent">什么</span></h2>
+  <div class="card-grid c3">
+    <div class="card">
+      <span class="card-icon">🔢</span>
+      <h3>进制与位运算</h3>
+      <p>看懂十六进制<br>看懂位操作</p>
+    </div>
+    <div class="card green">
+      <span class="card-icon">🔤</span>
+      <h3>编码</h3>
+      <p>ASCII、GBK、UTF-8<br>为什么会有乱码</p>
+    </div>
+    <div class="card orange">
+      <span class="card-icon">➕</span>
+      <h3>原码反码补码</h3>
+      <p>整数溢出<br>有符号无符号陷阱</p>
+    </div>
+    <div class="card purple">
+      <span class="card-icon">📐</span>
+      <h3>浮点数</h3>
+      <p>0.1 + 0.2<br>为什么不等于 0.3</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">🧩</span>
+      <h3>算法概念</h3>
+      <p>判断 AI 代码<br>是否合格的基础</p>
+    </div>
+    <div class="card green">
+      <span class="card-icon">💻</span>
+      <h3>第一个 C 程序</h3>
+      <p>从源码到可执行文件<br>完整过程</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 3 总原则 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">先给一个<span class="accent">总原则</span></h2>
+  <p class="big-statement" style="margin-bottom: 36px;">
+    这些知识不是<span class="hl-orange">历史遗留内容</span>，<br>
+    而是 <span class="hl-green">AI 时代判断力的地基</span>。
+  </p>
+  <div class="quote">
+    “AI 会在这里犯错。<br>
+    你不懂，就看不出来。”
+    <span class="quote-src">—— 本课贯穿始终的一句话</span>
+  </div>
+  <p class="text" style="margin-top: 28px; text-align: center;">
+    接下来每一块内容，我们都会问同一个问题：<br>
+    <span class="hl-blue">AI 可能在哪个地方出错？你凭什么看出来？</span>
+  </p>
+</div>
+
+<!-- ==================== 4 进制转换 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">进制：<span class="accent">不是手算，是看懂</span></h2>
+  <div class="two-col">
+    <div class="panel">
+      <h3>以前怎么讲</h3>
+      <ul>
+        <li>大量手算转换练习</li>
+        <li>为了应付考试</li>
+        <li>学完就忘</li>
+      </ul>
+    </div>
+    <div class="panel green">
+      <h3>现在为什么讲</h3>
+      <ul>
+        <li>看懂内存地址 <span class="hl-green">0x7fff...</span></li>
+        <li>看懂位运算 <span class="hl-green">0xFF &amp; 0x0F</span></li>
+        <li>看懂 AI 代码里的位操作</li>
+      </ul>
+    </div>
+  </div>
+  <div class="code-box" style="margin-top: 26px;">
+    <span class="label">AI 生成的代码里，你经常看到这种写法：</span>
+    <div class="text-line">flags = flags | 0x80;    // 把最高位设为 1</div>
+    <div class="text-line">data = (data &gt;&gt; 4) &amp; 0x0F;  // 取高 4 位</div>
+  </div>
+  <p class="text" style="text-align: center;">
+    不懂进制和位运算，你连它在干什么都不知道，<br>
+    更别提判断它对不对。
+  </p>
+</div>
+
+<!-- ==================== 5 编码 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">编码：<span class="warn">AI 最容易翻车的地方</span></h2>
+  <p class="lead">
+    字符在计算机里，本质上是一个整数。<br>
+    编码，就是约定俗成的映射规则。
+  </p>
+  <div class="card-grid c3" style="margin-top: 10px;">
+    <div class="card">
+      <span class="card-icon">🔤</span>
+      <h3>ASCII</h3>
+      <p>英文世界的标准<br>一个字符一个字节</p>
+    </div>
+    <div class="card green">
+      <span class="card-icon">🀄</span>
+      <h3>GBK</h3>
+      <p>中文世界的旧标准<br>一个汉字两个字节</p>
+    </div>
+    <div class="card orange">
+      <span class="card-icon">🌍</span>
+      <h3>UTF-8</h3>
+      <p>全球通用<br>一个汉字三个字节</p>
+    </div>
+  </div>
+  <p class="text" style="margin-top: 26px; text-align: center;">
+    为什么会有乱码？因为<span class="hl-orange">编码和解码用了不同的规则</span>。<br>
+    AI 处理中文字符串时，经常在这里出错——你得能看出来。
+  </p>
+</div>
+
+<!-- ==================== 6 补码 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">补码：<span class="accent">整数溢出与陷阱</span></h2>
+  <p class="lead">
+    为什么用补码？因为它统一了加减法，消除了负零。<br>
+    <span class="hl-orange">但补码也带来了经典陷阱。</span>
+  </p>
+  <div class="code-box bad">
+    <span class="label">AI 生成的代码，可能藏了这个坑：</span>
+    <div class="text-line">int a = -1;</div>
+    <div class="text-line">unsigned int b = 1;</div>
+    <div class="text-line">if (a &lt; b) { ... }   // 你以为会进，其实不会</div>
+  </div>
+  <div class="two-col" style="margin-top: 8px;">
+    <div class="panel red">
+      <h3>为什么危险</h3>
+      <ul>
+        <li><span class="hl-red">-1</span> 在内存里是 0xFFFFFFFF</li>
+        <li>和 unsigned 比较时，a 被当成一个巨大的正数</li>
+        <li>结果：<span class="hl-red">-1 &gt; 1</span></li>
+      </ul>
+    </div>
+    <div class="panel green">
+      <h3>你该怎么做</h3>
+      <ul>
+        <li>看到 signed / unsigned 混用，立刻警觉</li>
+        <li>让 AI 解释这段代码的类型转换</li>
+        <li>自己写一遍，亲手验证</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 7 浮点数 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">浮点数：<span class="warn">最隐蔽的坑</span></h2>
+  <p class="big-statement" style="margin-bottom: 30px;">
+    <span class="hl-red">0.1 + 0.2 ≠ 0.3</span>
+  </p>
+  <div class="code-box bad">
+    <span class="label">你运行这段代码，结果会让你怀疑人生：</span>
+    <div class="text-line">float sum = 0;</div>
+    <div class="text-line">for (int i = 0; i &lt; 10; i++) sum += 0.1;</div>
+    <div class="text-line">printf("%.10f\n", sum);  // 0.9999999404</div>
+  </div>
+  <div class="two-col" style="margin-top: 10px;">
+    <div class="panel orange">
+      <h3>为什么</h3>
+      <ul>
+        <li>浮点数用二进制表示</li>
+        <li>0.1 在二进制里是无限循环小数</li>
+        <li>存储时被截断，产生误差</li>
+      </ul>
+    </div>
+    <div class="panel green">
+      <h3>怎么用</h3>
+      <ul>
+        <li>不要用 == 比较浮点数</li>
+        <li>用 <span class="hl-green">fabs(a - b) &lt; 1e-6</span> 判断相等</li>
+        <li>需要精确计算时，用整数或定点数</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 8 算法概念 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">算法：<span class="accent">判断 AI 代码的基础</span></h2>
+  <p class="lead">
+    算法的五个特性，仍然是判断一段代码是否合格的底层标准。
+  </p>
+  <ul class="num-list">
+    <li><span class="hl-blue">有穷性</span>：步骤有限，不能无限循环。</li>
+    <li><span class="hl-blue">确定性</span>：每一步含义明确，不能有歧义。</li>
+    <li><span class="hl-blue">可行性</span>：每一步都能实际执行。</li>
+    <li><span class="hl-blue">输入</span>：有零个或多个输入。</li>
+    <li><span class="hl-blue">输出</span>：有至少一个输出。</li>
+  </ul>
+  <p class="text" style="margin-top: 24px; text-align: center;">
+    AI 给你的代码，你拿这五条去套——<br>
+    <span class="hl-green">过不了，就不是合格算法，哪怕它能跑。</span>
+  </p>
+</div>
+
+<!-- ==================== 9 流程图 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">流程图：<span class="accent">弱化画图，强化拆解</span></h2>
+  <div class="two-col">
+    <div class="panel">
+      <h3>以前</h3>
+      <ul>
+        <li>花大量时间手画流程图</li>
+        <li>记各种图形符号</li>
+        <li>画完就扔，跟代码脱节</li>
+      </ul>
+    </div>
+    <div class="panel green">
+      <h3>现在</h3>
+      <ul>
+        <li>用自然语言描述步骤</li>
+        <li>让 AI 生成流程图</li>
+        <li><span class="hl-green">你检查 AI 的图对不对</span></li>
+      </ul>
+    </div>
+  </div>
+  <p class="text" style="margin-top: 30px; text-align: center;">
+    核心能力不是画图，是<span class="hl-green">把问题拆解成可执行步骤</span>。<br>
+    你能拆清楚，AI 才能生成对；你拆不清楚，AI 也帮不了你。
+  </p>
+</div>
+
+<!-- ==================== 10 第一个C程序 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">第一个 C 程序：<span class="accent">理解完整过程</span></h2>
+  <div class="step-flow">
+    <div class="step-item">编辑 .c</div>
+    <div class="step-arrow">→</div>
+    <div class="step-item">预处理</div>
+    <div class="step-arrow">→</div>
+    <div class="step-item">编译 .s</div>
+    <div class="step-arrow">→</div>
+    <div class="step-item">汇编 .o</div>
+    <div class="step-arrow">→</div>
+    <div class="step-item">链接 .exe</div>
+    <div class="step-arrow">→</div>
+    <div class="step-item">运行</div>
+  </div>
+  <div class="code-box good" style="margin-top: 20px;">
+    <span class="label">你的第一个程序：</span>
+    <div class="text-line">#include &lt;stdio.h&gt;</div>
+    <div class="text-line">int main() {</div>
+    <div class="text-line">    printf("Hello, World!\n");</div>
+    <div class="text-line">    return 0;</div>
+    <div class="text-line">}</div>
+  </div>
+  <p class="text" style="text-align: center;">
+    重点不是这一行代码，而是<span class="hl-green">从源码到可执行文件的完整过程</span>。<br>
+    这个过程，AI 替不了你理解。
+  </p>
+</div>
+
+<!-- ==================== 11 故意犯错 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">故意犯几个错，<span class="accent">学会读错误信息</span></h2>
+  <div class="code-box bad">
+    <span class="label">❌ 少了一个分号</span>
+    <div class="text-line">printf("Hello, World!\n")</div>
+  </div>
+  <div class="code-box bad">
+    <span class="label">❌ 函数名拼错了</span>
+    <div class="text-line">print("Hello, World!\n");</div>
+  </div>
+  <div class="code-box bad">
+    <span class="label">❌ 忘记包含头文件</span>
+    <div class="text-line">// 没有 #include &lt;stdio.h&gt;</div>
+  </div>
+  <p class="text" style="margin-top: 18px; text-align: center;">
+    编译器报的错，是<span class="hl-blue">你和计算机对话的方式</span>。<br>
+    学会读错误信息，比学会写正确代码更重要。
+  </p>
+</div>
+
+<!-- ==================== 12 总结表 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">哪些加强，<span class="accent">哪些弱化</span></h2>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th style="width: 34%;">内容</th>
+        <th style="width: 33%;">建议</th>
+        <th style="width: 33%;">理由</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="tool-name">进制转换</td>
+        <td>保留，弱化手算</td>
+        <td>看懂十六进制和位运算即可</td>
+      </tr>
+      <tr>
+        <td class="tool-name">编码</td>
+        <td>保留，加强</td>
+        <td>字符串处理是 AI 高频出错区</td>
+      </tr>
+      <tr class="highlight-row">
+        <td class="tool-name">原码反码补码</td>
+        <td>保留，重点讲溢出</td>
+        <td>有符号无符号陷阱是经典 bug</td>
+      </tr>
+      <tr class="highlight-row">
+        <td class="tool-name">定点浮点数</td>
+        <td>保留，加强实验</td>
+        <td>浮点精度问题是隐蔽 bug 来源</td>
+      </tr>
+      <tr>
+        <td class="tool-name">算法概念</td>
+        <td>保留</td>
+        <td>判断 AI 代码的理论基础</td>
+      </tr>
+      <tr>
+        <td class="tool-name">流程图</td>
+        <td>弱化</td>
+        <td>核心能力是拆解而非画图</td>
+      </tr>
+      <tr class="highlight-row">
+        <td class="tool-name">第一个 C 程序</td>
+        <td>保留，加强过程</td>
+        <td>理解编译链接过程，AI 替不了</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== 13 收束 ==================== -->
+<div class="slide">
+  <h2 class="slide-title">回到<span class="accent">那句话</span></h2>
+  <p class="big-statement" style="margin-bottom: 36px;">
+    AI 会在这里犯错。<br>
+    <span class="hl-green">你不懂，就看不出来。</span>
+  </p>
+  <div class="tag-row" style="justify-content: center;">
+    <span class="tag">进制</span>
+    <span class="tag green">编码</span>
+    <span class="tag orange">补码</span>
+    <span class="tag">浮点数</span>
+    <span class="tag green">算法</span>
+    <span class="tag orange">编译过程</span>
+  </div>
+  <p class="text" style="margin-top: 36px; text-align: center;">
+    这些不是老掉牙的知识，<br>
+    而是你在 AI 时代<span class="hl-green">看懂、判断、改对</span>代码的前提。
+  </p>
+</div>
+
+<!-- ==================== 14 结束页 ==================== -->
+<div class="slide">
+  <h2 class="end-title">
+    基本功砸实了，<br>
+    <span class="grad">AI 才是你的杠杆。</span>
+  </h2>
+  <p class="end-sub">
+    现在，打开你的编辑器。<br>
+    我们从 <code>Hello, World</code> 开始。
+  </p>
+  <div class="tag-row">
+    <span class="tag">看懂进制</span>
+    <span class="tag green">看懂编码</span>
+    <span class="tag green">看懂溢出</span>
+    <span class="tag orange">看懂浮点</span>
+  </div>
+</div>
+
+<div class="page-num" id="pageNum">1 / 14</div>
+<div class="nav">
+  <button onclick="prevSlide()">← 上一页</button>
+  <button onclick="nextSlide()">下一页 →</button>
+</div>
+
+<script>
+  var current = 0;
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var pageNum = document.getElementById('pageNum');
+  var progress = document.getElementById('progress');
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    pageNum.textContent = (current + 1) + ' / ' + total;
+    progress.style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  function nextSlide() { showSlide(current + 1); }
+  function prevSlide() { showSlide(current - 1); }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault(); nextSlide();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+      e.preventDefault(); prevSlide();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); showSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); showSlide(total - 1);
+    }
+  });
+
+  var startX = 0;
+  document.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; });
+  document.addEventListener('touchend', function (e) {
+    var diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 60) { diff > 0 ? nextSlide() : prevSlide(); }
+  });
+
+  showSlide(0);
+</script>
+
+</body>
+</html>
