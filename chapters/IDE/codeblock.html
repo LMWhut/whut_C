@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code::Blocks 安装配置指南</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;
+    background:#eef3f8;
+    color:var(--ink);
+    line-height:1.8;
+    -webkit-font-smoothing:antialiased;
+    font-size:16px;
+  }
+
+  /* ============ 页面容器 ============ */
+  .page{
+    max-width:1080px;
+    margin:0 auto;
+    background:#fff;
+    box-shadow:0 4px 24px rgba(18,79,131,.08);
+  }
+
+  /* ============ 封面 ============ */
+  .cover{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    color:#fff;
+    padding:60px 56px 50px;
+    position:relative;
+    overflow:hidden;
+  }
+  .cover::before{
+    content:"";position:absolute;right:-120px;top:-120px;
+    width:400px;height:400px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.25) 0%,rgba(232,114,12,0) 70%);
+  }
+  .cover::after{
+    content:"";position:absolute;left:-100px;bottom:-140px;
+    width:380px;height:380px;border-radius:50%;
+    background:radial-gradient(circle,rgba(74,151,212,.22) 0%,rgba(74,151,212,0) 70%);
+  }
+  .cover-inner{position:relative;z-index:2;}
+  .cover-kicker{
+    display:inline-block;
+    font-size:14px;letter-spacing:3px;
+    color:#ffd9b3;
+    border:1px solid rgba(255,217,179,.55);
+    padding:6px 20px;margin-bottom:24px;border-radius:999px;
+  }
+  .cover h1{
+    font-size:42px;font-weight:800;
+    letter-spacing:3px;line-height:1.2;
+    margin-bottom:14px;
+  }
+  .cover-bar{
+    width:120px;height:6px;border-radius:3px;
+    background:linear-gradient(90deg,#e8720c,#ffb26b);
+    margin-bottom:20px;
+  }
+  .cover-sub{
+    font-size:18px;color:#a9d8f5;
+    letter-spacing:1.5px;
+  }
+
+  /* ============ 正文 ============ */
+  main{padding:44px 56px 64px;}
+
+  /* ============ 标题 ============ */
+  h2.chapter{
+    font-size:26px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    border-left:9px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    padding:12px 26px 12px 20px;
+    margin:44px 0 20px;
+    box-shadow:0 6px 16px rgba(18,79,131,.16);
+    letter-spacing:1px;
+  }
+  h2.chapter:first-child{margin-top:0;}
+
+  h3.section{
+    font-size:21px;font-weight:700;
+    color:var(--blue-700);
+    border-left:6px solid var(--blue-600);
+    padding-left:14px;
+    margin:28px 0 14px;
+  }
+
+  h4.sub{
+    font-size:18px;font-weight:700;
+    color:var(--blue-700);
+    margin:20px 0 10px;
+    display:flex;align-items:center;gap:10px;
+  }
+  h4.sub::before{
+    content:"▍";
+    color:var(--orange);
+    font-size:1em;
+  }
+
+  /* ============ 段落与列表 ============ */
+  p{margin:10px 0;}
+  ul,ol{padding-left:1.9em;margin:10px 0;}
+  li{margin:6px 0;}
+  ul>li::marker{color:var(--blue-600);}
+  ol>li::marker{color:var(--orange);font-weight:700;}
+
+  b,strong{color:var(--blue-700);}
+
+  /* ============ 提示框 ============ */
+  .box{
+    border-left:6px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:14px 22px;
+    margin:16px 0;
+    font-size:15.5px;
+    line-height:1.75;
+  }
+  .box .label{
+    display:inline-block;
+    font-weight:800;
+    color:var(--blue-700);
+    margin-right:8px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ============ 代码 ============ */
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);
+    color:#c0392b;
+    padding:2px 8px;
+    font-size:14.5px;
+    border-radius:5px;
+  }
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:5px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    padding:14px 22px;
+    margin:12px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14.5px;
+    line-height:1.6;
+    white-space:pre-wrap;word-break:break-word;
+    overflow-x:auto;
+  }
+
+  /* ============ 步骤卡片 ============ */
+  .steps{display:flex;flex-direction:column;gap:18px;margin:18px 0;}
+  .step{
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:6px solid var(--blue-600);
+    border-radius:0 12px 12px 0;
+    padding:16px 24px;
+    box-shadow:0 4px 12px rgba(18,79,131,.06);
+  }
+  .step:nth-child(even){border-left-color:var(--orange);}
+  .step-title{
+    font-size:17px;font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:8px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .step-num{
+    display:inline-flex;
+    align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-size:14px;font-weight:700;
+    flex:0 0 auto;
+  }
+  .step p{margin:6px 0;font-size:15.5px;}
+
+  /* ============ 表格 ============ */
+  table.tb{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    font-size:15px;
+    line-height:1.6;
+    margin:16px 0;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 4px 14px rgba(18,79,131,.08);
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-weight:600;
+    font-size:15px;
+    padding:12px 16px;
+    text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:11px 16px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+  table.tb tbody tr:nth-child(even) td{background:#f7fafd;}
+  table.tb tbody th{
+    background:#eaf3fb;
+    color:var(--blue-700);
+    font-weight:600;
+    text-align:left;
+  }
+  .c-red{color:var(--red);font-weight:600;}
+  .c-green{color:var(--green);font-weight:700;}
+
+  /* ============ 图片占位 ============ */
+  .img-ph{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:120px;
+    border:2px dashed #b0c4de;
+    background:#f8fbff;
+    color:#6b7d8d;
+    text-align:center;
+    font-size:14px;
+    margin:14px 0;
+    padding:16px;
+    border-radius:8px;
+    line-height:1.6;
+    max-width: 100%;
+    height: auto;
+  }
+  .img-ph.large{min-height:200px;}
+
+  /* ============ 回到顶部 ============ */
+  .backtop{
+    position:fixed;
+    right:28px;bottom:28px;
+    width:48px;height:48px;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;border:none;border-radius:50%;
+    font-size:22px;cursor:pointer;
+    box-shadow:0 6px 16px rgba(18,79,131,.32);
+    transition:all .2s;
+    z-index:50;
+    display:flex;align-items:center;justify-content:center;
+    font-family:inherit;
+  }
+  .backtop:hover{background:linear-gradient(135deg,#e8720c,#c55807);transform:translateY(-3px);}
+
+  /* ============ 页脚 ============ */
+  footer{
+    background:#f5f7fa;
+    border-top:1px solid var(--line);
+    padding:22px 56px;
+    text-align:center;
+    font-size:13px;
+    color:#6b7d8d;
+    line-height:1.7;
+  }
+
+  /* ============ 响应式 ============ */
+  @media (max-width:768px){
+    body{font-size:15px;}
+    .cover{padding:40px 28px 34px;}
+    .cover h1{font-size:28px;letter-spacing:2px;}
+    .cover-sub{font-size:15px;}
+    main{padding:28px 24px 40px;}
+    h2.chapter{font-size:20px;padding:10px 18px 10px 16px;}
+    h3.section{font-size:18px;}
+    h4.sub{font-size:16px;}
+    .step{padding:14px 18px;}
+    table.tb{font-size:13.5px;}
+    table.tb thead th,table.tb td,table.tb tbody th{padding:9px 12px;}
+    footer{padding:18px 24px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ================= 封面 ================= -->
+  <header class="cover">
+    <div class="cover-inner">
+      <div class="cover-kicker">武汉理工大学 · 人工智能学院 · C 程序设计基础</div>
+      <h1>Code::Blocks 安装配置指南</h1>
+      <div class="cover-bar"></div>
+      <div class="cover-sub">免费 · 开源 · 跨平台 · 内置 MinGW 编译器</div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================================================
+         一、软件简介
+    ============================================================ -->
+    <h2 class="chapter">一、软件简介</h2>
+
+    <p>Code::Blocks 是一款<b>免费、开源、跨平台</b>的 C/C++ 集成开发环境（IDE），支持 Windows、macOS 和 Linux 三大操作系统。它内置 MinGW 编译器，安装后即可直接编写和运行 C 程序，是 C 语言初学者的理想工具。</p>
+
+    <div class="box tip">
+      <span class="label">本课程推荐场景</span>
+      机房上课、快速上手。机房已预装，功能完整，调试方便。
+    </div>
+
+    <div class="box">
+      <span class="label">系统要求</span>
+      Windows 7 / 10 / 11，至少 500MB 磁盘空间。
+    </div>
+
+    <!-- ============================================================
+         二、下载
+    ============================================================ -->
+    <h2 class="chapter">二、下载</h2>
+
+    <p><b>下载地址：</b>访问 Code::Blocks 官网 <code class="inline">http://www.codeblocks.org/</code>，点击 <b>Downloads</b>。</p>
+
+    <div class="img-ph large"><img src="../../images/IDE/codeblock_1.png" alt="下载向导1"style="max-width:100%;height:auto;display:block;margin:14px 0;">
+    
+    </div>
+
+    <h3 class="section">关键操作</h3>
+    <p>在下载页面选择 <code class="inline">codeblocks-XX.XXmingw-setup.exe</code>（<b>带 mingw 的版本</b>）。名称中带有 <b>mingw</b> 表示安装包已内置编译器，安装后可直接编译 C 程序。<b>不要下载不带 mingw 的版本</b>，否则需要单独安装编译器，配置复杂。</p>
+
+    <div class="box warn">
+      <span class="label">版本建议</span>
+      截至 2026 年，推荐使用 Code::Blocks 20.03 或更高版本，内置 MinGW-w64 编译器。
+    </div>
+
+    <div class="img-ph large"><img src="../../images/IDE/codeblock_2.png" alt="下载向导2"style="max-width:100%;height:auto;display:block;margin:14px 0;">      
+    </div>
+    <div class="img-ph large"><img src="../../images/IDE/codeblock_3.png" alt="下载向导3"style="max-width:100%;height:auto;display:block;margin:14px 0;">      
+    </div>
+
+    
+    <!-- ============================================================
+         三、安装步骤
+    ============================================================ -->
+    <h2 class="chapter">三、安装步骤</h2>
+
+    <div class="steps">
+
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-title"><span class="step-num">1</span>启动安装程序</div>
+        <p>双击下载的 <code class="inline">.exe</code> 文件，进入安装程序，点击 <b>Next</b>。</p>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_4.png" alt="安装向导初始界面"style="max-width:100%;height:auto;display:block;margin:14px 0;">   
+          </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-title"><span class="step-num">2</span>同意许可协议</div>
+        <p>阅读许可协议后，点击 <b>I Agree</b>。</p>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_5.png" alt="许可协议界面"style="max-width:100%;height:auto;display:block;margin:14px 0;">
+          </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-title"><span class="step-num">3</span>选择组件</div>
+        <p>安装程序默认选择 <b>Full</b>（全部安装），直接点击 <b>Next</b> 即可。</p>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_6.png" alt="组件选择界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-title"><span class="step-num">4</span>选择安装路径</div>
+        <p>选择安装位置。注意：<b>路径中不要包含中文或空格</b>，建议安装在 <code class="inline">D:\CodeBlocks</code> 或 <code class="inline">C:\CodeBlocks</code> 等简洁路径下。点击 <b>Install</b> 开始安装。</p>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_7.png" alt="路径选择界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step">
+        <div class="step-title"><span class="step-num">5</span>等待安装完成</div>
+        <p>安装过程约 1–2 分钟，耐心等待。安装完成后点击 <b>Next</b>，再点击 <b>Finish</b>。</p>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_8.png" alt="安装完成界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_9.png" alt="安装完成界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step">
+        <div class="step-title"><span class="step-num">6</span>验证安装</div>
+        <p>打开「开始 → 所有程序」，看到「CodeBlocks」文件夹即表示安装成功，桌面也会生成快捷方式图标。</p>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_10.png" alt="快捷方式图标"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================
+         四、首次启动与配置
+    ============================================================ -->
+    <h2 class="chapter">四、首次启动与配置</h2>
+
+    <div class="steps">
+
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-title"><span class="step-num">1</span>启动软件</div>
+        <p>双击桌面 CodeBlocks 图标启动软件。</p>
+        <p>首次启动时，如果弹出编译器自动检测对话框，点击 <b>OK</b> 即可。</p>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_11.png" alt="编译器检测对话框"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-title"><span class="step-num">2</span>验证编译器</div>
+        <p>进入主界面后，进入 <b>Settings → Compiler</b>。确认「Selected compiler」为 <b>GNU GCC Compiler</b>。</p>
+        <p>如果未自动检测到，点击 <b>Auto-detect</b> 让软件自动查找。</p>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_12.png" alt="Compiler 设置界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+        <div class="img-ph"><img src="../../images/IDE/codeblock_13.png" alt="Compiler 设置界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+      </div>
+
+    </div>
+
+    <h3 class="section">汉化（可选）</h3>
+    <ol>
+      <li>下载 Code::Blocks 汉化包，解压后得到 <code class="inline">locale</code> 文件夹。</li>
+      <li>进入 Code::Blocks 安装目录，依次进入 <code class="inline">share → CodeBlocks</code> 文件夹，将 <code class="inline">locale</code> 文件夹复制到此处。</li>
+      <li>打开 Code::Blocks，选择 <b>Settings → Environment</b>。</li>
+      <li>选择 <b>View</b> 选项卡，勾选 <b>Internationalization (needs restart)</b>，在下拉框中选择 <b>Chinese (Simplified)</b>。</li>
+      <li>点击 <b>OK</b>，重启 Code::Blocks 即可。</li>
+    </ol>
+    <div class="img-ph">截图建议：Environment 设置界面中 View 选项卡的勾选状态</div>
+
+    <!-- ============================================================
+         五、中文乱码解决方案
+    ============================================================ -->
+    <h2 class="chapter">五、中文乱码解决方案</h2>
+
+    <p>如果程序输出中文显示为乱码，按以下步骤配置：</p>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">1</span>设置编辑器编码</div>
+        <p>进入 <b>Settings → Editor → Encoding settings</b>，将编码设置为 <b>UTF-8</b>，点击确定。</p>
+        <div class="img-ph">截图建议：Editor Encoding settings 界面</div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">2</span>设置编译器编码选项</div>
+        <p>进入 <b>Settings → Compiler</b>，选择 <b>GNU GCC Compiler</b>，切换到 <b>Other compiler options</b> 标签页，在输入框中添加以下内容：</p>
+        <pre class="code">-finput-charset=UTF-8 -fexec-charset=GBK</pre>
+        <div class="img-ph">截图建议：Other compiler options 标签页，红框标注输入的命令</div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">3</span>重新编译</div>
+        <p>点击 <b>OK</b> 保存，重新编译运行程序，中文即可正常显示。</p>
+      </div>
+
+    </div>
+
+    <!-- ============================================================
+         六、编译运行与调试
+    ============================================================ -->
+    <h2 class="chapter">六、编译运行与调试</h2>
+
+    <ul>
+      <li><b>编译：</b>按 <code class="inline">Ctrl + F9</code> 或点击菜单 <b>Build → Build</b>。</li>
+      <li><b>运行：</b>按 <code class="inline">Ctrl + F10</code> 或点击工具栏绿色三角形按钮。</li>
+      <li><b>调试：</b>在代码行号左侧单击设置断点（红色圆点），点击工具栏红色虫子图标 <b>Debug</b>（或按 <code class="inline">F8</code>）启动调试。</li>
+    </ul>
+
+    <h4 class="sub">常用调试快捷键</h4>
+    <table class="tb">
+      <thead>
+        <tr><th style="width:50%">操作</th><th style="width:50%">快捷键</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>单步进入</td><td><code class="inline">Shift + F7</code></td></tr>
+        <tr><td>单步跳过</td><td><code class="inline">F7</code></td></tr>
+        <tr><td>继续</td><td><code class="inline">F8</code></td></tr>
+        <tr><td>停止调试</td><td><code class="inline">Shift + F8</code></td></tr>
+      </tbody>
+    </table>
+
+    <!-- ============================================================
+         七、常见问题排查
+    ============================================================ -->
+    <h2 class="chapter">七、常见问题排查</h2>
+
+    <table class="tb">
+      <thead>
+        <tr>
+          <th style="width:26%">问题</th>
+          <th style="width:32%">原因</th>
+          <th style="width:42%">解决方案</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>启动时提示未找到编译器</td>
+          <td>安装包未包含 mingw</td>
+          <td>重新下载带 mingw 的版本</td>
+        </tr>
+        <tr>
+          <td>编译按钮灰色</td>
+          <td>未打开项目，只打开了单个文件</td>
+          <td>通过 <b>File → New → Project</b> 创建项目</td>
+        </tr>
+        <tr>
+          <td>中文乱码</td>
+          <td>编码设置不一致</td>
+          <td>按第五部分步骤配置</td>
+        </tr>
+        <tr>
+          <td>控制台闪退</td>
+          <td>程序运行完毕后窗口立即关闭</td>
+          <td>正常现象，可通过断点或添加 <code class="inline">getch()</code> 观察</td>
+        </tr>
+        <tr>
+          <td>断点无效</td>
+          <td>Debug 配置未创建</td>
+          <td>创建项目时勾选「Create Debug configuration」</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </main>
+
+  <footer>
+    C 程序设计基础 · 工具指南 · Code::Blocks 安装配置<br>
+    武汉理工大学 人工智能学院　主讲：李　民
+  </footer>
+
+</div>
+
+<button class="backtop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到顶部">↑</button>
+
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev-C++ 安装配置指南</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;
+    background:#eef3f8;
+    color:var(--ink);
+    line-height:1.8;
+    -webkit-font-smoothing:antialiased;
+    font-size:16px;
+  }
+
+  /* ============ 页面容器 ============ */
+  .page{
+    max-width:1080px;
+    margin:0 auto;
+    background:#fff;
+    box-shadow:0 4px 24px rgba(18,79,131,.08);
+  }
+
+  /* ============ 封面 ============ */
+  .cover{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    color:#fff;
+    padding:60px 56px 50px;
+    position:relative;
+    overflow:hidden;
+  }
+  .cover::before{
+    content:"";position:absolute;right:-120px;top:-120px;
+    width:400px;height:400px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.25) 0%,rgba(232,114,12,0) 70%);
+  }
+  .cover::after{
+    content:"";position:absolute;left:-100px;bottom:-140px;
+    width:380px;height:380px;border-radius:50%;
+    background:radial-gradient(circle,rgba(74,151,212,.22) 0%,rgba(74,151,212,0) 70%);
+  }
+  .cover-inner{position:relative;z-index:2;}
+  .cover-kicker{
+    display:inline-block;
+    font-size:14px;letter-spacing:3px;
+    color:#ffd9b3;
+    border:1px solid rgba(255,217,179,.55);
+    padding:6px 20px;margin-bottom:24px;border-radius:999px;
+  }
+  .cover h1{
+    font-size:42px;font-weight:800;
+    letter-spacing:3px;line-height:1.2;
+    margin-bottom:14px;
+  }
+  .cover-bar{
+    width:120px;height:6px;border-radius:3px;
+    background:linear-gradient(90deg,#e8720c,#ffb26b);
+    margin-bottom:20px;
+  }
+  .cover-sub{
+    font-size:18px;color:#a9d8f5;
+    letter-spacing:1.5px;
+  }
+
+  /* ============ 正文 ============ */
+  main{padding:44px 56px 64px;}
+
+  /* ============ 标题 ============ */
+  h2.chapter{
+    font-size:26px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    border-left:9px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    padding:12px 26px 12px 20px;
+    margin:44px 0 20px;
+    box-shadow:0 6px 16px rgba(18,79,131,.16);
+    letter-spacing:1px;
+  }
+  h2.chapter:first-child{margin-top:0;}
+
+  h3.section{
+    font-size:21px;font-weight:700;
+    color:var(--blue-700);
+    border-left:6px solid var(--blue-600);
+    padding-left:14px;
+    margin:28px 0 14px;
+  }
+
+  h4.sub{
+    font-size:18px;font-weight:700;
+    color:var(--blue-700);
+    margin:20px 0 10px;
+    display:flex;align-items:center;gap:10px;
+  }
+  h4.sub::before{
+    content:"▍";
+    color:var(--orange);
+    font-size:1em;
+  }
+
+  /* ============ 段落与列表 ============ */
+  p{margin:10px 0;}
+  ul,ol{padding-left:1.9em;margin:10px 0;}
+  li{margin:6px 0;}
+  ul>li::marker{color:var(--blue-600);}
+  ol>li::marker{color:var(--orange);font-weight:700;}
+
+  b,strong{color:var(--blue-700);}
+
+  /* ============ 提示框 ============ */
+  .box{
+    border-left:6px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:14px 22px;
+    margin:16px 0;
+    font-size:15.5px;
+    line-height:1.75;
+  }
+  .box .label{
+    display:inline-block;
+    font-weight:800;
+    color:var(--blue-700);
+    margin-right:8px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ============ 代码 ============ */
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);
+    color:#c0392b;
+    padding:2px 8px;
+    font-size:14.5px;
+    border-radius:5px;
+  }
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:5px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    padding:14px 22px;
+    margin:12px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14.5px;
+    line-height:1.6;
+    white-space:pre-wrap;word-break:break-word;
+    overflow-x:auto;
+  }
+
+  /* ============ 步骤卡片 ============ */
+  .steps{display:flex;flex-direction:column;gap:18px;margin:18px 0;}
+  .step{
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:6px solid var(--blue-600);
+    border-radius:0 12px 12px 0;
+    padding:16px 24px;
+    box-shadow:0 4px 12px rgba(18,79,131,.06);
+  }
+  .step:nth-child(even){border-left-color:var(--orange);}
+  .step-title{
+    font-size:17px;font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:8px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .step-num{
+    display:inline-flex;
+    align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-size:14px;font-weight:700;
+    flex:0 0 auto;
+  }
+  .step p{margin:6px 0;font-size:15.5px;}
+
+  /* ============ 表格 ============ */
+  table.tb{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    font-size:15px;
+    line-height:1.6;
+    margin:16px 0;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 4px 14px rgba(18,79,131,.08);
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-weight:600;
+    font-size:15px;
+    padding:12px 16px;
+    text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:11px 16px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+  table.tb tbody tr:nth-child(even) td{background:#f7fafd;}
+  table.tb tbody th{
+    background:#eaf3fb;
+    color:var(--blue-700);
+    font-weight:600;
+    text-align:left;
+  }
+  .c-red{color:var(--red);font-weight:600;}
+  .c-green{color:var(--green);font-weight:700;}
+
+  /* ============ 图片占位 ============ */
+  .img-ph{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:120px;
+    border:2px dashed #b0c4de;
+    background:#f8fbff;
+    color:#6b7d8d;
+    text-align:center;
+    font-size:14px;
+    margin:14px 0;
+    padding:16px;
+    border-radius:8px;
+    line-height:1.6;
+  }
+  .img-ph.large{min-height:200px;}
+
+  /* ============ 链接框 ============ */
+  .link-box{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#f7fafd;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 20px;
+    margin:10px 0;
+    font-size:15px;
+    word-break:break-all;
+  }
+  .link-box .tag{
+    flex:0 0 auto;
+    display:inline-block;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    padding:4px 14px;
+    border-radius:999px;
+    letter-spacing:.5px;
+  }
+  .link-box code{
+    font-family:Consolas,"Courier New",monospace;
+    color:var(--blue-700);
+    font-size:14px;
+  }
+
+  /* ============ 回到顶部 ============ */
+  .backtop{
+    position:fixed;
+    right:28px;bottom:28px;
+    width:48px;height:48px;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;border:none;border-radius:50%;
+    font-size:22px;cursor:pointer;
+    box-shadow:0 6px 16px rgba(18,79,131,.32);
+    transition:all .2s;
+    z-index:50;
+    display:flex;align-items:center;justify-content:center;
+    font-family:inherit;
+  }
+  .backtop:hover{background:linear-gradient(135deg,#e8720c,#c55807);transform:translateY(-3px);}
+
+  /* ============ 页脚 ============ */
+  footer{
+    background:#f5f7fa;
+    border-top:1px solid var(--line);
+    padding:22px 56px;
+    text-align:center;
+    font-size:13px;
+    color:#6b7d8d;
+    line-height:1.7;
+  }
+
+  /* ============ 响应式 ============ */
+  @media (max-width:768px){
+    body{font-size:15px;}
+    .cover{padding:40px 28px 34px;}
+    .cover h1{font-size:28px;letter-spacing:2px;}
+    .cover-sub{font-size:15px;}
+    main{padding:28px 24px 40px;}
+    h2.chapter{font-size:20px;padding:10px 18px 10px 16px;}
+    h3.section{font-size:18px;}
+    h4.sub{font-size:16px;}
+    .step{padding:14px 18px;}
+    table.tb{font-size:13.5px;}
+    table.tb thead th,table.tb td,table.tb tbody th{padding:9px 12px;}
+    footer{padding:18px 24px;}
+    .link-box{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ================= 封面 ================= -->
+  <header class="cover">
+    <div class="cover-inner">
+      <div class="cover-kicker">武汉理工大学 · 人工智能学院 · C 程序设计基础</div>
+      <h1>Dev-C++ 安装配置指南</h1>
+      <div class="cover-bar"></div>
+      <div class="cover-sub">轻量 · 免费 · Windows · 内置 MinGW 编译器</div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================================================
+         一、软件简介
+    ============================================================ -->
+    <h2 class="chapter">一、软件简介</h2>
+
+    <p>Dev-C++ 是一款<b>轻量免费的 Windows C/C++ 集成开发环境</b>，内置 MinGW 编译器，安装即用。安装包仅约 <b>40MB</b>，启动快速，适合新手学习、竞赛与算法训练。首次安装后支持一键编译（<code class="inline">F9</code>）和编译运行（<code class="inline">F11</code>）。</p>
+
+    <div class="box tip">
+      <span class="label">本课程推荐场景</span>
+      个人电脑快速练习、轻量简洁。安装包小，操作简单，适合初学者。
+    </div>
+
+    <h3 class="section">版本说明</h3>
+    <p>原开发方 Bloodshed 的官网（bloodshed.net）早已停止维护并下线，原始版本停在 2005 年，也不兼容现在的 Win10/11。目前活跃的是社区接手的版本：</p>
+
+    <div class="link-box">
+      <span class="tag">Orwell</span>
+      <div>
+        <b>Orwell Dev-C++</b>：代码开源，托管在 SourceForge，是很多教程推荐的下载入口。<br>
+        <code>https://sourceforge.net/projects/orwelldevcpp/</code>
+        <span style="color:#6b7d8d;">（最后更新：2016）</span>
+      </div>
+    </div>
+
+    <div class="link-box">
+      <span class="tag">Embarcadero</span>
+      <div>
+        <b>Embarcadero Dev-C++</b>：在 Orwell 基础上继续更新，目前最活跃，版本号到 6.3 左右，也在 SourceForge 发布。<br>
+        <code>https://sourceforge.net/projects/embarcadero-devcpp/</code>
+        <span style="color:#6b7d8d;">（最后更新：2021 年 3 月）</span>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         二、下载
+    ============================================================ -->
+    <h2 class="chapter">二、下载</h2>
+
+    <p><b>下载地址：</b>访问 Dev-C++ 安装包链接（比如 Orwell Dev-C++ 的 5.11 版本 <code class="inline">https://sourceforge.net/projects/orwelldevcpp/</code>），下载 <code class="inline">Dev-Cpp XX.XX TDM-GCC Setup.exe</code>（<b>带编译器的完整安装版</b>）。</p>
+
+    <div class="box warn">
+      <span class="label">关键操作</span>
+      确保下载的是 <code class="inline">.exe</code> 安装文件，<b>不要下载 .zip 压缩版本</b>。安装包文件名中应包含「<b>TDM-GCC</b>」，表示已内置编译器。
+    </div>
+
+    <div class="box">
+      <span class="label">版本建议</span>
+      截至 2026 年，推荐使用 Dev-C++ <b>6.3</b> 或 <b>5.11</b> 版本。
+    </div>
+
+    <div class="img-ph large"><img src="../../images/IDE/devc_1.png" alt="SourceForge 下载页面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+
+    <!-- ============================================================
+         三、安装步骤
+    ============================================================ -->
+    <h2 class="chapter">三、安装步骤</h2>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">1</span>启动安装程序</div>
+        <p>双击 <code class="inline">.exe</code> 文件，等待安装程序加载（约几十秒）。</p>
+        <div class="img-ph"><img src="../../images/IDE/devc_2.png" alt="安装文件"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">2</span>选择安装语言</div>
+        <p>安装程序支持多国语言。选择 <b>English</b>，点击 <b>OK</b>。</p>
+        <div class="box warn" style="margin-top:8px;">
+          <span class="label">注意</span>
+          安装过程中的语言选择<b>仅影响安装向导界面</b>，不影响软件界面。
+        </div>
+        <div class="img-ph"><img src="../../images/IDE/devc_3.png" alt="语言选择界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">3</span>同意许可协议</div>
+        <p>阅读协议后，点击 <b>I Agree</b>。</p>
+        <div class="img-ph"><img src="../../images/IDE/devc_4.png" alt="许可协议界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">4</span>选择安装组件</div>
+        <p>保持默认，选择 <b>Full</b>（全部安装），点击 <b>Next</b>。</p>
+        <div class="img-ph"><img src="../../images/IDE/devc_5.png" alt="组件选择界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">5</span>选择安装路径</div>
+        <p>建议安装在非系统盘，如 <code class="inline">D:\Dev-Cpp</code>。<b>路径中不要包含中文</b>。点击 <b>Install</b> 开始安装。</p>
+        <div class="img-ph"><img src="../../images/IDE/devc_6.png" alt="路径选择界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">6</span>等待安装完成</div>
+        <p>等待安装完成后点击 <b>Finish</b>。</p>
+        <div class="img-ph"><img src="../../images/IDE/devc_7.png" alt="安装完成界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================
+         四、首次启动与汉化
+    ============================================================ -->
+    <h2 class="chapter">四、首次启动与汉化</h2>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">1</span>启动软件</div>
+        <p>双击桌面 Dev-C++ 图标。</p>
+        <div class="img-ph"><img src="../../images/IDE/devc_8.png" alt="Dev C++ 图标"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+        <p>首次启动会弹出语言选择界面，选择<b>简体中文</b>，点击 <b>Next</b>。</p>
+        
+      </div>     
+    </div>
+
+    <h3 class="section">手动切换中文</h3>
+    <p>如果首次启动时未选择中文，可手动切换：</p>
+    <ol>
+      <li>点击顶部菜单 <b>Tools（工具）→ Environment Options（环境选项）</b>。</li>
+      <li>在 <b>General（常规）</b>选项卡中找到 <b>Language（语言）</b>下拉框，选择 <b>Chinese (Simplified)</b>，点击 <b>OK</b> 保存。</li>
+    </ol>
+    <div class="img-ph"><img src="../../images/IDE/devc_9.png" alt="Environment Options 界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+    <div class="img-ph"><img src="../../images/IDE/devc_10.png" alt="Environment Options 界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+
+    <!-- ============================================================
+         五、中文乱码解决方案
+    ============================================================ -->
+    <h2 class="chapter">五、中文乱码解决方案</h2>
+
+    <h4 class="sub">方法一：另存为 GB2312 编码</h4>
+    <ol>
+      <li>进入 <b>文件 → 另存为</b>。</li>
+      <li>在弹出窗口右下角的编码下拉框中，选择 <b>Chinese GB2312</b>。</li>
+      <li>保存后重新编译运行。</li>
+    </ol>
+
+    <h4 class="sub">方法二：配置编译器选项</h4>
+    <ol>
+      <li>进入 <b>工具 → 编译选项</b>。</li>
+      <li>勾选「编译时加入以下命令」。</li>
+      <li>在输入框中填入：</li>
+    </ol>
+    <pre class="code">-fexec-charset=gbk</pre>
+    <ol start="4">
+      <li>点击<b>确认</b>，重新编译。</li>
+    </ol>
+
+    <div class="img-ph"><img src="../../images/IDE/devc_11.png" alt="编译选项设置界面"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+
+    <!-- ============================================================
+         六、编译运行与调试
+    ============================================================ -->
+    <h2 class="chapter">六、编译运行与调试</h2>
+
+    <ul>
+      <li><b>编译：</b>按 <code class="inline">F9</code>（或点击菜单 <b>运行 → 编译</b>）。</li>
+      <div class="img-ph"><img src="../../images/IDE/devc_12.png" alt="编译"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+
+      <li><b>运行：</b>按 <code class="inline">F10</code>（或点击 <b>运行 → 运行</b>）。</li>
+      <div class="img-ph"><img src="../../images/IDE/devc_13.png" alt="运行"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+
+      <li><b>编译运行：</b>按 <code class="inline">F11</code> 一键完成编译和运行。</li>
+      <div class="img-ph"><img src="../../images/IDE/devc_14.png" alt="编译运行"style="max-width:100%;height:auto;display:block;margin:14px 0;"></div>
+    </ul>
+
+    <div class="box tip">
+      <span class="label">防止控制台闪退</span>
+      在 <code class="inline">return 0;</code> 之前添加 <code class="inline">getchar();</code>。
+    </div>
+
+    <h4 class="sub">调试配置</h4>
+    <ul>
+      <li>进入 <b>项目 → 项目属性 → 编译器</b>，勾选「生成调试信息」（Generate debugging information），否则断点可能无效。</li>
+      <li><b>设置断点：</b>在代码行号左侧单击，出现红色圆点表示断点已生效。</li>
+      <li><b>启动调试：</b>按 <code class="inline">F5</code> 启动调试。</li>
+    </ul>
+
+    <h4 class="sub">常用调试快捷键</h4>
+    <table class="tb">
+      <thead>
+        <tr><th style="width:50%">操作</th><th style="width:50%">快捷键</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>单步进入</td><td><code class="inline">F7</code></td></tr>
+        <tr><td>单步跳过</td><td><code class="inline">F8</code></td></tr>
+        <tr><td>继续</td><td><code class="inline">Ctrl + F5</code></td></tr>
+        <tr><td>停止</td><td><code class="inline">Alt + F5</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="box">
+      <span class="label">观察变量</span>
+      在代码中选中变量，右键选择「添加查看」，调试时可在左侧面板看到变量值。
+    </div>
+    <div class="img-ph">截图建议：调试工具栏和变量查看面板</div>
+
+    <!-- ============================================================
+         七、常见问题排查
+    ============================================================ -->
+    <h2 class="chapter">七、常见问题排查</h2>
+
+    <table class="tb">
+      <thead>
+        <tr>
+          <th style="width:26%">问题</th>
+          <th style="width:32%">原因</th>
+          <th style="width:42%">解决方案</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>安装时中文乱码</td>
+          <td>安装程序编码问题</td>
+          <td>安装过程选择英文，安装后再切换中文</td>
+        </tr>
+        <tr>
+          <td>编译报错找不到头文件</td>
+          <td>未创建 C 项目，直接打开了 <code class="inline">.cpp</code> 文件</td>
+          <td>新建项目时选择「C 项目」</td>
+        </tr>
+        <tr>
+          <td>中文乱码</td>
+          <td>文件编码与编译器编码不一致</td>
+          <td>按第五章方法一或方法二配置</td>
+        </tr>
+        <tr>
+          <td>断点无效</td>
+          <td>未启用调试信息</td>
+          <td>项目属性中勾选「生成调试信息」</td>
+        </tr>
+        <tr>
+          <td>控制台闪退</td>
+          <td>程序正常结束</td>
+          <td>添加 <code class="inline">getchar();</code> 或观察</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </main>
+
+  <footer>
+    C 程序设计基础 · 工具指南 · Dev-C++ 安装配置<br>
+    武汉理工大学 人工智能学院　主讲：李　民
+  </footer>
+
+</div>
+
+<button class="backtop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到顶部">↑</button>
+
+</body>
+</html>
