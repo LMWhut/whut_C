@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>0.1 在计算机里长什么样？—— 二进制与浮点数入门</title>
+<style>
+:root{
+  --bg:#f4f7fb; --card:#fff; --ink:#1e293b; --muted:#64748b;
+  --blue:#2563eb; --amber:#f59e0b; --red:#ef4444;
+  --green:#10b981; --purple:#8b5cf6;
+  --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,-apple-system,sans-serif;
+  line-height:1.8;font-size:17px;
+}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;z-index:99;
+  background:linear-gradient(90deg,#2563eb,#8b5cf6,#f59e0b);transition:width .1s;}
+
+/* ---------- 封面 ---------- */
+.hero{
+  background:radial-gradient(1200px 500px at 15% -10%,#3b82f6 0%,transparent 60%),
+             radial-gradient(900px 500px at 90% 10%,#8b5cf6 0%,transparent 55%),
+             linear-gradient(135deg,#0f172a,#1e293b 60%,#0f172a);
+  color:#fff;padding:80px 20px 90px;text-align:center;position:relative;overflow:hidden;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;opacity:.16;
+  background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(circle at 50% 40%,#000,transparent 72%);
+          mask-image:radial-gradient(circle at 50% 40%,#000,transparent 72%);
+}
+.hero>*{position:relative;z-index:1;}
+.hero .tag{
+  display:inline-block;font-size:14px;letter-spacing:2px;padding:6px 16px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.35);color:#c7d2fe;margin-bottom:22px;
+}
+.hero h1{font-size:clamp(28px,5vw,46px);margin:0 0 18px;line-height:1.3;font-weight:800;}
+.hero h1 .hl{
+  background:linear-gradient(90deg,#60a5fa,#c084fc,#fbbf24);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{color:#94a3b8;font-size:17px;margin:0 auto;max-width:640px;}
+.hero .bits{margin-top:34px;font-family:var(--mono);font-size:clamp(12px,2.4vw,17px);
+  letter-spacing:3px;color:#64748b;word-break:break-all;}
+.hero .bits b{color:#38bdf8;}
+.hero .bits i{color:#fbbf24;font-style:normal;}
+.hero .bits u{color:#f87171;text-decoration:none;}
+
+/* ---------- 布局 ---------- */
+.wrap{max-width:960px;margin:0 auto;padding:0 20px 100px;}
+.card{
+  background:var(--card);border-radius:18px;padding:34px 38px;margin:26px 0;
+  box-shadow:0 1px 3px rgba(15,23,42,.06),0 14px 34px -20px rgba(15,23,42,.28);
+  border:1px solid #e8edf5;
+}
+@media(max-width:640px){.card{padding:24px 20px;border-radius:14px;}}
+
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+.sec-num{
+  flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-weight:800;font-size:16px;
+  font-family:var(--mono);box-shadow:0 6px 16px -6px rgba(37,99,235,.7);
+}
+h2{font-size:23px;margin:0;font-weight:800;letter-spacing:.3px;}
+h3{font-size:18px;margin:26px 0 10px;color:#0f172a;}
+p{margin:12px 0;}
+ul,ol{margin:12px 0;padding-left:24px;}
+li{margin:7px 0;}
+.muted{color:var(--muted);}
+.small{font-size:15px;}
+
+/* ---------- 代码 ---------- */
+code{
+  font-family:var(--mono);background:#eef2ff;color:#3730a3;
+  padding:2px 7px;border-radius:6px;font-size:.92em;word-break:break-all;
+}
+pre{
+  background:#0f172a;color:#e2e8f0;padding:18px 22px;border-radius:12px;
+  overflow-x:auto;font-family:var(--mono);font-size:15px;line-height:1.8;margin:16px 0;
+  border:1px solid #1e293b;
+}
+pre .c{color:#64748b;}
+pre .g{color:#4ade80;}
+pre .y{color:#fbbf24;}
+pre .b{color:#60a5fa;}
+pre .r{color:#f87171;}
+
+/* ---------- 表格 ---------- */
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:15.5px;}
+th,td{border:1px solid #e2e8f0;padding:9px 12px;text-align:center;}
+th{background:#f1f5f9;font-weight:700;color:#334155;}
+td.mono,th.mono{font-family:var(--mono);}
+tbody tr:nth-child(even){background:#fafbfe;}
+
+/* ---------- 提示框 ---------- */
+.note{
+  border-left:4px solid var(--blue);background:#eff6ff;border-radius:0 12px 12px 0;
+  padding:14px 18px;margin:18px 0;font-size:16px;
+}
+.note.warn{border-color:var(--amber);background:#fffbeb;}
+.note.key{border-color:var(--green);background:#ecfdf5;}
+.note.deep{border-color:var(--purple);background:#f5f3ff;}
+.note b{color:#0f172a;}
+
+/* ---------- 位分段着色 ---------- */
+.bits-box{
+  font-family:var(--mono);font-size:clamp(13px,2.6vw,19px);letter-spacing:2px;
+  display:flex;flex-wrap:wrap;gap:0;justify-content:center;margin:20px 0;
+}
+.seg{padding:10px 12px;border-radius:10px;margin:3px;white-space:nowrap;}
+.seg.s{background:#fee2e2;color:#b91c1c;}
+.seg.e{background:#fef3c7;color:#b45309;}
+.seg.m{background:#dbeafe;color:#1d4ed8;}
+.seg-labels{display:flex;justify-content:center;gap:8px;font-size:14px;flex-wrap:wrap;}
+.seg-labels span{padding:2px 12px;border-radius:999px;}
+
+/* ---------- 折叠答案 ---------- */
+details{
+  border:1px dashed #c7d2fe;border-radius:12px;padding:6px 18px;margin:18px 0;
+  background:#f8faff;transition:.2s;
+}
+details[open]{border-style:solid;background:#fff;box-shadow:0 6px 20px -14px rgba(37,99,235,.6);}
+summary{
+  cursor:pointer;font-weight:700;color:var(--blue);padding:10px 0;list-style:none;
+  display:flex;align-items:center;gap:8px;user-select:none;
+}
+summary::-webkit-details-marker{display:none;}
+summary::before{content:"▶";font-size:12px;transition:transform .2s;color:#818cf8;}
+details[open] summary::before{transform:rotate(90deg);}
+
+/* ---------- 步骤条 ---------- */
+.steps{counter-reset:st;list-style:none;padding:0;margin:16px 0;}
+.steps li{
+  counter-increment:st;position:relative;padding-left:44px;margin:14px 0;
+}
+.steps li::before{
+  content:counter(st);position:absolute;left:0;top:2px;width:28px;height:28px;border-radius:50%;
+  background:#e0e7ff;color:#4338ca;font-weight:800;font-size:14px;display:grid;place-items:center;
+  font-family:var(--mono);
+}
+
+/* ---------- 结尾 ---------- */
+footer{text-align:center;color:var(--muted);font-size:14px;padding:20px 0 40px;}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+
+<!-- ============ 封面 ============ -->
+<div class="hero">
+  <div class="tag">计算机组成原理 · 数据表示</div>
+  <h1>你写的 <span class="hl">0.1</span>，<br>计算机真的存下了 0.1 吗？</h1>
+  <p>从一个最简单的十进制小数出发，看懂二进制、IEEE 754 浮点数，以及那个经典问题：为什么 0.1 + 0.2 ≠ 0.3。</p>
+  <div class="bits">
+    <u>0</u> <i>01111011</i> <b>10011001100110011001101</b>
+  </div>
+
+      <div class="meta">
+      武汉理工大学　·　主讲：李民　孙骏
+    </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ 01 ============ -->
+<section class="card" id="s1">
+  <div class="sec-head"><span class="sec-num">01</span><h2>计算机为什么只认识 0 和 1？</h2></div>
+  <p>计算机内部是无数个电子开关（晶体管），它们只有两种稳定状态：</p>
+  <ul>
+    <li><b>通电 / 高电平</b> —— 记作 <code>1</code></li>
+    <li><b>断电 / 低电平</b> —— 记作 <code>0</code></li>
+  </ul>
+  <p>用两种状态表示数据最可靠、最不容易出错。于是整个计算机世界的一切——数字、文字、图片、视频——最终都被拆成一串 0 和 1。</p>
+  <div class="note">
+    <b>一个 0 或 1 叫一个「比特（bit）」。</b>8 个比特组成 1 个「字节（Byte）」。
+    本课要讲的单精度浮点数，占 <b>32 个比特 = 4 个字节</b>。
+  </div>
+</section>
+
+<!-- ============ 02 ============ -->
+<section class="card" id="s2">
+  <div class="sec-head"><span class="sec-num">02</span><h2>二进制与十进制：其实就是「位权」不同</h2></div>
+  <p>我们平时用十进制，是因为「逢十进一」，每一位的权重是 10 的幂：</p>
+  <pre>1234 = 1×10³ + 2×10² + 3×10¹ + 4×10⁰
+     = 1000  + 200   + 30    + 4</pre>
+  <p>二进制「逢二进一」，每一位的权重变成 2 的幂：</p>
+  <pre>1011₂ = 1×2³ + 0×2² + 1×2¹ + 1×2⁰
+      = 8    + 0    + 2    + 1  = 11₁₀</pre>
+
+  <h3>整数部分：各位的权重</h3>
+  <table>
+    <thead><tr><th>位置</th><th class="mono">2⁷</th><th class="mono">2⁶</th><th class="mono">2⁵</th><th class="mono">2⁴</th><th class="mono">2³</th><th class="mono">2²</th><th class="mono">2¹</th><th class="mono">2⁰</th></tr></thead>
+    <tbody><tr><td>权重</td><td class="mono">128</td><td class="mono">64</td><td class="mono">32</td><td class="mono">16</td><td class="mono">8</td><td class="mono">4</td><td class="mono">2</td><td class="mono">1</td></tr></tbody>
+  </table>
+
+  <h3>小数部分：权重继续往右「除以 2」</h3>
+  <table>
+    <thead><tr><th>位置</th><th class="mono">2⁻¹</th><th class="mono">2⁻²</th><th class="mono">2⁻³</th><th class="mono">2⁻⁴</th><th class="mono">2⁻⁵</th><th class="mono">…</th></tr></thead>
+    <tbody><tr><td>权重</td><td class="mono">0.5</td><td class="mono">0.25</td><td class="mono">0.125</td><td class="mono">0.0625</td><td class="mono">0.03125</td><td class="mono">…</td></tr></tbody>
+  </table>
+
+  <div class="note key">
+    <b>关键结论：</b>二进制小数能表示的最小「步长」是 0.5、0.25、0.125、0.0625……
+    它们是 <b>2 的负整数次幂</b>。这个事实，是后面一切问题的根源。
+  </div>
+</section>
+
+<!-- ============ 03 ============ -->
+<section class="card" id="s3">
+  <div class="sec-head"><span class="sec-num">03</span><h2>十进制 → 二进制（整数）：除 2 取余</h2></div>
+  <p>把十进制整数不断除以 2，记下余数，最后<b>从下往上</b>读。</p>
+  <p class="small muted">例：把 123 转成二进制</p>
+  <table>
+    <thead><tr><th>计算</th><th>商</th><th>余数</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">123 ÷ 2</td><td class="mono">61</td><td class="mono">1</td></tr>
+      <tr><td class="mono">61 ÷ 2</td><td class="mono">30</td><td class="mono">1</td></tr>
+      <tr><td class="mono">30 ÷ 2</td><td class="mono">15</td><td class="mono">0</td></tr>
+      <tr><td class="mono">15 ÷ 2</td><td class="mono">7</td><td class="mono">1</td></tr>
+      <tr><td class="mono">7 ÷ 2</td><td class="mono">3</td><td class="mono">1</td></tr>
+      <tr><td class="mono">3 ÷ 2</td><td class="mono">1</td><td class="mono">1</td></tr>
+      <tr><td class="mono">1 ÷ 2</td><td class="mono">0</td><td class="mono">1</td></tr>
+    </tbody>
+  </table>
+  <pre>从下往上读： 123₁₀ = <span class="b">1111011</span>₂</pre>
+</section>
+
+<!-- ============ 04 ============ -->
+<section class="card" id="s4">
+  <div class="sec-head"><span class="sec-num">04</span><h2>十进制 → 二进制（小数）：乘 2 取整</h2></div>
+  <p>小数部分不断乘以 2，把每次得到的<b>整数位</b>取出来，<b>从上往下</b>读。</p>
+  <p class="small muted">例：把 0.625 转成二进制</p>
+  <table>
+    <thead><tr><th>计算</th><th>结果</th><th>取整数位</th><th>剩下的小数</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">0.625 × 2</td><td class="mono">1.25</td><td class="mono">1</td><td class="mono">0.25</td></tr>
+      <tr><td class="mono">0.25 × 2</td><td class="mono">0.5</td><td class="mono">0</td><td class="mono">0.5</td></tr>
+      <tr><td class="mono">0.5 × 2</td><td class="mono">1.0</td><td class="mono">1</td><td class="mono">0 —— 结束</td></tr>
+    </tbody>
+  </table>
+  <pre>从上往下读： 0.625₁₀ = 0.<span class="b">101</span>₂
+
+验算：0.5 + 0 + 0.125 = 0.625 ✓</pre>
+  <div class="note warn">
+    注意第 3 步：剩下的小数变成了 <code>0</code>，过程<b>自然结束</b>了。
+    但并不是所有小数都这么听话 —— 马上你就知道了。
+  </div>
+</section>
+
+<!-- ============ 05 ============ -->
+<section class="card" id="s5">
+  <div class="sec-head"><span class="sec-num">05</span><h2>动手算 0.1 —— 结果停不下来了</h2></div>
+  <p>现在用同样的方法算 <code>0.1</code>：</p>
+  <table>
+    <thead><tr><th>步骤</th><th>计算</th><th>取整数位</th><th>剩下的小数</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="mono">0.1 × 2 = 0.2</td><td class="mono">0</td><td class="mono">0.2</td></tr>
+      <tr><td>2</td><td class="mono">0.2 × 2 = 0.4</td><td class="mono">0</td><td class="mono">0.4</td></tr>
+      <tr><td>3</td><td class="mono">0.4 × 2 = 0.8</td><td class="mono">0</td><td class="mono">0.8</td></tr>
+      <tr><td>4</td><td class="mono">0.8 × 2 = 1.6</td><td class="mono">1</td><td class="mono">0.6</td></tr>
+      <tr><td>5</td><td class="mono">0.6 × 2 = 1.2</td><td class="mono">1</td><td class="mono">0.2</td></tr>
+      <tr><td>6</td><td class="mono">0.2 × 2 = 0.4</td><td class="mono">0</td><td class="mono">0.4 &nbsp;⚠️ 回到第 2 步！</td></tr>
+    </tbody>
+  </table>
+  <p>第 6 步的结果 <code>0.4</code>，和第 2 步一模一样 —— 这意味着后面的计算会<b>无限重复</b>下去。</p>
+  <pre>0.1₁₀ = 0.<span class="y">000</span> <span class="g">1100</span> <span class="g">1100</span> <span class="g">1100</span> <span class="g">1100</span> <span class="g">1100</span> …₂
+
+          ↑      └──── 循环节 "0011" 永远重复 ────┘</pre>
+  <div class="note warn">
+    <b>0.1 在二进制里是一个无限循环小数。</b>就像十进制里的 1/3 = 0.333333… 永远写不完一样。
+  </div>
+</section>
+
+<!-- ============ 06 ============ -->
+<section class="card" id="s6">
+  <div class="sec-head"><span class="sec-num">06</span><h2>计算机怎么存小数：IEEE 754 单精度格式</h2></div>
+  <p>既然算不完，计算机只能<b>存一部分、剩下的丢掉</b>。但怎么存才科学？答案是用类似「科学计数法」的方式。</p>
+  <p>32 位（单精度 float）被划分成三段：</p>
+
+  <div class="bits-box">
+    <div class="seg s">0</div>
+    <div class="seg e">01111011</div>
+    <div class="seg m">10011001100110011001101</div>
+  </div>
+  <div class="seg-labels">
+    <span style="background:#fee2e2;color:#b91c1c;">符号位 1 位</span>
+    <span style="background:#fef3c7;color:#b45309;">指数位 8 位</span>
+    <span style="background:#dbeafe;color:#1d4ed8;">尾数位 23 位</span>
+  </div>
+
+  <table>
+    <thead><tr><th>部分</th><th>位数</th><th>作用</th></tr></thead>
+    <tbody>
+      <tr><td><b>符号位</b> S</td><td class="mono">1</td><td>0 表示正数，1 表示负数</td></tr>
+      <tr><td><b>指数位</b> E</td><td class="mono">8</td><td>决定小数点的位置（数量级）</td></tr>
+      <tr><td><b>尾数位</b> M</td><td class="mono">23</td><td>决定有效数字（精度）</td></tr>
+    </tbody>
+  </table>
+
+  <p class="muted small">下面我们把 0.1 一步步「塞」进这 32 个格子里。</p>
+</section>
+
+<!-- ============ 07 ============ -->
+<section class="card" id="s7">
+  <div class="sec-head"><span class="sec-num">07</span><h2>第 ① 步：写成二进制的「科学计数法」</h2></div>
+  <p>十进制里我们会把 1234 写成 <code>1.234 × 10³</code>。二进制里也一样，把小数点移动到<b>第一个 1 的后面</b>：</p>
+
+  <pre>原始：  0.0001100110011001100110011…₂
+              └──── 小数点右移 4 位 ────┘
+结果：  1.1001100110011001100110011…₂ × 2⁻⁴
+        └┬┘                          └┬┘
+      只有一个 1                   指数是 -4</pre>
+
+  <div class="note">
+    <b>为什么要这样写？</b>因为规范化的二进制数，整数部分<b>永远是 1</b>（只要不是 0）。
+    既然永远都是 1，那就不用存了！这就是「隐含的 1」，白白省下 1 个比特。
+  </div>
+
+  <p>所以我们现在手里有三个信息：</p>
+  <ul>
+    <li>符号：正数 → <code>0</code></li>
+    <li>真实指数：<code>-4</code></li>
+    <li>有效数字：<code>1.1001100110011001100110011…</code>（这里的 <code>1.</code> 不用存）</li>
+  </ul>
+</section>
+
+<!-- ============ 08 ============ -->
+<section class="card" id="s8">
+  <div class="sec-head"><span class="sec-num">08</span><h2>第 ② 步：指数怎么存？—— 加 127 偏置</h2></div>
+  <p>指数可能是负的（比如 -4），但指数位是 8 个纯 0/1，没有符号位。怎么办？</p>
+  <p><b>办法：统一加上一个固定的偏移量 127，把负数「搬」到正数区间。</b></p>
+
+  <pre>偏置值 bias = 2⁸⁻¹ − 1 = 128 − 1 = <span class="y">127</span>
+
+存入的指数 = 真实指数 + 127
+           = (−4) + 127
+           = <span class="g">123</span></pre>
+
+  <p>把 123 转成 8 位二进制：</p>
+  <pre>123 = 64 + 32 + 16 + 8 + 2 + 1
+    = 2⁶ + 2⁵ + 2⁴ + 2³ + 2¹ + 2⁰
+
+位数：  2⁷  2⁶  2⁵  2⁴  2³  2²  2¹  2⁰
+取值：   0   1   1   1   1   0   1   1
+       └─────────── 01111011 ───────────┘</pre>
+
+  <div class="note key">
+    <b>读取时反过来算：</b>存储值 − 127 = 真实指数，即 <code>123 − 127 = −4</code>。
+    <br>用 127 偏置，8 位指数可以表示真实指数范围 <b>−126 ~ +127</b>。
+  </div>
+</section>
+
+<!-- ============ 09 ============ -->
+<section class="card" id="s9">
+  <div class="sec-head"><span class="sec-num">09</span><h2>第 ③ 步：取 23 位尾数 —— 还要四舍五入！</h2></div>
+  <p>有效数字是 <code>1.1001100110011001100110011…</code>，但尾数位只有 23 个格子，必须截断。</p>
+
+  <pre>完整小数部分： 1<span class="y">.</span>1001100110011001100110011 0011 0011 …
+                 └──────── 取前 23 位 ────────┘└─ 第 24 位 ─┘
+
+前 23 位：  <span class="b">10011001100110011001100</span>
+第 24 位：  <span class="r">1</span>   ← 是 1，要「进位」！
+
+进位后：    <span class="g">10011001100110011001101</span></pre>
+
+  <div class="note warn">
+    这一步就是<b>舍入误差的来源</b>。如果第 24 位是 0，直接丢掉；是 1，就要向前进 1 位。
+    （IEEE 754 实际用的是「四舍六入五成双」，但这里刚好是进位的情况。）
+  </div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="card" id="s10">
+  <div class="sec-head"><span class="sec-num">10</span><h2>拼起来：0.1 的 32 位真身</h2></div>
+  <p>把三段拼在一起：</p>
+
+  <div class="bits-box">
+    <div class="seg s">0</div>
+    <div class="seg e">01111011</div>
+    <div class="seg m">10011001100110011001101</div>
+  </div>
+
+  <table>
+    <thead><tr><th>部分</th><th>内容</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td>符号</td><td class="mono">0</td><td>正数</td></tr>
+      <tr><td>指数</td><td class="mono">01111011</td><td>123 − 127 = −4</td></tr>
+      <tr><td>尾数</td><td class="mono">10011001100110011001101</td><td>1.10011001100110011001101₂</td></tr>
+    </tbody>
+  </table>
+
+  <pre>连续写出来：
+<span class="r">0</span> <span class="y">01111011</span> <span class="b">10011001100110011001101</span>
+
+= 00111101110011001100110011001101₂</pre>
+
+  <div class="note">
+    <b>小技巧：</b>只要指数不是全 0 或全 1，尾数就默认前面有个隐藏的 <code>1.</code>。
+    所以这 23 位实际表示的是 <code>1.10011001100110011001101</code>。
+  </div>
+</section>
+
+<!-- ============ 11 ============ -->
+<section class="card" id="s11">
+  <div class="sec-head"><span class="sec-num">11</span><h2>转成十六进制：4 位一组</h2></div>
+  <p>二进制太长不好写，程序员习惯每 <b>4 位</b>合成 1 个十六进制数字（因为 2⁴ = 16）。</p>
+
+  <pre>0011  1101  1100  1100  1100  1100  1100  1101
+  │     │     │     │     │     │     │     │
+  3     D     C     C     C     C     C     D
+
+所以： 0.1 的单精度十六进制 = <span class="g">0x3DCCCCCD</span></pre>
+
+  <table>
+    <thead><tr><th>二进制</th><th class="mono">0000</th><th class="mono">0001</th><th class="mono">0010</th><th class="mono">0011</th><th class="mono">0100</th><th class="mono">…</th><th class="mono">1101</th><th class="mono">1111</th></tr></thead>
+    <tbody><tr><td>十六进制</td><td class="mono">0</td><td class="mono">1</td><td class="mono">2</td><td class="mono">3</td><td class="mono">4</td><td class="mono">…</td><td class="mono">D</td><td class="mono">F</td></tr></tbody>
+  </table>
+
+  <p class="small muted">在 C / Java 里，<code>0x3DCCCCCD</code> 就是 float 类型的 0.1f 在内存中的原始比特。</p>
+</section>
+
+<!-- ============ 12 ============ -->
+<section class="card" id="s12">
+  <div class="sec-head"><span class="sec-num">12</span><h2>再转回十进制，还等于 0.1 吗？</h2></div>
+  <p>我们把存下来的值还原出来算一遍：</p>
+
+  <pre>存储的值 = 1.<span class="b">10011001100110011001101</span>₂ × 2⁻⁴
+
+把它当成二进制小数展开：
+= (1 + 0.5 + 0.0625 + …) × 0.0625
+
+精确计算（用整数算最准）：
+尾数位 = 10011001100110011001101₂ = 5033165
+尾数整体 = 2²³ + 5033165 = 8388608 + 5033165 = 13421773
+
+值 = 13421773 ÷ 2²³ ÷ 2⁴
+   = 13421773 ÷ 134217728</pre>
+
+  <div class="note warn" style="font-size:18px;">
+    <b>最终结果：</b>
+    <br>0.1 在计算机里实际存的是
+    <br><code style="font-size:17px;">0.100000001490116119384765625</code>
+    <br><b>不是 0.1！</b>差了大约 1.49 × 10⁻⁹。
+  </div>
+
+  <p>这个误差很小，小到平时打印出来还是显示 <code>0.1</code>，所以你可能一直没发现。但它确实<b>客观存在</b>。</p>
+
+  <table>
+    <thead><tr><th></th><th>值</th></tr></thead>
+    <tbody>
+      <tr><td>你写的</td><td class="mono">0.100000000000000000000000000</td></tr>
+      <tr><td>计算机存的</td><td class="mono">0.100000001490116119384765625</td></tr>
+      <tr><td>误差</td><td class="mono">约 1.49 × 10⁻⁹</td></tr>
+    </tbody>
+  </table>
+
+  <details>
+    <summary>附：为什么这个精确计算可以用整数来算？</summary>
+
+    <p>这里能“用整数算得准”，是因为 <b>二进制浮点数的结构决定了它可以被写成一个整数除以 2 的幂</b>，而“除以 2 的幂”在二进制里只是移动小数点，不会产生新的误差。我们一步步拆开看。</p>
+
+    <h3>一、先看尾数是什么</h3>
+    <p>0.1 规格化后是：</p>
+    <pre>1.10011001100110011001101₂ × 2⁻⁴</pre>
+    <p>尾数部分 <code>1.10011001100110011001101</code> 里：</p>
+    <ul>
+      <li>小数点左边是 <b>1 位</b>：<code>1</code></li>
+      <li>小数点右边是 <b>23 位</b>：<code>10011001100110011001101</code></li>
+    </ul>
+    <p>所以它一共是 <b>24 位二进制有效数字</b>。</p>
+
+    <h3>二、把它变成整数：乘以 2²³</h3>
+    <p>如果要让这个数变成整数，只需要把小数点 <b>右移 23 位</b>，也就是乘以 <code>2²³</code>：</p>
+    <pre>1.10011001100110011001101₂ × 2²³
+= 110011001100110011001101₂</pre>
+    <p>这个 24 位二进制整数就是：</p>
+    <pre>1 10011001100110011001101₂</pre>
+    <p>把它拆成两部分看：</p>
+    <pre>= 1 × 2²³  +  10011001100110011001101₂
+= 2²³       +  10011001100110011001101₂</pre>
+    <p>已知：</p>
+    <pre>2²³ = 8388608
+10011001100110011001101₂ = 5033165</pre>
+    <p>所以：</p>
+    <pre>1.10011001100110011001101₂ × 2²³
+= 8388608 + 5033165 = <span class="g">13421773</span></pre>
+
+    <h3>三、别忘了外面还有个 × 2⁻⁴</h3>
+    <p>我们刚才算的是“尾数 × 2²³”，但真实值是：</p>
+    <pre>尾数 × 2⁻⁴</pre>
+    <p>为了保持相等，我们把刚才乘的 <code>2²³</code> 再除掉：</p>
+    <pre>值 = 尾数 × 2⁻⁴
+   = (尾数 × 2²³) × 2⁻²³ × 2⁻⁴
+   = 13421773 × 2⁻²³ × 2⁻⁴
+   = 13421773 × 2⁻²⁷</pre>
+    <p>所以：</p>
+    <pre>值 = 13421773 ÷ 2²⁷</pre>
+    <p>而：</p>
+    <pre>2²⁷ = 134217728</pre>
+    <p>因此：</p>
+    <pre>值 = 13421773 ÷ 134217728</pre>
+
+    <h3>四、为什么这样算就是“精确”的？</h3>
+    <p>关键在于两点：</p>
+
+    <p><b>1. 浮点数的尾数是有限位二进制</b></p>
+    <p>单精度尾数只有 <b>23 位</b>，所以它一定能写成一个“整数 ÷ 2²³”的形式。</p>
+    <pre>1.10011001100110011001101₂
+= 110011001100110011001101₂ ÷ 2²³
+= 13421773 ÷ 8388608</pre>
+
+    <p><b>2. 除以 2 的幂，在二进制里只是移动小数点</b></p>
+    <p>在十进制里，除以 10 的幂就是小数点左移：</p>
+    <pre>1234 ÷ 10³ = 1.234</pre>
+    <p>在二进制里完全一样，除以 2 的幂就是二进制小数点左移：</p>
+    <pre>110011001100110011001101₂ ÷ 2²³
+= 1.10011001100110011001101₂</pre>
+    <p>这个操作 <b>不会产生任何舍入误差</b>，因为只是把小数点挪了位置，每一位数字都原样保留。</p>
+    <p>所以：</p>
+    <pre>值 = 13421773 ÷ 2²⁷</pre>
+    <p>这个除法在数学上是完全精确的，因为分子分母都是整数，而且分母是 2 的幂，结果是一个有限二进制小数。</p>
+
+    <h3>五、和“直接用十进制小数算”有什么区别？</h3>
+    <p>如果你直接写：</p>
+    <pre>1.10011001100110011001101₂ × 2⁻⁴</pre>
+    <p>然后想用十进制小数去算，会碰到两个麻烦：</p>
+    <ol>
+      <li>二进制小数转十进制时，每一位权重是 0.5、0.25、0.125……这些数在十进制里虽然有限，但加起来容易算错；</li>
+      <li>中间步骤如果用十进制浮点数计算，本身又会引入新的舍入误差。</li>
+    </ol>
+    <p>而用整数算：</p>
+    <pre>13421773 ÷ 134217728</pre>
+    <ul>
+      <li>分子分母都是精确整数；</li>
+      <li>分母是 2 的幂，二进制意义下“除得尽”；</li>
+      <li>不涉及任何近似。</li>
+    </ul>
+    <p>所以这个结果就是计算机里 <b>实际存储的那个浮点数所代表的精确十进制值</b>：</p>
+    <pre>13421773 ÷ 134217728
+= 0.100000001490116119384765625</pre>
+
+    <h3>六、一句话总结</h3>
+    <div class="note key">
+      <b>单精度浮点数的尾数只有 23 位，所以它可以写成 <code>整数 ÷ 2²³</code>；</b>
+      <br>再乘上指数 <code>2⁻⁴</code>，就变成 <code>整数 ÷ 2²⁷</code>。
+      <br>除以 2 的幂在二进制里只是移动小数点，不产生误差，
+      <br>所以用整数来算，得到的就是那个浮点数真正代表的精确值。
+    </div>
+    <p>这就是为什么可以用整数精确计算，而不是近似计算。</p>
+
+  </details>
+</section>
+
+<!-- ============ 13 ============ -->
+<section class="card" id="s13">
+  <div class="sec-head"><span class="sec-num">13</span><h2>为什么有的小数就是存不下？</h2></div>
+  <p>回到最根本的问题。二进制小数的权重是：</p>
+  <pre>0.5   0.25   0.125   0.0625   0.03125   …</pre>
+  <p>它们全都是 <b>1/2ⁿ</b> 的形式。两个这样的数相加，结果的分母仍然是 2 的幂。</p>
+  <p>也就是说：<b>能用有限位二进制精确表示的小数，其分母（约分后）只能是 2 的幂。</b></p>
+
+  <table>
+    <thead><tr><th>十进制数</th><th>最简分数</th><th>分母含因子</th><th>能否精确存储</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">0.5</td><td class="mono">1/2</td><td class="mono">2</td><td style="color:#10b981;font-weight:700;">✓ 可以</td></tr>
+      <tr><td class="mono">0.25</td><td class="mono">1/4</td><td class="mono">2</td><td style="color:#10b981;font-weight:700;">✓ 可以</td></tr>
+      <tr><td class="mono">0.625</td><td class="mono">5/8</td><td class="mono">2</td><td style="color:#10b981;font-weight:700;">✓ 可以</td></tr>
+      <tr><td class="mono">0.1</td><td class="mono">1/10</td><td class="mono">2 × <b>5</b></td><td style="color:#ef4444;font-weight:700;">✗ 不行</td></tr>
+      <tr><td class="mono">0.2</td><td class="mono">1/5</td><td class="mono"><b>5</b></td><td style="color:#ef4444;font-weight:700;">✗ 不行</td></tr>
+      <tr><td class="mono">0.3</td><td class="mono">3/10</td><td class="mono">2 × <b>5</b></td><td style="color:#ef4444;font-weight:700;">✗ 不行</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note deep">
+    <b>类比一下：</b>在十进制里，1/3 = 0.3333333… 永远写不完，因为我们只有 10 个数字，除不尽 3。
+    <br>同样地，在二进制里，分母含有因子 5 的数，永远除不尽。
+    <br><b>不是计算机「算错了」，是 0.1 这个数本身在二进制下就是无限循环的。</b>
+  </div>
+</section>
+
+<!-- ============ 14 ============ -->
+<section class="card" id="s14">
+  <div class="sec-head"><span class="sec-num">14</span><h2>课堂练习：请你自己算一遍 0.2</h2></div>
+  <p>现在轮到你了。按照刚才的六个步骤，把 <code>0.2</code> 存进单精度浮点数里。</p>
+
+  <ol class="steps">
+    <li><b>乘 2 取整</b>：写出 0.2 的二进制小数（注意循环节）</li>
+    <li><b>科学计数法</b>：写成 <code>1.xxx × 2ⁿ</code>，确定真实指数 n</li>
+    <li><b>算偏置指数</b>：n + 127 = ? 转成 8 位二进制</li>
+    <li><b>取尾数</b>：取小数点后 23 位，看第 24 位决定是否进位</li>
+    <li><b>拼装</b>：符号位 + 指数位 + 尾数位，写出 32 位</li>
+    <li><b>转十六进制</b>：每 4 位一组，写出 0x 形式</li>
+  </ol>
+
+  <div class="note">
+    <b>提示：</b>0.2 = 0.1 × 2。既然 0.1 的二进制已经算过，0.2 是不是能偷个懒？
+    <br>注意观察：0.1 = 0.000110011…₂，那 0.2 的二进制应该是什么样？
+  </div>
+
+  <details>
+    <summary>点击查看完整答案</summary>
+
+    <h3>① 乘 2 取整</h3>
+    <table>
+      <thead><tr><th>步骤</th><th>计算</th><th>取整数位</th><th>剩下的小数</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="mono">0.2 × 2 = 0.4</td><td class="mono">0</td><td class="mono">0.4</td></tr>
+        <tr><td>2</td><td class="mono">0.4 × 2 = 0.8</td><td class="mono">0</td><td class="mono">0.8</td></tr>
+        <tr><td>3</td><td class="mono">0.8 × 2 = 1.6</td><td class="mono">1</td><td class="mono">0.6</td></tr>
+        <tr><td>4</td><td class="mono">0.6 × 2 = 1.2</td><td class="mono">1</td><td class="mono">0.2</td></tr>
+        <tr><td>5</td><td class="mono">0.2 × 2 = 0.4</td><td class="mono">0</td><td class="mono">0.4 &nbsp;⚠️ 回到第 1 步</td></tr>
+      </tbody>
+    </table>
+    <pre>0.2₁₀ = 0.<span class="g">0011 0011 0011 0011</span> …₂ （循环节同样是 0011）</pre>
+
+    <h3>② 写成科学计数法</h3>
+    <pre>0.001100110011…₂ = 1.<span class="b">1001100110011001100110011…</span>₂ × 2⁻³
+                                                       ↑
+                                              真实指数 n = −3</pre>
+
+    <h3>③ 算偏置指数</h3>
+    <pre>−3 + 127 = <span class="g">124</span>
+
+124 = 64 + 32 + 16 + 8 + 4
+    = 01111100₂</pre>
+
+    <h3>④ 取尾数（23 位）</h3>
+    <pre>完整： 1.1001100110011001100110011…
+前 23 位：<span class="b">10011001100110011001100</span>
+第 24 位：<span class="r">1</span> → 进位
+结果：  <span class="g">10011001100110011001101</span></pre>
+    <div class="note key">
+      <b>发现了吗？</b>0.2 的尾数和 0.1 的尾数<b>完全一样</b>！
+      因为 0.2 = 0.1 × 2，乘 2 只改变指数，不改变有效数字。
+    </div>
+
+    <h3>⑤ 拼装 32 位</h3>
+    <div class="bits-box">
+      <div class="seg s">0</div>
+      <div class="seg e">01111100</div>
+      <div class="seg m">10011001100110011001101</div>
+    </div>
+    <pre>0 01111100 10011001100110011001101</pre>
+
+    <h3>⑥ 转十六进制</h3>
+    <pre>0011  1110  0100  1100  1100  1100  1100  1101
+  3     E     4     C     C     C     C     D
+
+<span class="g">0x3E4CCCCD</span></pre>
+
+    <h3>⑦ 实际存的值</h3>
+    <div class="note warn">
+      0.2 实际存的是 <code>0.20000000298023223876953125</code>
+      <br>而不是 0.2。
+    </div>
+
+    <p class="muted small">对照表：</p>
+    <table>
+      <thead><tr><th></th><th>0.1</th><th>0.2</th></tr></thead>
+      <tbody>
+        <tr><td>真实指数</td><td class="mono">−4</td><td class="mono">−3</td></tr>
+        <tr><td>偏置指数</td><td class="mono">123 = 01111011</td><td class="mono">124 = 01111100</td></tr>
+        <tr><td>尾数</td><td class="mono">10011001100110011001101</td><td class="mono">10011001100110011001101</td></tr>
+        <tr><td>十六进制</td><td class="mono">0x3DCCCCCD</td><td class="mono">0x3E4CCCCD</td></tr>
+        <tr><td>实际值</td><td class="mono">0.100000001490116…</td><td class="mono">0.200000002980232…</td></tr>
+      </tbody>
+    </table>
+  </details>
+</section>
+
+<!-- ============ 15 ============ -->
+<section class="card" id="s15">
+  <div class="sec-head"><span class="sec-num">15</span><h2>终极问题：为什么 0.1 + 0.2 ≠ 0.3？</h2></div>
+
+  <p>在 Python 或 JavaScript 的控制台里敲下这一行：</p>
+  <pre>&gt;&gt;&gt; 0.1 + 0.2
+<span class="g">0.30000000000000004</span></pre>
+
+  <p>这不是 bug，也不是语言的问题，而是<b>所有遵循 IEEE 754 标准的计算机都会这样</b>。</p>
+
+  <div class="note">
+    <b>说明：</b>日常编程（Python / JavaScript / Java 的 double）默认用<b>双精度</b>（64 位，尾数 52 位），
+    原理和上面讲的一模一样，只是位数更多、误差更小。下面用双精度来看。
+  </div>
+
+  <h3>原因拆解</h3>
+  <ol class="steps">
+    <li>
+      <b>0.1 存进去时就已经不是 0.1 了</b>
+      <pre>真实存储： 0.1000000000000000055511151231257827…</pre>
+    </li>
+    <li>
+      <b>0.2 存进去时也不是 0.2</b>
+      <pre>真实存储： 0.2000000000000000111022302462515654…</pre>
+    </li>
+    <li>
+      <b>两个「近似值」相加</b>
+      <pre>0.1000000000000000055511151231257827…
++ 0.2000000000000000111022302462515654…
+─────────────────────────────────────────
+= 0.3000000000000000166533453693773481…   ← 精确和</pre>
+    </li>
+    <li>
+      <b>这个和又要存进 64 位里，还得再舍入一次</b>
+      <pre>舍入后的结果： 0.30000000000000004440892098500626…
+显示出来就是： <span class="g">0.30000000000000004</span></pre>
+    </li>
+    <li>
+      <b>而 0.3 单独存进去，是另一个值</b>
+      <pre>0.3 实际存储： 0.29999999999999998889776975374843…</pre>
+    </li>
+  </ol>
+
+  <div class="note warn" style="font-size:18px;">
+    <b>结论：</b>
+    <pre style="background:#fff;border:1px solid #fde68a;color:#92400e;margin:10px 0 0;">
+0.1 + 0.2  →  0.30000000000000004…
+     0.3   →  0.29999999999999998…
+
+两者不相等  →  0.1 + 0.2 ≠ 0.3</pre>
+  </div>
+
+  <p class="muted">误差在每一步「存储」和「运算」中一点点累积，最后就暴露出来了。</p>
+</section>
+
+<!-- ============ 16 ============ -->
+<section class="card" id="s16">
+  <div class="sec-head"><span class="sec-num">16</span><h2>总结与避坑指南</h2></div>
+
+  <h3>三个核心结论</h3>
+  <ol>
+    <li><b>二进制小数的权重是 1/2、1/4、1/8…</b>，只有分母为 2 的幂的分数才能被精确表示。</li>
+    <li><b>0.1、0.2、0.3 这类数在二进制下是无限循环小数</b>，计算机只能存一个「最接近的近似值」。</li>
+    <li><b>浮点数运算会累积误差</b>，所以不能用 <code>==</code> 直接比较两个浮点数。</li>
+  </ol>
+
+  <h3>编程中的正确做法</h3>
+  <table>
+    <thead><tr><th>场景</th><th>❌ 不要这样</th><th>✅ 应该这样</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>判断浮点数相等</td>
+        <td class="mono">a == b</td>
+        <td class="mono">abs(a − b) &lt; 1e-9</td>
+      </tr>
+      <tr>
+        <td>金额计算</td>
+        <td class="mono">用 float / double</td>
+        <td>用整数（以「分」为单位）<br>或 <span class="mono">Decimal</span></td>
+      </tr>
+      <tr>
+        <td>输出显示</td>
+        <td class="mono">直接打印</td>
+        <td>格式化保留 2 位小数</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note key">
+    <b>一句话记住：</b>
+    <br>计算机不是「算不准」，而是它用二进制工作，而 0.1 这个数在二进制里本来就没有尽头。
+    <br>就像我们没法用十进制写完整 1/3 一样。
+  </div>
+
+  <h3>课后小任务</h3>
+  <ul>
+    <li>自己动手算一遍 <code>0.25</code> 和 <code>0.75</code>，看看它们能不能被精确存储，为什么？</li>
+    <li>打开浏览器的开发者工具，在 Console 里输入 <code>0.1 + 0.2</code>，看看结果。</li>
+    <li>再试试 <code>0.1 + 0.2 + 0.3</code> 和 <code>0.3 + 0.3</code>，观察差异。</li>
+  </ul>
+</section>
+
+<footer>
+  计算机组成原理 · 数据表示专题 &nbsp;|&nbsp; IEEE 754 单精度浮点数
+</footer>
+
+</div>
+
+<script>
+window.addEventListener('scroll', function () {
+  var h = document.documentElement;
+  var max = h.scrollHeight - h.clientHeight;
+  var p = max > 0 ? (h.scrollTop / max) * 100 : 0;
+  document.getElementById('bar').style.width = p + '%';
+});
+</script>
+
+</body>
+</html>
