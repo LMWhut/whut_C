@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C 语言学习方法指导 · 别怕，C 语言其实很讲道理</title>
+<style>
+  :root{
+    --fs-title: 44px;
+    --fs-body:  30px;
+    --fs-other: 26px;
+    --fs-small: 22px;
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{
+    background:var(--blue-900);
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    color:var(--ink);
+    line-height:1.6;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:48px 28px 80px;}
+
+  /* ================= 页头 ================= */
+  .hero{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    border-radius:20px;padding:48px 56px;position:relative;overflow:hidden;
+    margin-bottom:34px;
+    box-shadow:0 18px 40px rgba(10,61,99,.28);
+  }
+  .hero::before{
+    content:"";position:absolute;right:-80px;top:-80px;
+    width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.22) 0%,rgba(232,114,12,0) 70%);
+  }
+  .hero::after{
+    content:"";position:absolute;left:-70px;bottom:-90px;
+    width:300px;height:300px;border-radius:50%;
+    background:radial-gradient(circle,rgba(74,151,212,.20) 0%,rgba(74,151,212,0) 70%);
+  }
+  .hero-inner{position:relative;z-index:2;}
+  .kicker{
+    display:inline-block;font-size:22px;letter-spacing:2px;
+    color:#ffd9b3;border:1px solid rgba(255,217,179,.55);
+    padding:6px 24px;margin-bottom:24px;border-radius:999px;
+  }
+  .hero h1{font-size:56px;font-weight:800;color:#fff;letter-spacing:2px;line-height:1.2;margin-bottom:16px;}
+  .hero-bar{width:260px;height:7px;border-radius:4px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:24px;}
+  .hero p{font-size:28px;color:#a9d8f5;letter-spacing:1px;line-height:1.5;}
+  
+  /* 调整最后一行的主讲信息 */
+  .hero-meta{
+    font-size:20px; /* 字号改小 */
+    color:#7fb2dd;
+    letter-spacing:2px;
+    margin-top:20px; /* 下移一点 */
+    line-height:1.5;
+  }
+
+  /* ================= 区块 ================= */
+  section.block{
+    background:#fff;border-radius:18px;padding:34px 40px;
+    margin-bottom:26px;
+    box-shadow:0 10px 28px rgba(10,61,99,.16);
+    opacity:0;transform:translateY(20px);
+    animation:in .6s ease forwards;
+  }
+  section.block:nth-of-type(1){animation-delay:.05s;}
+  section.block:nth-of-type(2){animation-delay:.15s;}
+  section.block:nth-of-type(3){animation-delay:.25s;}
+  section.block:nth-of-type(4){animation-delay:.35s;}
+  section.block:nth-of-type(5){animation-delay:.45s;}
+  section.block:nth-of-type(6){animation-delay:.55s;}
+  @keyframes in{to{opacity:1;transform:none;}}
+
+  .b-title{
+    display:flex;align-items:center;gap:14px;
+    font-size:var(--fs-title);font-weight:800;color:var(--blue-700);
+    margin-bottom:20px;line-height:1.25;
+  }
+  .b-title .num{
+    flex:0 0 auto;width:52px;height:52px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#e8720c,#c55807);
+    color:#fff;font-size:26px;font-weight:800;
+    box-shadow:0 6px 14px rgba(232,114,12,.32);
+  }
+  h3.sub{
+    font-size:28px;font-weight:800;color:var(--blue-700);
+    border-left:7px solid var(--orange);
+    padding-left:14px;margin:26px 0 12px;
+  }
+  h3.sub:first-child{margin-top:0;}
+  p.lead{font-size:var(--fs-body);color:var(--ink);line-height:1.8;margin:10px 0;}
+  p.note{font-size:var(--fs-other);color:var(--muted);line-height:1.75;margin:8px 0;}
+
+  /* 一句话高亮 */
+  .oneline{
+    background:var(--purple-soft);
+    border-left:8px solid var(--purple);
+    border-radius:0 14px 14px 0;
+    padding:22px 30px;margin:18px 0;
+    font-size:32px;font-weight:800;color:var(--blue-700);line-height:1.6;
+  }
+
+  /* 表格 */
+  table.tb{
+    width:100%;border-collapse:separate;border-spacing:0;
+    font-size:var(--fs-other);line-height:1.55;margin:12px 0;
+    border-radius:12px;overflow:hidden;
+    box-shadow:0 4px 14px rgba(18,79,131,.10);
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:700;font-size:var(--fs-other);
+    padding:14px 18px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:13px 18px;background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody tr:last-child td,table.tb tbody tr:last-child th{border-bottom:none;}
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:700;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:nth-child(even) td{background:#f7fafd;}
+
+  /* 提示框 */
+  .box{
+    border-left:8px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 12px 12px 0;
+    padding:20px 28px;margin:16px 0;
+    font-size:var(--fs-other);line-height:1.8;
+  }
+  .box .label{display:inline-block;font-weight:800;color:var(--blue-700);margin-right:10px;}
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* 两栏 */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+  @media (max-width:820px){.two{grid-template-columns:1fr;}}
+
+  /* 清单卡片 */
+  .card{
+    background:#fff;border:1px solid var(--line);
+    border-top:8px solid var(--blue-600);
+    border-radius:0 0 16px 16px;
+    padding:22px 26px;
+    box-shadow:0 8px 20px rgba(18,79,131,.10);
+  }
+  .card.green{border-top-color:var(--green);}
+  .card.orange{border-top-color:var(--orange);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:28px;color:var(--blue-700);margin-bottom:14px;
+    display:flex;align-items:center;gap:10px;line-height:1.3;
+  }
+  .card.green h4{color:var(--green);}
+  .card.orange h4{color:#b95a05;}
+  .card.red h4{color:var(--red);}
+  .card ul{list-style:none;padding:0;margin:0;}
+  .card li{
+    font-size:var(--fs-other);line-height:1.75;color:var(--ink);
+    padding:8px 0 8px 34px;position:relative;
+    border-bottom:1px dashed var(--line);
+  }
+  .card li:last-child{border-bottom:none;}
+  .card li::before{
+    content:"✔";position:absolute;left:0;top:8px;
+    font-weight:800;color:var(--blue-600);
+  }
+  .card.green li::before{color:var(--green);}
+  .card.red li::before{content:"✖";color:var(--red);}
+  .card.red.keep li::before{content:"✔";color:var(--red);}
+  .card.orange li::before{content:"○";color:var(--orange);}
+  .card li b{color:var(--blue-700);}
+  .card li code,.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 7px;border-radius:5px;font-size:.92em;
+  }
+
+  /* 步骤 */
+  .steps{display:flex;flex-direction:column;gap:14px;margin:14px 0;}
+  .step{
+    display:flex;gap:18px;align-items:flex-start;
+    background:#fff;border:1px solid var(--line);
+    border-left:8px solid var(--blue-600);
+    border-radius:0 14px 14px 0;
+    padding:18px 24px;
+    box-shadow:0 4px 12px rgba(18,79,131,.08);
+  }
+  .step:nth-child(2){border-left-color:var(--orange);}
+  .step:nth-child(3){border-left-color:var(--green);}
+  .step:nth-child(4){border-left-color:var(--purple);}
+  .step:nth-child(5){border-left-color:var(--red);}
+  .step:nth-child(6){border-left-color:#e8a33d;}
+  .step .n{
+    flex:0 0 auto;width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-size:22px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .step:nth-child(2) .n{background:linear-gradient(135deg,#e8720c,#c55807);}
+  .step:nth-child(3) .n{background:linear-gradient(135deg,#2e8b57,#1f6b42);}
+  .step:nth-child(4) .n{background:linear-gradient(135deg,#8e44ad,#6d2f8a);}
+  .step:nth-child(5) .n{background:linear-gradient(135deg,#c0392b,#96291e);}
+  .step:nth-child(6) .n{background:linear-gradient(135deg,#e8a33d,#b8801f);}
+  .step .body{flex:1;}
+  .step .body h4{font-size:26px;color:var(--blue-700);margin-bottom:6px;line-height:1.3;}
+  .step .body p{font-size:var(--fs-other);color:var(--muted);line-height:1.7;margin:0;}
+  .step .body p b{color:var(--blue-700);}
+
+  /* 代码 */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:7px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    padding:16px 24px;margin:12px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:24px;line-height:1.6;
+    white-space:pre-wrap;overflow:auto;
+    box-shadow:0 10px 24px rgba(13,43,69,.22);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  /* 页脚 */
+  .footer{
+    text-align:center;color:#7fb2dd;font-size:20px;
+    letter-spacing:2px;padding:20px 0 0;
+  }
+  .footer b{color:#ffd9b3;}
+
+  @media print{
+    html,body{background:#fff;}
+    .wrap{max-width:none;padding:0;}
+    .hero{box-shadow:none;border-radius:0;}
+    section.block{box-shadow:none;border:1px solid var(--line);page-break-inside:avoid;animation:none;opacity:1;transform:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ 页头 ============ -->
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="kicker">C 程序设计基础 · 致 2 周后有点懵的你</div>
+      <h1>别怕，C 语言其实很讲道理</h1>
+      <div class="hero-bar"></div>
+      <p style="font-size:22px;">觉得难、觉得要记的太多，是因为你正在经历从“自然语言思维”到“机器思维”的阵痛。</p>
+      <div class="hero-meta">武汉理工大学　·　主讲：孙骏　李民</div>
+    </div>
+  </header>
+
+  <!-- ============ 一、你现在的困惑，非常正常 ============ -->
+  <section class="block">
+    <div class="b-title"><span class="num">1</span>你现在的困惑，非常正常</div>
+    <p class="lead">
+      上了两周课，你可能觉得：分号老是忘、`%d` 和 `%f` 老弄混、各种类型规则让人头晕……于是你想：“我是不是太笨了？我是不是该把书从头到尾看懂了再来敲代码？”
+    </p>
+    <p class="lead">
+      其实，<b>几乎每一个程序员入门时，都被这些规则绊过跟头。</b>你觉得它难，是因为 C 语言让你第一次看清了计算机底层的“物理规则”。就像学开车，你觉得教练要求太多（看后视镜、打转向灯、踩离合），那是因为你还不熟练，而不是你学不会。
+    </p>
+
+    <div class="oneline">
+      不要被规则吓倒。<br>
+      Python 把规则藏起来，让你先跑起来；<br>
+      C 把规则摆出来，让你知道车是怎么跑起来的。
+    </div>
+  </section>
+
+  <!-- ============ 二、破除完美主义：千万不要“看懂了再做” ============ -->
+  <section class="block">
+    <div class="b-title"><span class="num">2</span>破除完美主义：不要“看懂了再做”</div>
+    <p class="lead">
+      很多同学觉得“要记得内容太多”，于是采取了一个看似保险的策略：<b>先把书上的细节全背下来，或者全看懂了，再去上机写代码。</b>
+    </p>
+    <p class="lead">
+      这是编程学习最大的误区。C 语言是一门“手艺”，就像学游泳、学骑自行车，<b>你不可能在岸上把游泳理论背熟再去下水</b>。很多语法细节，你只有在亲手敲击、亲手报错、亲手修改的过程中，才能形成肌肉记忆。
+    </p>
+
+    <div class="box warn">
+      <span class="label">转变思路</span>
+      编程不是考试背诵，而是“通关打怪”。<b>能做对题，比“全看懂”重要得多。</b>不需要一次记住所有细节，代码报错了，去查、去改，改对了，你就记住了。
+    </div>
+  </section>
+
+  <!-- ============ 三、入门阶段：先抓什么，先放什么 ============ -->
+  <section class="block">
+    <div class="b-title"><span class="num">3</span>入门阶段：先抓什么，先放什么</div>
+    <p class="lead">
+      不用全背！把规则分两批：一批必须马上养成习惯，另一批知道结论就行，细节以后再补。
+    </p>
+
+    <div class="two">
+      <div class="card red keep">
+        <h4>✔ 必须盯住（放过会连环报错）</h4>
+        <ul>
+          <li><b>分号、英文半角符号</b>——漏一个就编译不过</li>
+          <li><b>变量先定义后使用</b>——别指望系统自动猜</li>
+          <li><b><code>scanf</code> 的 <code>&amp;</code> 不能丢</b>——丢了程序直接崩</li>
+          <li><b>格式符必须配对</b>——<code>%d</code> 配 int，<code>%lf</code> 配 double</li>
+          <li><b>整数除法 <code>/</code> 与取余 <code>%</code></b>——<code>5/2=2</code>，不是 2.5</li>
+        </ul>
+      </div>
+      <div class="card orange">
+        <h4>○ 暂时放过（先知道就行）</h4>
+        <ul>
+          <li><code>sizeof</code> 的具体字节数——不同系统不一样</li>
+          <li>补码、原码反码推导——知道负数在内存是补码就行</li>
+          <li>IEEE 754 浮点格式——知道“别用 == 比较浮点”就够</li>
+          <li>隐式转换的完整优先级链——记住“低往高转”够用</li>
+          <li>编译链接的底层过程——知道“编辑→编译→运行”三步就行</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 四、怎么快速进入状态？ ============ -->
+  <section class="block">
+    <div class="b-title"><span class="num">4</span>怎么快速进入状态？</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="n">1</div>
+        <div class="body">
+          <h4>先模仿，再理解</h4>
+          <p>先照着老师的模板把题做对、跑通，有成就感了，再回头问“为什么”。入门阶段允许“先会用、后明白”。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <div class="body">
+          <h4>找套路：按“输入-计算-输出”归类</h4>
+          <p>把做过的题按“输入-计算-输出”分类，新题先想“它像我之前做过的哪一道题”。其实编程的套路比数学少得多。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <div class="body">
+          <h4>先修表象，再究原理</h4>
+          <p>编译报错了，先看红字指向哪一行、把错改到能跑再说；原理可以之后慢慢悟，<b>千万别让一个报错卡你一天</b>。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">4</div>
+        <div class="body">
+          <h4>把“格式匹配”做成随身卡</h4>
+          <p><code>%d</code>–int、<code>%f</code>–float、<code>%lf</code>–double、<code>%c</code>–char。每次写 <code>scanf</code>/<code>printf</code> 前对一遍，两三周就能形成肌肉记忆，这比死记硬背管用。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">5</div>
+        <div class="body">
+          <h4>先自己扛，再问 AI</h4>
+          <p>卡住了先想 10 分钟，再问 AI。问的时候说清楚：我在做什么、遇到什么、报错是什么、试过什么。AI 给答案后，自己重写一遍，不许直接复制。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="box tip">
+      <span class="label">小建议</span>
+      入门阶段的目标是<b>“写对、跑通、结果对”</b>；等学到指针和内存，再回头看这些规则，你会发现每一条都有它的道理。
+    </div>
+  </section>
+
+  <!-- ============ 五、看一眼就懂：C 为什么非要这么严 ============ -->
+  <section class="block">
+    <div class="b-title"><span class="num">5</span>看一眼就懂：C 为什么非要这么严</div>
+    <p class="lead">求两个整数的商和余数。看两段代码，体会 C 到底多管了什么“闲事”。</p>
+
+    <div class="two">
+      <div>
+        <h3 class="sub" style="border-left-color:var(--green);">Python（替你包办）</h3>
+        <pre class="code"><span class="cmt"># 读两个整数</span>
+a, b = <span class="kw">map</span>(<span class="kw">int</span>, <span class="kw">input</span>().split())
+<span class="kw">print</span>(a // b)   <span class="cmt"># 整除</span>
+<span class="kw">print</span>(a % b)    <span class="cmt"># 取余</span></pre>
+        <p class="note">
+          不用声明类型，不用写格式符，不用取地址，解释器全在后台替你干了。
+        </p>
+      </div>
+      <div>
+        <h3 class="sub">C（你必须交代清楚）</h3>
+        <pre class="code"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+
+<span class="kw">int</span> main()
+{
+    <span class="kw">int</span> a, b;                    <span class="cmt">// ① 声明类型</span>
+    scanf(<span class="str">"%d %d"</span>, &amp;a, &amp;b);     <span class="cmt">// ② 格式符 + 取地址</span>
+    printf(<span class="str">"%d\n"</span>, a / b);       <span class="cmt">// ③ 格式符匹配类型</span>
+    printf(<span class="str">"%d\n"</span>, a % b);
+    <span class="kw">return</span> <span class="num">0</span>;                  <span class="cmt">// ④ 返回值 + 分号</span>
+}</pre>
+        <p class="note">
+          多出来的 ①②③④，就是 C 要求你“自己交代清楚”的部分。
+        </p>
+      </div>
+    </div>
+
+    <div class="box tip">
+      <span class="label">底层逻辑</span>
+      Python 替你做了：类型推断、格式解析、地址管理。<br>
+      C 让你自己做：声明类型、写格式符、取地址。<b>多写的这几行，就是“可控”的代价，也是“看得见底层”的入口。</b>
+    </div>
+  </section>
+
+  <!-- ============ 六、写在最后 ============ -->
+  <section class="block">
+    <div class="b-title"><span class="num">6</span>写在最后：难，是正常；通，是必然</div>
+    
+    <p class="lead">
+      觉得难的同学，你们<b>非常正常</b>。C 语言诞生近 50 年，几乎每个程序员入门时都被它的分号、类型、格式符绊过跟头。
+    </p>
+    <p class="lead" style="margin-bottom:20px;">
+      难，是因为你在学两件大事：<b>怎么让计算机做事</b>，以及<b>计算机到底是怎么做事的</b>。前期累，后期爽——这份“累”本身就是你在长本事。
+    </p>
+
+    <div class="oneline">
+      今天记住这一句：<br>先求“做对题”，再求“全懂”。等你写顺了，回头看这些“严格的要求”，会发现它们其实很讲道理。
+    </div>
+
+    <h3 class="sub" style="margin-top:30px;">调整一下心态</h3>
+    <div class="two">
+      <div class="card green">
+        <h4>✔ 这样想</h4>
+        <ul>
+          <li>报错不是“我不行”，是“编译器在帮我找问题”</li>
+          <li>规矩多不是“C 落后”，是“C 把底层摆给你看”</li>
+          <li>先做对题，再问为什么，最后回头补原理</li>
+          <li>每改对一个报错，就多懂一条机器规则</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h4>✖ 别这样想</h4>
+        <ul>
+          <li>“Python 一行就行，C 要写十行，C 真麻烦”</li>
+          <li>“报错这么多，我肯定学不会”</li>
+          <li>“先把书看完、把所有细节背下来再做题”</li>
+          <li>“AI 能写，我不用懂”</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="lead" style="margin-top:30px;">
+      最后，列三件<b>今天就能做的小事</b>，做完就关掉这份指南去敲代码吧：
+    </p>
+    <ul class="feat" style="list-style:none; padding:0; margin-top:14px;">
+      <li style="font-size:var(--fs-other); line-height:1.8; margin-bottom:10px; position:relative; padding-left:34px;">
+        <span style="position:absolute; left:0; color:var(--blue-600); font-weight:800;">●</span>
+        打开编译器，把课件里任意一个示例<b>自己敲一遍并运行</b>（哪怕照着抄）；
+      </li>
+      <li style="font-size:var(--fs-other); line-height:1.8; margin-bottom:10px; position:relative; padding-left:34px;">
+        <span style="position:absolute; left:0; color:var(--blue-600); font-weight:800;">●</span>
+        挑一道第 1-2 章的习题，用“四步曲”（输入-处理-输出-检查）<b>独立写出来</b>；
+      </li>
+      <li style="font-size:var(--fs-other); line-height:1.8; margin-bottom:10px; position:relative; padding-left:34px;">
+        <span style="position:absolute; left:0; color:var(--blue-600); font-weight:800;">●</span>
+        建一个“困惑清单”文档，<b>写下你最想问的 3 个问题</b>，下次上课直接问老师。
+      </li>
+    </ul>
+
+    <div class="box red" style="margin-top:24px;">
+      <span class="label">记住</span>
+      基本功砸实了，AI 才是你的杠杆；底层看不清，AI 给你的代码你也判断不了。
+    </div>
+  </section>
+
+  <div class="footer">
+    C 程序设计基础 · 学习方法指导　|　<b>先做对，再弄懂，最后回头看原理</b>
+  </div>
+
+</div>
+</body>
+</html>
