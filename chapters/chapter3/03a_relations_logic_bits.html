@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第3章（一）关系逻辑运算与位运算</title>
+<style>
+  :root{
+    --fs-title: 48px;
+    --fs-body:  32px;
+    --fs-other: 30px;
+    --fs-list:  29px;
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html,body{
+    height:100%;overflow:hidden;background:var(--blue-900);
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  #stage{
+    position:fixed;left:50%;top:50%;
+    width:1600px;height:900px;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    transform-origin:center center;
+    background:#fff;overflow:hidden;
+    transition:opacity .22s ease;
+  }
+  body.blackout #stage{opacity:0;}
+
+  .slide{
+    position:absolute;inset:0;
+    display:none;flex-direction:column;
+    padding:30px 64px 60px;
+    background:linear-gradient(180deg,#ffffff 0%,#f4faff 100%);
+  }
+  .slide.active{display:flex;animation:fadeUp .26s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  @keyframes itemIn{
+    from{opacity:0;transform:translateY(18px);}
+    to{opacity:1;transform:none;}
+  }
+  .slide.active .s-title{animation:itemIn .42s ease both;}
+  .slide.active .s-body > *{animation:itemIn .42s ease both;}
+  .slide.active .s-body > *:nth-child(1){animation-delay:.08s;}
+  .slide.active .s-body > *:nth-child(2){animation-delay:.16s;}
+  .slide.active .s-body > *:nth-child(3){animation-delay:.24s;}
+  .slide.active .s-body > *:nth-child(4){animation-delay:.32s;}
+  .slide.active .s-body > *:nth-child(5){animation-delay:.40s;}
+  .slide.active .s-body > *:nth-child(6){animation-delay:.48s;}
+
+  .slide.cover.active .s-title,
+  .slide.cover.active .s-body > *,
+  .slide.end.active .s-title,
+  .slide.end.active .s-body > *,
+  .slide.break.active .s-title,
+  .slide.break.active .s-body > *{animation:none;}
+
+  .slide::after{
+    content:"";position:absolute;right:-90px;bottom:-90px;
+    width:300px;height:300px;border-radius:50%;
+    background:radial-gradient(circle,rgba(26,111,181,.10) 0%,rgba(26,111,181,0) 70%);
+    pointer-events:none;
+  }
+
+  .s-title{
+    flex:0 0 auto;align-self:flex-start;
+    background:linear-gradient(135deg,#1a6fb5 0%,#124f83 100%);
+    color:#fff;font-size:48px;font-weight:700;
+    letter-spacing:1.5px;line-height:1.15;
+    padding:14px 30px 14px 24px;
+    border-left:10px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    margin-bottom:18px;
+    box-shadow:0 6px 16px rgba(18,79,131,.18);
+  }
+  .s-sub{
+    font-size:var(--fs-body);font-weight:700;color:var(--blue-700);
+    border-left:7px solid var(--orange);
+    padding:2px 0 2px 14px;margin:14px 0 10px;
+  }
+  .s-sub:first-child{margin-top:0;}
+  .s-sub.blue{border-left-color:var(--blue-600);}
+
+  .s-body{
+    flex:1 1 auto;min-height:0;overflow:hidden;
+    font-size:32px;line-height:1.5;color:var(--ink);
+  }
+  .s-body p{margin:8px 0;}
+  .s-body p:first-child{margin-top:0;}
+  .s-body ul,.s-body ol{padding-left:1.5em;margin:8px 0;}
+  .s-body li{margin:4px 0;}
+  .s-body ul>li::marker{color:var(--blue-600);}
+  .s-body ol>li::marker{color:var(--orange);font-weight:800;}
+  b,strong{color:var(--blue-700);}
+
+  table.tb{
+    width:100%;border-collapse:separate;border-spacing:0;
+    font-size:var(--fs-other);line-height:1.45;margin:6px 0;
+    border-radius:12px;overflow:hidden;
+    box-shadow:0 4px 14px rgba(18,79,131,.08);
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;font-size:var(--fs-other);
+    padding:12px 18px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:11px 18px;background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:nth-child(even) td{background:#f7fafd;}
+  .c-red{color:var(--red);font-weight:600;}
+  .c-green{color:var(--green);font-weight:700;}
+  .c-blue{color:var(--blue-600);font-weight:700;}
+
+  .box{
+    border-left:7px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:16px 28px;margin:10px 0;
+    font-size:30px;line-height:1.7;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:10px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:6px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    padding:14px 22px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:28px;line-height:1.55;
+    white-space:pre;overflow:hidden;
+    box-shadow:0 8px 22px rgba(13,43,69,.22);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:2px 8px;font-size:28px;border-radius:5px;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:6px solid var(--blue-400);
+    border-radius:0 12px 12px 0;
+    padding:12px 22px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:28px;line-height:1.5;white-space:pre;
+  }
+
+  .steps{display:flex;gap:10px;align-items:stretch;}
+  .step{
+    flex:1;background:#fff;border:1px solid var(--line);
+    border-top:7px solid var(--blue-600);
+    border-radius:0 0 14px 14px;
+    padding:14px 12px;text-align:center;
+    box-shadow:0 6px 16px rgba(18,79,131,.08);
+  }
+  .step.orange{border-top-color:var(--orange);}
+  .step.green{border-top-color:var(--green);}
+  .step.purple{border-top-color:var(--purple);}
+  .step .n{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,var(--orange),#c55807);
+    color:#fff;font-size:28px;font-weight:700;margin-bottom:8px;
+  }
+  .step .t{font-size:30px;font-weight:700;color:var(--blue-700);line-height:1.2;}
+  .step .d{font-size:26px;color:var(--muted);margin-top:6px;line-height:1.4;}
+
+  .grid{display:grid;gap:26px 14px;}
+  .grid.c2{grid-template-columns:1fr 1fr;}
+  .grid.c3{grid-template-columns:repeat(3,1fr);}
+  .card{
+    background:#fff;border:1px solid var(--line);
+    border-top:7px solid var(--blue-600);
+    border-radius:0 0 16px 16px;
+    padding:22px 28px;
+    box-shadow:0 6px 16px rgba(18,79,131,.08);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:30px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:10px;
+    line-height:1.2;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:27px;color:var(--muted);line-height:1.7;margin:0;}
+  .card .ico{font-size:30px;line-height:1;}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+  .two.wide{grid-template-columns:1.15fr 1fr;}
+
+  .feat{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
+  .feat li{
+    display:flex;align-items:center;gap:22px;
+    background:#fff;border:1px solid var(--line);
+    border-left:7px solid var(--blue-600);
+    border-radius:0 12px 12px 0;
+    padding:12px 24px;
+    box-shadow:0 4px 10px rgba(18,79,131,.06);
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;width:270px;
+    font-size:30px;font-weight:700;color:var(--blue-700);
+    line-height:1.25;
+  }
+  .feat .v{font-size:27px;color:var(--muted);line-height:1.5;}
+
+  .slide.cover{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    padding:0 110px 60px;justify-content:center;
+  }
+  .slide.cover::before{
+    content:"";position:absolute;right:-100px;top:-100px;
+    width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.18) 0%,rgba(232,114,12,0) 70%);
+  }
+  .slide.cover::after{
+    content:"";position:absolute;left:-100px;bottom:-120px;
+    width:440px;height:440px;border-radius:50%;
+    background:radial-gradient(circle,rgba(74,151,212,.18) 0%,rgba(74,151,212,0) 70%);
+  }
+  .cover-inner{position:relative;z-index:2;}
+  .cover-kicker{
+    display:inline-block;font-size:var(--fs-other);letter-spacing:3px;
+    color:#ffd9b3;border:1px solid rgba(255,217,179,.55);
+    padding:8px 24px;margin-bottom:28px;border-radius:999px;
+  }
+  .cover h1{
+    font-size:82px;font-weight:800;color:#fff;
+    letter-spacing:5px;line-height:1.15;margin-bottom:16px;
+  }
+  .cover-bar{width:650px;height:8px;border-radius:4px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:22px;}
+  .cover-sub{font-size:40px;color:#a9d8f5;letter-spacing:3px;margin-bottom:36px;}
+  .cover-meta{font-size:var(--fs-other);color:#7fb2dd;letter-spacing:2px;}
+
+  .slide.end{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    padding:0 110px 60px;justify-content:center;
+  }
+  .slide.end::before{
+    content:"";position:absolute;right:-100px;bottom:-120px;
+    width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.16) 0%,rgba(232,114,12,0) 70%);
+  }
+  .end-inner{position:relative;z-index:2;}
+  .end h2{font-size:82px;font-weight:800;color:#fff;letter-spacing:10px;margin-bottom:22px;}
+  .end p{font-size:var(--fs-body);color:#a9d8f5;letter-spacing:2px;}
+
+  /* 章节分隔页 */
+  .slide.break{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    padding:0 110px 60px;justify-content:center;
+  }
+  .slide.break::before{
+    content:"";position:absolute;right:-120px;top:-120px;
+    width:480px;height:480px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.16) 0%,rgba(232,114,12,0) 70%);
+  }
+  .break-inner{position:relative;z-index:2;}
+  .break-num{font-size:120px;font-weight:800;color:#ffd9b3;line-height:1;letter-spacing:2px;}
+  .break h2{font-size:64px;font-weight:800;color:#fff;letter-spacing:3px;margin:6px 0 14px;}
+  .break-bar{width:520px;height:8px;border-radius:4px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:18px;}
+  .break-sub{font-size:34px;color:#a9d8f5;letter-spacing:2px;}
+  .break-tags{margin-top:26px;display:flex;gap:14px;flex-wrap:wrap;}
+  .break-tags span{font-size:26px;color:#cfe6f7;background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:8px 20px;}
+
+  .pageinfo{
+    position:absolute;right:40px;top:22px;z-index:20;
+    font-size:var(--fs-other);color:var(--blue-600);letter-spacing:1px;
+    background:rgba(255,255,255,.95);
+    border:1px solid var(--line);border-radius:999px;
+    padding:5px 20px;
+    box-shadow:0 4px 10px rgba(18,79,131,.08);
+  }
+  .pageinfo b{font-size:var(--fs-other);color:var(--orange);}
+
+  .nav{
+    position:absolute;right:36px;bottom:14px;z-index:20;
+    display:flex;align-items:center;gap:10px;
+  }
+  .nav button{
+    height:50px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-size:var(--fs-other);line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .18s;font-family:inherit;
+    border-radius:12px;width:50px;
+    box-shadow:0 5px 12px rgba(18,79,131,.28);
+  }
+  .nav button:hover{background:linear-gradient(135deg,#e8720c,#c55807);transform:translateY(-2px);}
+  .nav button:disabled{background:#b9cfe4;cursor:not-allowed;box-shadow:none;transform:none;}
+  .nav .tocbtn{width:auto;padding:0 22px;font-weight:700;letter-spacing:1px;}
+
+  .progress{
+    position:absolute;left:0;bottom:0;height:6px;width:0;z-index:20;
+    background:linear-gradient(90deg,#1a6fb5,#e8720c);
+    transition:width .3s ease;
+  }
+
+  .keyhint{
+    position:absolute;left:50%;bottom:18px;transform:translateX(-50%);
+    z-index:20;font-size:20px;color:#7fa8c4;letter-spacing:1px;
+    background:rgba(255,255,255,.85);border:1px solid var(--line);
+    border-radius:999px;padding:4px 16px;
+    transition:opacity .6s ease;
+  }
+  .keyhint.hide{opacity:0;}
+
+  .toc{
+    position:absolute;inset:0;z-index:40;
+    background:rgba(10,61,99,.96);
+    display:none;padding:44px 60px 60px;overflow:hidden;
+  }
+  .toc.show{display:block;}
+  .toc h3{font-size:40px;color:#fff;letter-spacing:4px;margin-bottom:6px;}
+  .toc .toc-bar{width:110px;height:6px;border-radius:3px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:20px;}
+  
+  /* ==== 目录：5列单排水平排列 ==== */
+  .toc-list{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: stretch;
+    width: 100%;
+  }
+  .toc-group{
+    flex: 1;
+    background: rgba(255,255,255,.05);
+    border-radius: 12px;
+    padding: 16px 12px;
+    border-top: 5px solid var(--blue-400);
+    box-sizing: border-box;
+  }
+  .toc-group:nth-child(2){border-top-color:var(--orange);}
+  .toc-group:nth-child(3){border-top-color:var(--green);}
+  .toc-group:nth-child(4){border-top-color:var(--purple);}
+  .toc-group:nth-child(5){border-top-color:var(--red);}
+
+  .toc-group-title{
+    font-size: 20px;
+    color: #ffc17a;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed rgba(255,255,255,.18);
+    line-height: 1.25;
+  }
+  .toc-group a{
+    display: block;
+    color: #cfe6f7;
+    font-size: 18px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    text-decoration: none;
+    line-height: 1.4;
+    transition: all .16s;
+  }
+  .toc-group a:hover{
+    background: linear-gradient(90deg,#e8720c,#c55807);
+    color: #fff;
+  }
+  .toc-close{
+    position:absolute;right:40px;top:22px;
+    background:none;border:1px solid #7fb2dd;color:#cfe6f7;
+    font-size:var(--fs-other);padding:7px 22px;cursor:pointer;font-family:inherit;
+    border-radius:12px;
+  }
+  .toc-close:hover{background:#e8720c;border-color:#e8720c;color:#fff;}
+
+  /* ===== 位运算可视化面板 ===== */
+  .bits{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0;}
+  .bit-cell{width:46px;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-family:Consolas,"Courier New",monospace;font-size:30px;font-weight:800;border:3px solid var(--line);}
+  .bit-cell.on{background:linear-gradient(135deg,#1a6fb5,#124f83);color:#fff;border-color:#124f83;}
+  .bit-cell.off{background:#eef3f8;color:#9bb0c2;border-color:#d6e2ee;}
+  .bit-cell.hi{background:linear-gradient(135deg,#e8720c,#c55807);color:#fff;border-color:#c55807;}
+  .bit-cap{font-size:24px;color:var(--muted);margin-right:8px;font-family:"Microsoft YaHei",sans-serif;font-weight:700;
+    flex:0 0 140px;width:140px;text-align:right;display:inline-block;}
+  .bit-row{display:flex;align-items:center;gap:8px;margin:8px 0;}
+  .bits-wrap{margin:12px 0;cursor:pointer;}
+
+  /* 只有结果行默认隐藏为“空槽”，A/B 行直接显示 */
+  .bits-wrap .bits-result .bit-cell:not(.show){
+    background:#f4f8fc;border:3px dashed #cfe0ef;color:transparent;
+  }
+  .bits-wrap .bits-result .bit-cell.show{animation:bitPop .4s ease both;}
+
+  @keyframes bitPop{0%{transform:scale(.4);opacity:.4;}55%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+  .bit-op{font-size:34px;font-weight:800;color:var(--orange);width:42px;text-align:center;}
+
+  /* ===== 思维导图 ===== */
+  .mm{display:flex;flex-direction:column;align-items:center;gap:18px;margin:6px 0;}
+  .mm-center{background:linear-gradient(135deg,#1a6fb5,#124f83);color:#fff;font-size:34px;font-weight:800;
+    padding:14px 38px;border-radius:14px;box-shadow:0 8px 20px rgba(18,79,131,.25);letter-spacing:1px;}
+  .mm-branches{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
+  .mm-branch{background:#fff;border:1px solid var(--line);border-top:7px solid var(--blue-600);
+    border-radius:0 0 14px 14px;padding:14px 18px;min-width:220px;max-width:300px;
+    box-shadow:0 6px 16px rgba(18,79,131,.08);}
+  .mm-branch:nth-child(2){border-top-color:var(--orange);}
+  .mm-branch:nth-child(3){border-top-color:var(--green);}
+  .mm-branch:nth-child(4){border-top-color:var(--purple);}
+  .mm-branch:nth-child(5){border-top-color:var(--red);}
+  .mm-branch h4{font-size:26px;color:var(--blue-700);margin-bottom:6px;}
+  .mm-branch.orange h4{color:#b95a05;}
+  .mm-branch.green h4{color:var(--green);}
+  .mm-branch.purple h4{color:var(--purple);}
+  .mm-branch.red h4{color:var(--red);}
+  .mm-branch p{font-size:23px;color:var(--muted);line-height:1.5;margin:0;}
+
+  /* ===== 课堂练习（题目显示，参考答案折叠） ===== */
+  .ex-block{background:#f6f0fb;border-left:7px solid var(--purple);border-radius:0 12px 12px 0;
+    padding:14px 24px;margin:12px 0;font-size:28px;line-height:1.6;}
+  .ex-q{color:var(--ink);font-weight:700;}
+  .ex-hint{margin-top:6px;color:var(--muted);font-size:25px;}
+  details.ex-ans{margin-top:10px;}
+  details.ex-ans > summary{cursor:pointer;font-weight:800;color:var(--purple);font-size:27px;
+    list-style:none;padding:4px 0;user-select:none;width:fit-content;}
+  details.ex-ans > summary::-webkit-details-marker{display:none;}
+  details.ex-ans > summary::before{content:"▸ 显示参考答案";font-size:24px;}
+  details.ex-ans[open] > summary::before{content:"▾ 收起参考答案";}
+  details.ex-ans .ans{margin-top:8px;padding-top:10px;border-top:1px dashed rgba(142,68,173,.3);color:var(--ink);}
+  details.ex-ans .ans b{color:var(--green);}
+
+  /* ===== 通用折叠块 ===== */
+  details.fold{margin-top:10px;}
+  details.fold > summary{
+    cursor:pointer;font-weight:800;color:#b95a05;
+    list-style:none;padding:4px 0;user-select:none;
+    width:fit-content;font-size:24px;
+  }
+  details.fold > summary::-webkit-details-marker{display:none;}
+  details.fold > summary::before{content:"▸ 展开：C99 的布尔类型";}
+  details.fold[open] > summary::before{content:"▾ 收起：C99 的布尔类型";}
+  details.fold .fold-body{
+    margin-top:10px;padding-top:10px;
+    border-top:1px dashed rgba(185,90,5,.3);
+    line-height:1.7;font-size:28px;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- ========== 1 封面 ========== -->
+  <section class="slide cover active">
+    <div class="cover-inner">
+      <div class="cover-kicker">武汉理工大学 人工智能学院</div>
+      <h1>C 程序设计基础</h1>
+      <div class="cover-bar"></div>
+      <div class="cover-sub">第 3 章（一）关系、逻辑运算与位运算</div>
+      <div class="cover-meta">主讲：李　民</div>
+    </div>
+  </section>
+
+  <!-- ========== 2 本讲内容 ========== -->
+  <section class="slide">
+    <div class="s-title">本讲内容</div>
+    <div class="s-body">
+      <div class="grid c2">
+        <div class="card"><h4><span class="ico">🔍</span>关系运算符</h4><p>比较大小与相等：<code class="inline">&lt;　&lt;=　&gt;　&gt;=　==　!=</code><br>结果是 0/1。</p></div>
+        <div class="card orange"><h4><span class="ico">🔗</span>逻辑运算符</h4><p><code class="inline">!　&amp;&amp;　|| </code>组合条件；<br>掌握短路求值。</p></div>
+        <div class="card green"><h4><span class="ico">🔧</span>位运算符（新增）</h4><p><code class="inline">&amp;　|　^　~ 　&lt;&lt;　&gt;&gt; </code>直接操作二进制位。</p></div>
+        <div class="card purple"><h4><span class="ico">💡</span>典型应用</h4><p>状态标志、掩码、置位/清位、奇偶、异或交换。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 3 学习目标 ========== -->
+  <section class="slide">
+    <div class="s-title">本讲学习目标</div>
+    <div class="s-body">
+      <ul class="feat">
+        <li><span class="k">① 关系运算</span><span class="v">会用 6 个关系运算符构造条件，理解结果恒为 <code class="inline">0</code> 或 <code class="inline">1</code>。</span></li>
+        <li><span class="k">② 逻辑运算</span><span class="v">理解 <code class="inline">!</code>、<code class="inline">&amp;&amp;</code> 、 <code class="inline">||</code> 的语义与真值表，掌握短路求值。</span></li>
+        <li><span class="k">③ 复杂条件</span><span class="v">用 <code class="inline">&amp;&amp;</code> 、 <code class="inline">||</code> 正确表达区间、字符范围、闰年等。</span></li>
+        <li><span class="k">④ 易错点</span><span class="v">区分 <code class="inline">=</code> 与 <code class="inline">==</code>、避免连续不等式、慎用实数相等。</span></li>
+        <li><span class="k">⑤ 位运算</span><span class="v">理解 6 个位运算符的逐位规则。</span></li>
+        <li><span class="k">⑥ 应用</span><span class="v">会用位运算做置位/清位/测试与状态标志压缩。</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========== 4 为什么需要选择 ========== -->
+  <section class="slide">
+    <div class="s-title">为什么程序需要“选择”？</div>
+    <div class="s-body">
+      <div class="box key">
+        <span class="label">核心问题</span>
+        程序能否像人一样，<b>根据不同情况做出不同反应</b>？比如：余额充足才支付、成绩≥60 才合格……<br>
+        这种“<b>如果…就…否则…</b>”的思维，就是<b>选择结构</b>。
+      </div>
+      <div class="box tip">
+        <span class="label">本章基石</span>
+        选择结构的本质是对<b>条件的判断</b>。
+      </div>
+    </div>
+  </section>
+
+<!-- ========== 5 真与假 ========== -->
+<section class="slide">
+  <div class="s-title">判定条件：真与假</div>
+  <div class="s-body">
+    <div class="box key">
+      <span class="label">条件表达式</span>
+      用运算符把操作数连成的式子，作为<b>运算数：非 0 即“真”、为 0 即“假”。</b><br>
+      表示<b>运算结果：真用 1 表示，假用 0 表示</b>。
+    </div>
+    <div class="card">
+      <span class="ico">🧭<b>比喻</b></span>
+      条件表达式像一道判断题：程序看答案是“是”(1) 还是“否”(0)，来决定走哪条路。
+    </div>
+    <div class="box warn">
+      <span class="label">关键认知</span>
+      早期 C 没有专门的布尔类型，<b>用整数 1/0 充当真假</b>，自 <b>C99</b> 起新增了布尔类型 <code class="inline">_Bool</code> 。
+      <details class="fold">
+        <summary></summary>
+        <div class="fold-body">
+          － <b>C99 新增内置类型关键字 <code class="inline">_Bool</code></b>，专门表示布尔值；<br>
+          　　· <code class="inline">_Bool</code> 对象只能取 <b>0 或 1</b>，任何非零值赋给它都会变成 1；<br>
+          － 头文件 <code class="inline">&lt;stdbool.h&gt;</code> 没有定义 <code class="inline">_Bool</code>，而是用宏提供别名：
+          &nbsp;&nbsp;<code class="inline">#define <b>bool</b> _Bool</code>
+          <br>　　　<code class="inline">#define <b>true</b> 1</code>　　　<code class="inline">#define <b>false</b> 0</code><br>
+          － 所以 <code class="inline">bool</code> 是 <code class="inline">_Bool</code> 的宏别名，<code class="inline">true</code>/<code class="inline">false</code> 就是 1/0；<br>
+          
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+  <!-- ========== 6 关系运算符一览 ========== -->
+  <section class="slide">
+    <div class="s-title">关系运算符一览（6 个）</div>
+    <div class="s-body">
+      <table class="tb">
+        <thead><tr><th>运算符</th><th>含义</th><th>示例</th><th>结果</th><th>结合方向</th></tr></thead>
+        <tbody>
+          <tr><th>&lt;</th><td>小于</td><td>3 &lt; 5</td><td>1</td><td>自左向右</td></tr>
+          <tr><th>&lt;=</th><td>小于等于</td><td>5 &lt;= 5</td><td>1</td><td>自左向右</td></tr>
+          <tr><th>&gt;</th><td>大于</td><td>3 &gt; 5</td><td>0</td><td>自左向右</td></tr>
+          <tr><th>&gt;=</th><td>大于等于</td><td>5 &gt;= 3</td><td>1</td><td>自左向右</td></tr>
+          <tr><th>==</th><td>等于</td><td>3 == 5</td><td>0</td><td>自左向右</td></tr>
+          <tr><th>!=</th><td>不等于</td><td>3 != 5</td><td>1</td><td>自左向右</td></tr>
+        </tbody>
+      </table>
+      <div class="box tip">
+        <span class="label">要点</span> 
+        ① 结果只有 <b>0（假）</b>或 <b>1（真）</b>；<br>　　
+        ② 优先级<b>低于算术运算</b>：<b><code class="inline">a &gt; b + 1</code></b> 等价于<code class="inline"> a &gt; (b+1)</code>；<br>　　
+        ③ <b><code class="inline">== </code>是两个等号</b>，别写成赋值 <b><code class="inline">=</code></b>。
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 7 关系运算符示例 ========== -->
+  <section class="slide">
+    <div class="s-title">关系运算符示例</div>
+    <div class="s-body">
+      <div class="two">
+        <pre class="code"style="font-size: 34px;"><span class="kw">int</span> a=<span class="num">3</span>, b=<span class="num">2</span>, c=<span class="num">1</span>, d, f;
+d = a &gt; b;        <span class="cmt">// 3&gt;2 为真</span>
+f = a &gt; b &gt; c;   <span class="cmt">// 注意结合方向！</span></pre>
+        <div class="out"style="font-size: 32px;"><br>➤  a &gt; b      → 1
+　　d = a &gt; b  → d = 1
+➤  a &gt; b &gt; c  → (3&gt;2)=1, 再 1&gt;1 = 0 → f = 0</div>
+      </div>
+      <div class="box warn">
+        <span class="label">易错提醒:</span><br>
+        - <b><code class="inline">a &gt; b &gt; c</code></b> 不是数学的“a 大于 b 大于 c”！<br>
+        - C 中, 从左到右算：先<code class="inline"> (a&gt;b)</code>=1，再<code class="inline"> (1 &gt; c) </code>, 即<code class="inline"> 1 &gt; 1</code> = 0。<br>
+        - 要表达“a&gt;b 且 b&gt;c”必须用<b>逻辑与</b>：<b><code class="inline">(a &gt; b) &amp;&amp; (b &gt; c)</code></b>。
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 8 逻辑运算符与真值表 ========== -->
+  <section class="slide">
+    <div class="s-title">逻辑运算符与真值表</div>
+    <div class="s-body">
+      <div class="box key">
+        <span class="label">三种逻辑运算: </span>
+        <b>!</b> 逻辑非（取反）　<b>&amp;&amp;</b> 逻辑与（并且）　<b>||</b> 逻辑或（或者）。<br>
+        　　<b>操作数</b>：0 表假，非 0 表真；<b>结果</b>：0 表假，1 表真。
+      </div>
+      <div class="grid c2">
+        <table class="tb">
+          <thead><tr><th>A</th><th>B</th><th>A &amp;&amp; B</th></tr></thead>
+          <tbody>
+            <tr><th>0</th><td>0</td><td>0</td></tr>
+            <tr><th>0</th><td>1</td><td>0</td></tr>
+            <tr><th>1</th><td>0</td><td>0</td></tr>
+            <tr><th>1</th><td>1</td><td>1</td></tr>
+          </tbody>
+        </table>
+        <table class="tb">
+          <thead><tr><th>A</th><th>B</th><th>A || B</th></tr></thead>
+          <tbody>
+            <tr><th>0</th><td>0</td><td>0</td></tr>
+            <tr><th>0</th><td>1</td><td>1</td></tr>
+            <tr><th>1</th><td>0</td><td>1</td></tr>
+            <tr><th>1</th><td>1</td><td>1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box tip">
+        <span class="label">非（!）</span>
+        !0 = 1，!非0 = 0；即 <b>“取反”</b>。<br>
+        　　　　<code class="inline">!1 = 0</code>，<code class="inline">!0 = 1</code>。
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 9 逻辑运算符：组合条件 ========== -->
+  <section class="slide">
+    <div class="s-title">逻辑运算符：组合条件</div>
+    <div class="s-body">
+      <table class="tb">
+        <thead><tr><th>运算符</th><th>名称</th><th>含义</th><th>示例</th><th>结果</th></tr></thead>
+        <tbody>
+          <tr><th><code class="inline">!</code></th><td>逻辑非</td><td>取反</td><td><code class="inline">!0</code></td><td>1</td></tr>
+          <tr><th><code class="inline">&amp;&amp;</code></th><td>逻辑与</td><td>都真才真</td><td><code class="inline">4 &amp;&amp; 5</code></td><td>1</td></tr>
+          <tr><th><code class="inline">||</code></th><td>逻辑或</td><td>一真即真</td><td><code class="inline">5 || 0</code></td><td>1</td></tr>
+        </tbody>
+      </table>
+      <div class="box tip">
+        <span class="label">记忆口诀</span><br>
+        - <b><code class="inline">&amp;&amp;</code> 像“串联开关”</b>：一个断全断；<br>
+        - <b><code class="inline">|| </code>像“并联开关”</b>：一个通全通；<br>
+        - <b><code class="inline">! </code>像“反相器”</b>：真变假、假变真。
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 10 逻辑运算符示例 ========== -->
+  <section class="slide">
+    <div class="s-title">逻辑运算符示例</div>
+    <div class="s-body">
+      <div class="two">
+        <pre class="code"style="font-size: 32px;line-height: 1.6;"><span class="kw">int</span> a = <span class="num">4</span>, b = <span class="num">5</span>;
+<span class="kw">printf</span>(<span class="str">"%d\n"</span>, !a);      <span class="cmt">// a真→取反</span>
+<span class="kw">printf</span>(<span class="str">"%d\n"</span>, a &amp;&amp; b);  <span class="cmt">// 都真</span>
+<span class="kw">printf</span>(<span class="str">"%d\n"</span>, a || <span class="num">0</span>);  <span class="cmt">// 一真即真</span>
+<span class="kw">printf</span>(<span class="str">"%d\n"</span>, !a || b);</pre>
+        <div class="out"style="font-size: 32px;line-height: 1.6;">
+0 　　　　// 4 是非 0，视为“真”
+1 　　　　// a &amp;&amp; b = 真 = 1
+1 　　　　// a || 0 = 真 = 1
+1 　　　　// !a || b = 真 = 1
+</div>
+      </div>
+    </div>
+  </section>
+
+<!-- ========== 11 短路求值（一） ========== -->
+<section class="slide">
+  <div class="s-title">逻辑短路求值（一）</div>
+  <div class="s-body">
+    <div class="two" style="gap:32px;">
+
+      <!-- 左列：概念 + 代码 -->
+      <div>
+        <div class="box key" style="margin-top:0;">
+          <span class="label">什么是短路</span><br>
+          <b><code class="inline"> &amp;&amp;</code></b>：左边为假，右边<b>不再计算</b>（结果已定假）；<br>
+          <b><code class="inline">||</code></b>：左边为真，右边<b>不再计算</b>（结果已定真）。
+        </div>
+        <pre class="code"><span class="kw">int</span> i = <span class="num">0</span>, j = <span class="num">5</span>;
+<span class="cmt">// 安全：i==0 为假，j/i 这个危险除法不会执行！</span>
+<span class="kw">if</span> (i != <span class="num">0</span> &amp;&amp; j / i &gt; <span class="num">2</span>) {
+    <span class="cmt">// ...</span>
+}</pre>
+       
+      </div>
+
+      <!-- 右列：生活例子 + 注意 -->
+      <div>
+        <div class="box key" style="margin-top:0;">
+          <span class="label">生活中的短路</span>
+          ① <b>“先看有没有，再决定要不要”</b><br>
+          先问“你带伞了吗？”——没带，就不用再问“能不能借给我？”。左边条件不成立，右边的问题就不用回答了。<br>
+          ② <b>“省一步”</b><br>
+          <code class="inline">if (年龄 &gt;= 18 &amp;&amp; 查看身份证)</code> —— 年龄不够，就不用再查身份证了。
+        </div>
+       </div>    
+    </div>
+     <div class="box tip">
+          <span class="label">价值</span>
+          短路不只是“省事”：它能<b>避免错误</b>（如除零）、<b>避免副作用</b>。
+        </div>
+        <div class="box warn">
+          <span class="label">注意</span>
+          短路虽然方便，但<b>不要依赖它来“跳过”重要的操作</b>；条件复杂时，写成清楚的 if 语句更好读、更不容易出错。
+        </div>
+  </div>
+</section>
+
+  <!-- ========== 12 短路求值（二）· 副作用 ========== -->
+  <section class="slide">
+    <div class="s-title">逻辑短路求值（二）· 副作用</div>
+    <div class="s-body">
+      <div class="box warn">
+        <span class="label">经典题:</span>执行下面的语句后 <code class="inline">b</code> 的值是多少？
+      </div>
+      <pre class="code" style="font-size: 32px;"><span class="kw">int</span> a=<span class="num">5</span>, b=<span class="num">6</span>, c=<span class="num">1</span>, x=<span class="num">2</span>, y=<span class="num">3</span>, z=<span class="num">4</span>;
+c = (a = c &lt; x) || (b = y &gt; z);</pre>
+      <div class="box tip">
+        <span class="label">逐步推</span><br>
+        ① 先算 <code class="inline">(a = (c&lt;x))</code> → <code class="inline">(a = (1&lt;2))</code> → <code class="inline">a = 1</code>，括号内为 1（真）；<br>
+        ② <b><code class="inline">||</code> 左边已真 → 短路</b>，右边 <code class="inline">(b=y&gt;z) </code>不执行；<br>
+        ③ 故 <b>b 仍为 6</b>，<code class="inline">c = 1</code>。
+      </div>
+    </div>
+  </section>
+
+ <!-- ========== 13 用逻辑运算表达复杂条件 ========== -->
+<section class="slide">
+  <div class="s-title">用逻辑运算表达复杂条件</div>
+  <div class="s-body">
+    <table class="tb" style="margin-bottom:16px;">
+      <thead><tr><th style="width:22%">含义</th><th style="width:22%">数学写法</th><th style="width:56%">C 语言正确写法</th></tr></thead>
+      <tbody>
+        <tr><th>x 在 [a,b] 内</th><td>a ≤ x ≤ b</td><td><code class="inline">(a &lt;= x) &amp;&amp; (x &lt;= b)</code></td></tr>
+        <tr><th>ch 是英文字母</th><td>—</td><td><code class="inline">(ch&gt;='A' &amp;&amp; ch&lt;='Z') || (ch&gt;='a' &amp;&amp; ch&lt;='z')</code></td></tr>
+      </tbody>
+    </table>
+
+    <!-- 闰年示例 -->
+    <div class="s-sub blue">典型例题：判断闰年</div>
+    <div class="two" style="grid-template-columns: 1.15fr 1fr; gap:24px; align-items:start;">
+      <div>
+        <div class="box tip" style="margin-top:0; font-size:26px; line-height:1.6;">
+          <span class="label">规则</span>
+          满足以下<b>任一</b>条件即可：<br>
+          ① 能被 4 整除 <b>且</b> 不能被 100 整除<br>
+          ② 能被 400 整除
+        </div>
+        <pre class="code" style="font-size:26px; padding:12px 20px; line-height:1.5; margin-top:0;"><span class="kw">int</span> year = <span class="num">2024</span>; <span class="cmt">// 或由 scanf 输入</span>
+
+<span class="kw">if</span> ((year % <span class="num">4</span> == <span class="num">0</span> &amp;&amp; year % <span class="num">100</span> != <span class="num">0</span>) 
+    || (year % <span class="num">400</span> == <span class="num">0</span>)) {
+    printf(<span class="str">"是闰年\n"</span>);
+}</pre>
+      </div>
+      <div>
+        <table class="tb" style="font-size:24px; margin-top:0;">
+          <thead><tr><th>规则要素</th><th>C 代码对应</th></tr></thead>
+          <tbody>
+            <tr><td>能被 4 整除</td><td><code class="inline">year % 4 == 0</code></td></tr>
+            <tr><td>不能被 100 整除</td><td><code class="inline">year % 100 != 0</code></td></tr>
+            <tr><td>条件①（同时满足）</td><td>用 <code class="inline">&amp;&amp;</code> 连接前两项</td></tr>
+            <tr><td>能被 400 整除</td><td><code class="inline">year % 400 == 0</code></td></tr>
+            <tr><td>条件②（或者）</td><td>用 <code class="inline">||</code> 连接条件①和②</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="box warn" style="margin-top:14px; font-size:28px; line-height:1.6;">
+      <span class="label">铁律</span>
+      数学里的<b>连续不等式在 C 中必须拆开用 <code class="inline">&amp;&amp;</code> 连接</b>；<br>
+      任何“多个条件同时成立”用<code class="inline"> &amp;&amp;</code>，“任一成立”用 <code class="inline">||</code>。别忘了加括号！
+    </div>
+  </div>
+</section>
+
+  <!-- ========== 14 常见错误（一） ========== -->
+  <section class="slide">
+    <div class="s-title">常见错误（一）：关系与逻辑</div>
+    <div class="s-body">
+      <div class="two">
+        <div class="box red">
+          <span class="label">❌ 陷阱1：= 与 ==</span><br>
+          <code class="inline">if (x = 5) {…} </code> <br>// 这是<b>赋值</b>，值为 5（真），<b>永远执行！</b>
+        </div>
+        <div class="box green">
+          <span class="label">✅ 正确写法</span><br>
+          <code class="inline">if (x == 5) {…} </code> <br>// 比较是否相等。建议写 <b><code class="inline">5 == x</code></b> 防笔误。
+        </div>
+      </div>
+      <div class="two">
+        <div class="box red">
+          <span class="label">❌ 陷阱2：连续不等式</span><br>
+          <code class="inline">if (3 &gt; 2 &gt; 1) {…}</code>    // 算成 (3&gt;2)=1, 1&gt;1=0
+        </div>
+        <div class="box green">
+          <span class="label">✅ 正确写法</span><br>
+          <code class="inline">if (3 &gt; 2 &amp;&amp; 2 &gt; 1){…} </code> // 用 &amp;&amp; ，结果真。
+        </div>
+      </div>
+      <div class="two">
+        <div class="box red">
+          <span class="label">❌ 陷阱3：实数直接判等</span><br>
+          <code class="inline">float f=0.1;<br> if (f == 0.1) {…}</code><br>二进制无法精确表示 0.1，<b>相等判断可能恒为假</b>。
+        </div>
+        <div class="box green">
+          <span class="label">✅ 正确写法</span><br>
+          ① <b>误差</b>：<code class="inline">if (fabs(f-0.1) &lt;= 1e-8){…} </code><br> 
+          ② <b>放大转整数比较</b>：<br><code class="inline">int k = (int)(f*100 + 0.5);<br> if (k == 10) {…}</code><br>
+          （把 0.1 放大 100 倍成 10 再比，彻底避开小数误差）。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 15 课堂练习 · 关系与逻辑 ========== -->
+  <section class="slide">
+    <div class="s-title">课堂练习 · 关系与逻辑</div>
+    <div class="s-body">
+      <div class="ex-block">
+        <div class="ex-q"style="font-size: 32px;">1. 设 <code class="inline"style="font-size: 32px;">int a=3,b=4;</code> 表达式 <code class="inline"style="font-size: 32px;">(a&lt;b) &amp;&amp; (a+b&gt;=7) </code>的值是？</div>
+        <div class="ex-hint">提示：先分别算两个子表达式。</div>
+        <details class="ex-ans">
+          <summary></summary>
+          <div class="ans"><b>参考答案：</b><code class="inline">a&lt;b </code>为 1；<code class="inline">a+b=7，7&gt;=7</code> 为 1；<code class="inline">1 &amp;&amp; 1 = <b>1</code>（真）</b>。</div>
+        </details>
+      </div>
+      <div class="ex-block">
+        <div class="ex-q"style="font-size: 32px;">2. 判断下面能否正确表达“x 是 0 到 100 之间的整数”：<code class="inline"style="font-size: 32px;"> 0 &lt;= x &lt;= 100</code></div>
+        <div class="ex-hint">提示：回忆连续不等式规则。</div>
+        <details class="ex-ans">
+          <summary></summary>
+          <div class="ans"><b>参考答案：</b><b>不能</b>。应写为 <b><code class="inline">(x &gt;= 0) &amp;&amp; (x &lt;= 100)</code></b>。</div>
+        </details>
+      </div>
+      <div class="ex-block">
+        <div class="ex-q"style="font-size: 32px;">3. 若<code class="inline"style="font-size: 32px;"> a=1,b=2；</code>执行<code class="inline"style="font-size: 32px;">x = a&gt;b &amp;&amp; (b=5);</code> 后<code class="inline"style="font-size: 32px;"> b </code>是多少？为什么？</div>
+        <div class="ex-hint">提示：短路求值。</div>
+        <details class="ex-ans">
+          <summary></summary>
+          <div class="ans"><b>参考答案：</b>b 仍为 <b>2</b>。因为<code class="inline"> a&gt;b </code>为假，<code class="inline">&amp;&amp; </code><b>短路</b>，<code class="inline">(b=5) </code>不执行。</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 16 章节分隔：位运算 ========== -->
+  <section class="slide break">
+    <div class="break-inner">
+      <div class="break-num">02</div>
+      <h2>位运算（Bitwise）</h2>
+      <div class="break-bar"></div>
+      <div class="break-sub">直接操作二进制位：&amp; 　|　 ^ 　~　 &lt;&lt;　 &gt;&gt;</div>
+      <div class="break-tags">
+        <span>为什么需要</span><span>6 个运算符</span><span>逐位演算</span><span>典型应用</span><span>常见陷阱</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 17 为什么需要位运算 ========== -->
+  <section class="slide">
+    <div class="s-title">为什么需要位运算？</div>
+    <div class="s-body">
+      <div class="box key">
+        <span class="label">核心问题</span>
+        计算机底层只认识 <b>0 和 1</b>。C 贴近硬件，提供直接对二进制<b>位(bit)</b>操作的运算符，能高效完成普通算术难以表达的事。
+      </div>
+      <div class="two">
+        <div class="card orange">
+          <h4><span class="ico">🎯</span>典型场景</h4>
+          <p>① 用<b>位标志</b>压缩存储多个布尔状态（权限、开关）；<br>
+            ② 操作硬件寄存器/网络协议/像素；<br>
+            ③ 加密、压缩、哈希的底层基石；<br>
+            ④ 用位移替代乘除法更快。</p>
+        </div>
+        <div class="card green">
+          <h4><span class="ico">🔘</span>比喻</h4>
+          <p>关系是“比较”，逻辑是“判断”，位运算是“<b>逐位雕刻</b>”——像一面有很多开关的面板，你能精确拨动任意一个。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 18 位运算符一览 ========== -->
+  <section class="slide">
+    <div class="s-title">位运算符一览（6 个）</div>
+    <div class="s-body">
+      <table class="tb">
+        <thead><tr><th>运算符</th><th>名称</th><th>规则</th><th>示例</th><th>结果</th></tr></thead>
+        <tbody>
+          <tr><th>&amp;</th><td>按位与</td><td>对应位都为 1 才为 1</td><td><code class="inline">6 &amp; 3</code></td><td><code class="inline">2　</code>(<code class="inline">0110 &amp; 0011 = 0010</code>)</td></tr>
+          <tr><th>|</th><td>按位或</td><td>对应位有 1 即为 1</td><td><code class="inline">6 | 3</code></td><td><code class="inline">7　</code>(<code class="inline">0110 | 0011 = 0111</code>)</td></tr>
+          <tr><th>^</th><td>按位异或</td><td>对应位不同为 1，相同为 0</td><td><code class="inline">6 ^ 3</code></td><td><code class="inline">5　</code>(<code class="inline">0110 ^ 0011 = 0101</code>)</td></tr>
+          <tr><th>~</th><td>按位取反</td><td>0 变 1、1 变 0（按补码）</td><td><code class="inline">~5</code></td><td><code class="inline">-6</code></td></tr>
+          <tr><th>&lt;&lt;</th><td>左移</td><td>整体左移，右边补 0</td><td><code class="inline">5 &lt;&lt; 2</code></td><td><code class="inline">20　</code>(×2²)</td></tr>
+          <tr><th>&gt;&gt;</th><td>右移</td><td>整体右移，左边补符号位</td><td><code class="inline">20 &gt;&gt; 2</code></td><td><code class="inline">5　</code>(÷2²)</td></tr>
+        </tbody>
+      </table>
+      <div class="box warn">
+        <span class="label">前提</span>
+        操作数必须是<b>整数类型</b>（char/short/int/long 及其 unsigned）；<br>
+        <b>浮点数不能</b>做位运算。<br>
+        运算<b>逐位</b>进行，结果仍是整数。
+      </div>
+    </div>
+  </section>
+
+<!-- ========== 19 按位与 · 逐位揭示 ========== -->
+<section class="slide">
+  <div class="s-title">按位与 &amp; —— 都为 1 才为 1</div>
+  <div class="s-body">
+    <div class="two wide" style="grid-template-columns:1.05fr 0.95fr;gap:34px;align-items:start;">
+
+      <!-- 左列：位运算图 -->
+      <div class="bits-wrap" title="点击逐个显示结果位（全部显示后，再点一下重置重来）">
+        <div class="bit-row">
+          <span class="bit-cap"style="font-size: 32px;">A = 6</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell on">1</div><div class="bit-cell off">0</div>
+        </div>
+        <div class="bit-row"><span class="bit-cap"></span><div class="bit-op">&amp;</div></div>
+        <div class="bit-row">
+          <span class="bit-cap"style="font-size: 32px;">B = 3</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell on">1</div><div class="bit-cell on">1</div>
+        </div>
+        <div class="bit-row"><span class="bit-cap"></span><div class="bit-op">=</div></div>
+        <div class="bit-row bits-result">
+          <span class="bit-cap"style="font-size: 32px;">结果 = 2</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell on">1</div><div class="bit-cell off">0</div>
+        </div>
+      </div>
+
+      <!-- 右列：说明 + 代码 -->
+      <div>
+        <div class="box tip" style="margin-top:0;font-size: 32px;">
+          <span class="label">用途</span><br>
+          ① 与 0 把某些位<b>清 0</b>；<br>
+          ② 与 1（掩码）<b>保留</b>某些位；<br>
+          ③ 判奇偶：<code class="inline">x &amp; 1 </code>, 末位为 1 即奇数。
+        </div>
+        <pre class="code"style="font-size: 32px;"><span class="kw">int</span> a=<span class="num">6</span>, b=<span class="num">3</span>;
+<span class="kw">printf</span>(<span class="str">"%d"</span>, a &amp; b);  <span class="cmt">// 输出 2</span></pre>
+       
+      </div>
+
+    </div>
+     <div class="box key" style="margin-bottom:0;font-size: 32px;">
+          <span class="label">规则</span>
+          对应位<b>都为 1</b>, 结果位才为<b> 1</b>，否则为 0。
+        </div>
+  </div>
+</section>
+
+<!-- ========== 20 按位或 · 逐位揭示 ========== -->
+<section class="slide">
+  <div class="s-title">按位或 | —— 有 1 即为 1</div>
+  <div class="s-body">
+    <div class="two wide" style="grid-template-columns:1.05fr 0.95fr;gap:34px;align-items:start;">
+
+      <!-- 左列：位运算图 -->
+      <div class="bits-wrap" title="点击逐个显示结果位（全部显示后，再点一下重置重来）">
+        <div class="bit-row">
+          <span class="bit-cap"style="font-size: 32px;">A = 6</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell on">1</div><div class="bit-cell off">0</div>
+        </div>
+        <div class="bit-row"><span class="bit-cap"></span><div class="bit-op">|</div></div>
+        <div class="bit-row">
+          <span class="bit-cap"style="font-size: 32px;">B = 3</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell on">1</div><div class="bit-cell on">1</div>
+        </div>
+        <div class="bit-row"><span class="bit-cap"></span><div class="bit-op">=</div></div>
+        <div class="bit-row bits-result">
+          <span class="bit-cap"style="font-size: 32px;">结果 = 7</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell on">1</div><div class="bit-cell on">1</div>
+        </div>
+      </div>
+
+      <!-- 右列：说明 + 代码 -->
+      <div>
+        <div class="box tip" style="margin-top:0;font-size:32px;">
+          <span class="label">用途</span><br>
+          ① 把某些位<b>置 1</b>（与 1 相或）；<br>
+          ② <b>合并多个标志位</b>：<code class="inline">READ | WRITE</code>；<br>
+          ③ 常用来拼接权限、状态、选项。
+        </div>
+        <pre class="code" style="font-size:32px;"><span class="kw">int</span> a=<span class="num">6</span>, b=<span class="num">3</span>;
+<span class="kw">printf</span>(<span class="str">"%d"</span>, a | b);  <span class="cmt">// 输出 7</span></pre>
+      </div>
+
+    </div>
+    <div class="box key" style="margin-bottom:0;font-size:32px;">
+      <span class="label">规则</span>
+      对应位<b>有 1, 结果位即为 1</b>; 都为 0, 结果位才为 0。
+    </div>
+  </div>
+</section>
+
+<!-- ========== 21 按位异或 · 逐位揭示 ========== -->
+<section class="slide">
+  <div class="s-title">按位异或 ^ —— 不同为 1，相同为 0</div>
+  <div class="s-body">
+    <div class="two wide" style="grid-template-columns:1.05fr 0.95fr;gap:34px;align-items:start;">
+
+      <!-- 左列：位运算图 -->
+      <div class="bits-wrap" title="点击逐个显示结果位（全部显示后，再点一下重置重来）">
+        <div class="bit-row">
+          <span class="bit-cap"style="font-size: 32px;">A = 6</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell on">1</div><div class="bit-cell off">0</div>
+        </div>
+        <div class="bit-row"><span class="bit-cap"></span><div class="bit-op">^</div></div>
+        <div class="bit-row">
+          <span class="bit-cap"style="font-size: 32px;">B = 3</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell on">1</div><div class="bit-cell on">1</div>
+        </div>
+        <div class="bit-row"><span class="bit-cap"></span><div class="bit-op">=</div></div>
+        <div class="bit-row bits-result">
+          <span class="bit-cap"style="font-size: 32px;">结果 = 5</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+        </div>
+      </div>
+
+      <!-- 右列：说明 + 代码 -->
+      <div>
+        <div class="box tip" style="margin-top:0;font-size:32px;">
+          <span class="label">用途</span><br>
+          ① 翻转某些位（与 1 异或）；<br>
+          ② 不用临时变量交换两数；<br>
+          ③ 判断两位是否不同、简单加密。
+        </div>
+        <pre class="code" style="font-size:32px;"><span class="kw">int</span> a=<span class="num">6</span>, b=<span class="num">3</span>;
+<span class="kw">printf</span>(<span class="str">"%d"</span>, a ^ b);  <span class="cmt">// 输出 5</span></pre>        
+      </div>
+    </div>
+    <div class="box key" style="margin-bottom:0;font-size:32px;">
+      <span class="label">规则</span>
+      对应位<b>不同</b>, 结果位为<b>1</b>; 对应位<b>相同</b>,结果位为<b> 0</b>。
+    </div>
+    <div class="box key" style="margin-top:10px;">
+          <span class="label">性质</span>
+          <code class="inline">a ^ 0 = a; a ^ a = 0; a ^ b ^ b = a;</code>。
+        </div>
+  </div>
+</section>
+
+<!-- ========== 22 按位取反 · 逐位揭示 ========== -->
+<section class="slide">
+  <div class="s-title">按位取反 ~ —— 0 变 1，1 变 0</div>
+  <div class="s-body">
+    <div class="two wide" style="grid-template-columns:1.05fr 0.95fr;gap:34px;align-items:start;">
+
+      <!-- 左列：位运算图（A 行直接显示，结果行逐位揭示） -->
+      <div class="bits-wrap" title="点击逐个显示结果位（全部显示后，再点一下重置重来）">
+        <div class="bit-row">
+          <span class="bit-cap">A = 5</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+        </div>
+        <div class="bit-row"><span class="bit-cap"></span><div class="bit-op">~</div></div>
+        <div class="bit-row bits-result">
+          <span class="bit-cap">结果 = -6</span>
+          <div class="bit-cell on">1</div><div class="bit-cell on">1</div>
+          <div class="bit-cell on">1</div><div class="bit-cell on">1</div>
+          <div class="bit-cell on">1</div><div class="bit-cell off">0</div>
+          <div class="bit-cell on">1</div><div class="bit-cell off">0</div>
+        </div>
+      </div>
+
+      <!-- 右列：规则 + 代码 + 提醒 -->
+      <div>
+        <div class="box tip" style="margin-top:0;font-size:32px;">
+          <span class="label">规则</span><br>
+          把每个二进制位<b>取反</b>：0 变 1，1 变 0。<br>
+          
+        </div>
+        <pre class="code" style="font-size:32px;"><span class="kw">unsigned</span> <span class="kw">int</span> x = ~<span class="num">0</span>;
+<span class="cmt">// x 的所有二进制位都是 1</span></pre>
+      </div>            
+    </div>
+    <div class="box warn" style="margin-top:10px;">
+          <span class="label">提醒</span>
+          <b>~ 是位运算</b>（结果是整数），别和<b>　逻辑非 !</b>（结果是０或１）　混淆：<br>
+          　　　　　<code class="inline">~5 </code>值为 -6，而 <code class="inline">!5 </code>值为 0。
+        </div> 
+  </div>
+</section>
+
+<!-- ========== 23 左移 · 逐位揭示 ========== -->
+<section class="slide">
+  <div class="s-title">左移 &lt;&lt; —— 整体左移，右边补 0</div>
+  <div class="s-body">
+    <div class="two wide" style="grid-template-columns:1.05fr 0.95fr;gap:34px;align-items:start;">
+
+      <!-- 左列：位运算图 -->
+      <div class="bits-wrap" title="点击逐个显示结果位（全部显示后，再点一下重置重来）">
+        <div class="bit-row">
+          <span class="bit-cap">5</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+        </div>
+        <div class="bit-row"><span class="bit-cap"></span><div class="bit-op">&lt;&lt; 2</div></div>
+        <div class="bit-row bits-result">
+          <span class="bit-cap">结果 = 20</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+        </div>
+      </div>
+
+      <!-- 右列：规则 + 代码 -->
+      <div>
+        <div class="box tip" style="margin-top:0;font-size:32px;">
+          <span class="label">规则</span><br>
+          a 的位整体左移 n 位，<b>右边补 0</b>；<br>
+          等价于 <b>a × 2ⁿ</b>（不溢出时）。
+        </div>
+        <pre class="code" style="font-size:32px;"><span class="kw">int</span> a = <span class="num">5</span>;
+<span class="kw">printf</span>(<span class="str">"%d"</span>, a &lt;&lt; <span class="num">2</span>);  <span class="cmt">// 输出 20</span></pre>
+      </div>
+
+    </div>
+
+    <div class="box warn" style="font-size:30px;">
+      <span class="label">移到符号位</span>
+      8 位示意：<code class="inline">0100 0000 &lt;&lt; 1 = 1000 0000</code>。<br>
+      对<b>有符号 int</b>，最高位变成 1 就是负数，结果可能变成负值；对 <b>unsigned</b> 则仍是正数。所以左移要小心最高位被“挤”成 1。
+    </div>
+    <div class="box red" style="font-size:30px;">
+      <span class="label">移出边界</span>
+      <code class="inline">1000 0000 &lt;&lt; 1 = 0000 0000</code>：最左边的 1 被移出丢弃，右边补 0，结果变成 0。<br>
+      移出的位直接丢失，不会“循环”回来；移位数 n 必须小于类型宽度，否则结果未定义。
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== 24 右移 · 逐位揭示 ========== -->
+<section class="slide">
+  <div class="s-title">右移 &gt;&gt; —— 整体右移，左边补符号位</div>
+  <div class="s-body">
+    <div class="two wide" style="grid-template-columns:1.05fr 0.95fr;gap:34px;align-items:start;">
+
+      <!-- 左列：位运算图 -->
+      <div class="bits-wrap" title="点击逐个显示结果位（全部显示后，再点一下重置重来）">
+        <div class="bit-row">
+          <span class="bit-cap">20</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+        </div>
+        <div class="bit-row"><span class="bit-cap"></span><div class="bit-op">&gt;&gt; 2</div></div>
+        <div class="bit-row bits-result">
+          <span class="bit-cap">结果 = 5</span>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell off">0</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+          <div class="bit-cell off">0</div><div class="bit-cell on">1</div>
+        </div>
+      </div>
+
+      <!-- 右列：规则 + 代码 -->
+      <div>
+        <div class="box tip" style="margin-top:0;font-size:32px;">
+          <span class="label">规则</span><br>
+          a 的位整体右移 n 位，<b>左边补符号位</b>；<br>
+          等价于 <b>a ÷ 2ⁿ</b>（整数除法，向零取整）。
+        </div>
+        <pre class="code" style="font-size:32px;"><span class="kw">int</span> a = <span class="num">20</span>;
+<span class="kw">printf</span>(<span class="str">"%d"</span>, a &gt;&gt; <span class="num">2</span>);  <span class="cmt">// 输出 5</span></pre>
+      </div>
+
+    </div>
+
+    <div class="box warn" style="font-size:30px;">
+      <span class="label">正数右移（补 0）</span>
+      8 位示意：<code class="inline">0001 0100 &gt;&gt; 2 = 0000 0101</code>。<br>
+      正数最高位是 0，右移左边补 0，结果仍是正数，相当于除以 4。
+    </div>
+    <div class="box red" style="font-size:30px;">
+      <span class="label">负数右移（补 1）</span>
+      8 位示意：<code class="inline">1111 0110 &gt;&gt; 2 = 1111 1101</code>（-10 ÷ 4 ≈ -3）。<br>
+      负数最高位是 1，右移左边补 1，保持符号不变；移出的低位直接丢弃。
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== 25 复合赋值位运算符 ========== -->
+<section class="slide">
+  <div class="s-title">复合赋值位运算符</div>
+  <div class="s-body">
+    <div class="box key" style="margin-top:0;font-size:30px; margin-bottom:16px;">
+      <span class="label">与算术 += 同理</span>
+      <code class="inline">&amp;=</code>、<code class="inline">|=</code>、<code class="inline">^=</code>、<code class="inline">&lt;&lt;=</code>、<code class="inline">&gt;&gt;=</code> —— 把运算结果写回左操作数。
+    </div>
+
+    <div class="two wide" style="grid-template-columns:1fr 1fr;gap:24px;align-items:start; max-width: 1250px; margin: 0 auto;">
+
+      <!-- 左栏：代码示例 + 要点提示 -->
+      <div>
+        <pre class="code" style="font-size:28px; padding:14px 24px; line-height:1.6; margin-top:0;"><span class="kw">int</span> x = <span class="num">0xA5</span>;   <span class="cmt">// 二进制 1010 0101</span>
+
+x &amp;= <span class="num">0xF0</span>;    
+<span class="cmt">// 保留高4位，低4位清0</span>
+
+x |= <span class="num">0x0F</span>;    
+<span class="cmt">// 低4位全置1</span>
+
+x &lt;&lt;= <span class="num">2</span>;     
+<span class="cmt">// 整体左移2位</span></pre>
+
+        <!-- 将要点挪到左栏下方 -->
+        <div class="box warn" style="margin-top:10px; font-size:26px; line-height:1.5; margin-bottom:0;">
+          <span class="label">要点</span>
+          <code class="inline">x op= y</code> 完全等价于 <code class="inline">x = x op y</code>；<br>
+          复合赋值同样满足“先算右边，再写回左边”。
+        </div>
+      </div>
+
+      <!-- 右栏：运算前后对照（竖式对齐） -->
+      <div>
+        <table class="tb" style="font-size:24px; line-height:1.4; margin-top:0; text-align:center;">
+          <thead>
+            <tr><th style="width:35%">运算式</th><th style="width:65%">二进制计算过程 (8位)</th></tr>
+          </thead>
+          <tbody>
+            <!-- 第一步：&= -->
+            <tr>
+              <td rowspan="3" style="vertical-align:middle; font-weight:bold; color:var(--blue-700); border-right:1px solid var(--line);">
+                初始值 &amp;<br><br>
+                <code class="inline" style="font-size:22px;">x &amp;= 0xF0</code>
+              </td>
+              <td style="font-family:Consolas,monospace;">x：1010 0101</td>
+            </tr>
+            <tr>
+              <td style="font-family:Consolas,monospace; border-bottom:2px solid #a0aabf;">&amp; 0xF0：1111 0000</td>
+            </tr>
+            <tr>
+              <td style="font-family:Consolas,monospace; color:var(--green); font-weight:bold;">
+                结果：1010 0000
+              </td>
+            </tr>
+
+            <!-- 第二步：|= -->
+            <tr style="border-top:2px solid var(--line);">
+              <td rowspan="3" style="vertical-align:middle; font-weight:bold; color:var(--blue-700); border-right:1px solid var(--line);">
+                <code class="inline" style="font-size:22px;">x |= 0x0F</code>
+              </td>
+              <td style="font-family:Consolas,monospace;">x：1010 0000</td>
+            </tr>
+            <tr>
+              <td style="font-family:Consolas,monospace; border-bottom:2px solid #a0aabf;">| 0x0F：0000 1111</td>
+            </tr>
+            <tr>
+              <td style="font-family:Consolas,monospace; color:var(--green); font-weight:bold;">
+                结果：1010 1111
+              </td>
+            </tr>
+
+            <!-- 第三步：<<= -->
+            <tr style="border-top:2px solid var(--line);">
+              <td rowspan="3" style="vertical-align:middle; font-weight:bold; color:var(--blue-700); border-right:1px solid var(--line);">
+                <code class="inline" style="font-size:22px;">x &lt;&lt;= 2</code>
+              </td>
+              <td style="font-family:Consolas,monospace;">x：1010 1111</td>
+            </tr>
+            <tr>
+              <td style="font-family:Consolas,monospace; border-bottom:2px solid #a0aabf;">左移2位</td>
+            </tr>
+            <tr>
+              <td style="font-family:Consolas,monospace; color:var(--purple); font-weight:bold;">
+                结果：1011 1100 (低位补0)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== 26 典型应用（一） ========== -->
+<section class="slide">
+  <div class="s-title">典型应用（一）：位的 置1 / 清0 / 翻转 / 测试</div>
+  <div class="s-body">
+    <div class="box key" style="margin-top:0;font-size:32px;">
+      <span class="label">核心思路</span>
+      <b><code class="inline">1 &lt;&lt; k</code> 是第 k 位的“单点掩码”</b>：只有第 k 位是 1，其余位全 0。用它和 x 做位运算，就能精确操作第 k 位。
+    </div>
+
+    <div class="two wide" style="grid-template-columns:1.1fr 0.9fr;gap:34px;align-items:start;">
+
+      <!-- 左栏：四种操作代码 -->
+      <pre class="code" style="font-size:30px;"><span class="cmt">// ① 将第 k 位置 1</span>
+x |= (<span class="num">1</span> &lt;&lt; k);
+
+<span class="cmt">// ② 将第 k 位清 0</span>
+x &amp;= ~(<span class="num">1</span> &lt;&lt; k);
+
+<span class="cmt">// ③ 翻转第 k 位</span>
+x ^= (<span class="num">1</span> &lt;&lt; k);
+
+<span class="cmt">// ④ 测试第 k 位是否为 1</span>
+<span class="kw">if</span> (x &amp; (<span class="num">1</span> &lt;&lt; k)) { <span class="cmt">/* 为 1 */</span> }
+
+<span class="cmt">// ⑤ 判断 n 是否为奇数</span>
+<span class="kw">if</span> (n &amp; <span class="num">1</span>) { <span class="cmt">/* 奇数 */</span> }</pre>
+
+      <!-- 右栏：四种操作对照 -->
+      <div>
+        <div class="box tip" style="margin-top:0;font-size:28px;">
+          <span class="label">① 置 1</span>
+          <code class="inline">x |= (1 &lt;&lt; k)</code><br>
+          或上 1 → 该位变 1，其余位不变。
+        </div>
+        <div class="box tip" style="font-size:28px;">
+          <span class="label">② 清 0</span>
+          <code class="inline">x &amp;= ~(1 &lt;&lt; k)</code><br>
+          与上 0 → 该位变 0，其余位不变。
+        </div>
+        <div class="box key" style="font-size:28px;">
+          <span class="label">③ 翻转</span>
+          <code class="inline">x ^= (1 &lt;&lt; k)</code><br>
+          异或 1 → 该位取反，其余位不变。
+        </div>
+        <div class="box key" style="margin-bottom:0;font-size:28px;">
+          <span class="label">④ 测试</span>
+          <code class="inline">x &amp; (1 &lt;&lt; k)</code><br>
+          与上 1 → 结果非 0 说明该位是 1。
+        </div>
+      </div>
+
+    </div>
+
+    <div class="box warn" style="margin-bottom:0;font-size:30px;">
+      <span class="label">口诀</span>
+      <b>或上它 → 置 1；与上它的反 → 清 0；异或它 → 翻转；与上它 → 测试。</b>
+      <code class="inline">1 &lt;&lt; k</code> 始终是那个“单点掩码”。
+    </div>
+  </div>
+</section>
+
+<!-- ========== 27 典型应用（二）异或交换 ========== -->
+<section class="slide">
+  <div class="s-title">典型应用（二）：异或交换两个整数</div>
+  <div class="s-body">
+    <div class="box key" style="margin-top:0;font-size:32px;">
+      <span class="label">核心思路</span>
+      利用异或的<b>自反性</b>：<code class="inline">a ^ a → 0</code>、<code class="inline">a ^ 0 → a</code>、<code class="inline">a ^ b ^ b → a</code>(三次异或，就能让 a、b 互换)
+    </div>
+
+    <div class="two wide" style="grid-template-columns:1.05fr 0.95fr;gap:34px;align-items:start;">
+
+      <!-- 左栏：代码 -->
+      <pre class="code" style="font-size:30px;"><span class="kw">int</span> a = <span class="num">3</span>, b = <span class="num">5</span>;
+
+a = a ^ b;   <span class="cmt">// a = 3^5 = 6</span>
+b = a ^ b;   <span class="cmt">// b = 6^5 = 3</span>
+a = a ^ b;   <span class="cmt">// a = 6^3 = 5</span>
+
+<span class="cmt">// 交换后：a = 5, b = 3</span></pre>
+
+      <!-- 右栏：逐步推演 -->
+      <div>
+        <div class="box tip" style="margin-bottom:0;font-size:28px;">
+          <span class="label">为什么对</span><br>
+          第二步 <code class="inline">b = a ^ b</code> 里的 a 已经是 <code class="inline">3^5</code>，所以<br> <code class="inline">b = (3^5)^5 = 3</code>；<br>
+          第三步同理还原出 5。
+        </div>
+      </div>
+
+    </div>
+
+    <div class="box warn" style="margin-bottom:0;font-size:30px;">
+      <span class="label">注意</span>
+      当 a、b 指向<b>同一变量</b>时，<code class="inline">a ^ a = 0</code> 会把值清零；<br>
+      工程上更推荐用临时变量交换，可读性更好。<code class="inline">int a, b, t; t = a; a = b; b = t;</code>
+    </div>
+  </div>
+</section>
+
+ <!-- ========== 28 典型应用（三）状态标志 ========== -->
+<section class="slide">
+  <div class="s-title">典型应用（三）：用位运算压缩状态标志</div>
+  <div class="s-body">
+    <div class="box key" style="margin-top:0;font-size:32px;">
+      <span class="label">核心思路</span>
+      一个 <code class="inline">char</code> 有 8 位，可以当作 <b>8 个独立开关</b>使用：每一位代表一个状态，用置位/清位/测试来操作。这里用 3 位记录灯、门、窗。
+    </div>
+
+    <div class="two wide" style="grid-template-columns:1.05fr 0.95fr;gap:34px;align-items:start;">
+
+      <!-- 左栏：代码 -->
+      <pre class="code" style="font-size:28px;"><span class="kw">char</span> flags = <span class="num">0</span>;   <span class="cmt">// 0000 0000</span>
+
+<span class="cmt">// 点亮灯：位 0 置 1</span>
+flags |= (<span class="num">1</span> &lt;&lt; <span class="num">0</span>);   <span class="cmt">// 0000 0001</span>
+
+<span class="cmt">// 测试门：位 1 是否为 1</span>
+<span class="kw">if</span> (flags &amp; (<span class="num">1</span> &lt;&lt; <span class="num">1</span>)) {
+    <span class="kw">printf</span>(<span class="str">"door open\n"</span>);
+}
+
+<span class="cmt">// 关闭窗：位 2 清 0</span>
+flags &amp;= ~(<span class="num">1</span> &lt;&lt; <span class="num">2</span>);   <span class="cmt">// 位 2 变 0</span></pre>
+
+      <!-- 右栏：状态位示意 + 推演 -->
+      <div>
+        <table class="tb" style="font-size:28px;">
+          <thead>
+            <tr><th>位</th><th>2</th><th>1</th><th>0</th><th>含义</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>初始</td><td>0</td><td>0</td><td>0</td><td>全关</td></tr>
+            <tr><td>点亮灯</td><td>0</td><td>0</td><td>1</td><td>窗关、门关、灯亮</td></tr>
+            <tr><td>测试门</td><td>0</td><td>0</td><td>1</td><td>位 1 是 0，门未开</td></tr>
+            <tr><td>关闭窗</td><td>0</td><td>0</td><td>1</td><td>位 2 本来就是 0</td></tr>
+          </tbody>
+        </table>
+        <div class="box tip" style="margin-bottom:0;font-size:28px;">
+          <span class="label">对照</span>
+          位 0 = 灯，位 1 = 门，位 2 = 窗；<br>
+          <code class="inline">flags |= (1&lt;&lt;k)</code> 置 1，<br>
+          <code class="inline">flags &amp;= ~(1&lt;&lt;k)</code> 清 0，<br>
+          <code class="inline">flags &amp; (1&lt;&lt;k)</code> 测试。
+        </div>
+      </div>
+
+    </div>
+
+    <div class="box warn" style="margin-bottom:0;font-size:30px;">
+      <span class="label">价值</span>
+      一个字节即可存 <b>8 个布尔状态</b>，<b>省内存、判断快</b>——这是嵌入式与系统程序里压缩状态标志的常见手法。
+    </div>
+  </div>
+</section>
+
+  <!-- ========== 29 常见错误（二）位运算 ========== -->
+  <section class="slide">
+    <div class="s-title">常见错误（二）：位运算</div>
+    <div class="s-body">
+      <div class="two">
+        <div class="box red">
+          <span class="label">❌ 陷阱1：位运算 vs 逻辑运算</span><br>
+          把<code class="inline"> &amp; </code>、<code class="inline">^</code>、 <code class="inline">|</code> 写成 <code class="inline">&amp;&amp;</code>、 <code class="inline">||</code> ——结果类型不同（整数 vs <code class="inline">0/1</code>），且位运算<b>无短路</b>。
+        </div>
+        <div class="box green">
+          <span class="label">✅ 区分</span><br>
+          逐位比较/组合用<code class="inline"> <b>&amp;</b></code>、 <code class="inline"><b>|</b></code>、 <code class="inline"><b>^</b></code>；<br>
+          整体真假判断才用 <code class="inline"><b>&amp;&amp; </b></code>、<code class="inline"><b>||</b></code>。
+        </div>
+      </div>
+      <!-- <div class="two"> -->
+        <div class="box red">
+          <span class="label">❌ 陷阱2：移位越界</span><br>
+          对 int 做 <code class="inline">x &lt;&lt; 40</code> → 结果<b>未定义</b>。
+        </div>
+        <div class="box red">
+          <span class="label">❌ 陷阱3：~ 与 !</span><br>
+          <code class="inline">~5</code> = -6（位取反）；<code class="inline">!5</code> = 0（逻辑非）。两者完全不同。
+        </div>
+      <!-- </div> -->
+      <div class="box red">
+        <span class="label">❌ 陷阱4：对浮点位运算</span><br>
+        <code class="inline">float</code>/<code class="inline">double</code> 不能做位运算 —— 编译报错。
+      </div>
+    </div>
+  </section>
+
+<!-- ========== 30 课堂练习 · 位运算 ========== -->
+<section class="slide">
+  <div class="s-title">课堂练习 · 位运算</div>
+  <div class="s-body">
+    <div class="box key" style="margin-top:0;font-size:30px;">
+      <span class="label">说明</span>
+      先自己算，再点“显示答案”核对。三题分别练：按位与/或/异或、置位掩码、左移。
+    </div>
+
+    <div class="ex-block" style="font-size:32px;">
+      <div class="ex-q">1. <code class="inline" style="font-size:32px;">6 &amp; 3</code>、<code class="inline" style="font-size:32px;">6 | 3</code>、<code class="inline" style="font-size:32px;">6 ^ 3</code> 各是多少？</div>
+      <details class="ex-ans">
+        <summary></summary>
+        <div class="ans">
+          <b>提示：</b>6 = 0110，3 = 0011，逐位对照规则。<br>
+          <b>参考答案：</b><code class="inline" style="font-size:32px;">6 &amp; 3</code> → <b>2</b>，<code class="inline" style="font-size:32px;">6 | 3</code> → <b>7</b>，<code class="inline" style="font-size:32px;">6 ^ 3</code> → <b>5</b>。
+        </div>
+      </details>
+    </div>
+
+    <div class="ex-block" style="font-size:32px;">
+      <div class="ex-q">2. 把整数 x 的第 3 位（从 0 计）置 1，写出语句。</div>
+      <details class="ex-ans">
+        <summary></summary>
+        <div class="ans">
+          <b>提示：</b>置位用“或上单点掩码”，第 k 位的掩码是 <code class="inline" style="font-size:32px;">1 &lt;&lt; k</code>。<br>
+          <b>参考答案：</b><b>x |= (1 &lt;&lt; 3);</b>
+        </div>
+      </details>
+    </div>
+
+    <div class="ex-block" style="font-size:32px;">
+      <div class="ex-q">3. <code class="inline" style="font-size:32px;">5 &lt;&lt; 2</code> 等于多少？它在算术上等价于什么？</div>
+      <details class="ex-ans">
+        <summary></summary>
+        <div class="ans">
+          <b>提示：</b>左移 n 位相当于乘 2ⁿ。<br>
+          <b>参考答案：</b>5&lt;&lt;2 = <b>20</b>，等价于 5 × 2² = 5 × 4。
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 31 本讲小结 ========== -->
+<section class="slide">
+  <div class="s-title">本讲小结 · 知识脉络</div>
+  <div class="s-body">
+    <div class="mm" style="gap:26px;">
+      <div class="mm-center" style="font-size:38px;padding:16px 44px;">第3章（一）关系逻辑运算与位运算</div>
+
+      <!-- 第一行：关系、逻辑、复杂条件 -->
+      <div class="mm-branches" style="gap:26px;">
+        <div class="mm-branch" style="min-width:0;max-width:none;flex:1;padding:18px 24px;">
+          <h4 style="font-size:32px;">关系运算</h4>
+          <p style="font-size:28px;line-height:1.6;">6 个运算符；结果 0/1；优先级低于算术</p>
+        </div>
+        <div class="mm-branch orange" style="min-width:0;max-width:none;flex:1;padding:18px 24px;">
+          <h4 style="font-size:32px;">逻辑运算</h4>
+          <p style="font-size:28px;line-height:1.6;">! &amp;&amp; ||；真值表；短路求值</p>
+        </div>
+        <div class="mm-branch green" style="min-width:0;max-width:none;flex:1;padding:18px 24px;">
+          <h4 style="font-size:32px;">复杂条件</h4>
+          <p style="font-size:28px;line-height:1.6;">区间/字符/闰年用 &amp;&amp; || 拆写</p>
+        </div>
+      </div>
+
+      <!-- 第二行：位运算、典型应用 -->
+      <div class="mm-branches" style="gap:26px;">
+        <div class="mm-branch purple" style="min-width:0;max-width:none;flex:1;padding:18px 24px;">
+          <h4 style="font-size:32px;">位运算 6 种</h4>
+          <p style="font-size:28px;line-height:1.6;">&amp; | ^ ~ &lt;&lt; &gt;&gt;；逐位演算、移位补位规则</p>
+        </div>
+        <div class="mm-branch red" style="min-width:0;max-width:none;flex:1;padding:18px 24px;">
+          <h4 style="font-size:32px;">典型应用</h4>
+          <p style="font-size:28px;line-height:1.6;">置位/清位/测试、异或交换、状态标志压缩</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+  <!-- ========== 32 结束页 ========== -->
+  <section class="slide end">
+    <div class="end-inner">
+      <h2>本讲结束</h2>
+      <p>下一讲：第 3 章（二）if 语句</p>
+    </div>
+  </section>
+
+  <!-- 导航 UI -->
+  <div class="pageinfo"><b id="cur">1</b> / <span id="total">32</span></div>
+
+  <div class="nav">
+    <button class="tocbtn" id="btnToc" title="目录（按 O 键）">目录</button>
+    <button id="btnPrev" title="上一页（←）">‹</button>
+    <button id="btnNext" title="下一页（→ / 空格）">›</button>
+  </div>
+
+  <div class="keyhint" id="keyhint">← → 翻页　·　空格下一页　·　B 黑屏　·　O 目录　·　Esc 关闭</div>
+  <div class="progress" id="progress"></div>
+
+  <div class="toc" id="toc">
+    <button class="toc-close" id="btnTocClose">关闭 ✕</button>
+    <h3>目录</h3>
+    <div class="toc-bar"></div>
+    <div class="toc-list" id="tocList"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var stage   = document.getElementById('stage');
+  var slides  = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total   = slides.length;
+  var cur     = 0;
+  var curEl   = document.getElementById('cur');
+  var bar     = document.getElementById('progress');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+  var toc     = document.getElementById('toc');
+  var tocList = document.getElementById('tocList');
+  var keyhint = document.getElementById('keyhint');
+
+  document.getElementById('total').textContent = total;
+
+  /* ---------- 目录（5列单排水平排列） ---------- */
+  var tocGroups = [
+    { 
+      title: '开场', 
+      items: [
+        { i: 0, t: '封面' }, 
+        { i: 1, t: '本讲内容' }, 
+        { i: 2, t: '学习目标' },
+        { i: 3, t: '为什么需要选择' }, 
+        { i: 4, t: '真与假' }
+      ]
+    },
+    { 
+      title: '关系与逻辑运算', 
+      items: [
+        { i: 5, t: '关系运算符一览' }, 
+        { i: 6, t: '关系示例' }, 
+        { i: 7, t: '逻辑运算符与真值表' },
+        { i: 8, t: '逻辑运算符：组合条件' },        
+        { i: 9, t: '逻辑示例' },
+        { i: 10, t: '短路(一)' }, 
+        { i: 11, t: '短路(二)·副作用' }, 
+        { i: 12, t: '复杂条件(闰年)' }, 
+        { i: 13, t: '常见错误(一)' },
+        { i: 14, t: '课堂练习·关系逻辑' }
+      ]
+    },
+    { 
+      title: '位运算基础', 
+      items: [
+        { i: 15, t: '章节分隔：位运算' }, 
+        { i: 16, t: '为什么需要位运算' }, 
+        { i: 17, t: '位运算一览表' },
+        { i: 18, t: '按位与 &' }, 
+        { i: 19, t: '按位或 |' }, 
+        { i: 20, t: '按位异或 ^' },
+        { i: 21, t: '按位取反 ~' },
+        { i: 22, t: '左移 <<' }, 
+        { i: 23, t: '右移 >>' }, 
+        { i: 24, t: '复合赋值位运算' }
+      ]
+    },
+    { 
+      title: '位运算应用', 
+      items: [
+        { i: 25, t: '置位/清位/翻转/测试' }, 
+        { i: 26, t: '异或交换' }, 
+        { i: 27, t: '状态标志压缩' },
+        { i: 28, t: '常见错误(二)' }
+      ]
+    },
+    { 
+      title: '练习与小结', 
+      items: [
+        { i: 29, t: '课堂练习·位运算' }, 
+        { i: 30, t: '本讲小结' }, 
+        { i: 31, t: '结束页' }
+      ]
+    }
+  ];
+
+  tocGroups.forEach(function(group){
+    var g = document.createElement('div');
+    g.className = 'toc-group';
+    var h = document.createElement('div');
+    h.className = 'toc-group-title';
+    h.textContent = group.title;
+    g.appendChild(h);
+    group.items.forEach(function(item){
+      var a = document.createElement('a');
+      a.textContent = item.t;
+      a.onclick = function(){ go(item.i); closeToc(); };
+      g.appendChild(a);
+    });
+    tocList.appendChild(g);
+  });
+
+  function resize(){
+    var s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+    stage.style.setProperty('--s', s);
+  }
+  window.addEventListener('resize', resize);
+
+  function go(i){
+    cur = Math.max(0, Math.min(total - 1, i));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === cur); });
+    resetBits(slides[cur]);   // 进入页面时把位运算面板重置为“空槽”
+    curEl.textContent = cur + 1;
+    bar.style.width = ((cur + 1) / total * 100) + '%';
+    btnPrev.disabled = (cur === 0);
+    btnNext.disabled = (cur === total - 1);
+  }
+
+  btnPrev.onclick = function(){ go(cur - 1); this.blur(); hideHint(); };
+  btnNext.onclick = function(){ go(cur + 1); this.blur(); hideHint(); };
+
+  function openToc(){ toc.classList.add('show'); }
+  function closeToc(){ toc.classList.remove('show'); }
+  document.getElementById('btnToc').onclick = function(){
+    toc.classList.contains('show') ? closeToc() : openToc();
+    this.blur();
+  };
+  document.getElementById('btnTocClose').onclick = function(){ closeToc(); this.blur(); };
+
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    if (toc.classList.contains('show')) {
+      if (k === 'Escape' || k === 'o' || k === 'O') { e.preventDefault(); closeToc(); }
+      return;
+    }
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ' || k === 'Enter') {
+      e.preventDefault(); go(cur + 1); hideHint();
+    } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || k === 'Backspace') {
+      e.preventDefault(); go(cur - 1); hideHint();
+    } else if (k === 'Home') { e.preventDefault(); go(0); hideHint(); }
+    else if (k === 'End')  { e.preventDefault(); go(total - 1); hideHint(); }
+    else if (k === 'o' || k === 'O') { e.preventDefault(); openToc(); }
+    else if (k === 'b' || k === 'B' || k === '.') { e.preventDefault(); document.body.classList.toggle('blackout'); }
+  });
+
+  var wheelLock = false;
+  document.addEventListener('wheel', function(e){
+    if (toc.classList.contains('show')) return;
+    if (wheelLock) return;
+    wheelLock = true;
+    setTimeout(function(){ wheelLock = false; }, 420);
+    if (e.deltaY > 0) go(cur + 1); else go(cur - 1);
+    hideHint();
+  }, { passive: true });
+
+  /* ---------- 位运算：点击逐位揭示（全部显示后再点重置） ---------- */
+  function revealStep(w){
+    var result = w.querySelector('.bits-result');
+    if (!result) return;
+    var cells = result.querySelectorAll('.bit-cell');
+    var shown = result.querySelectorAll('.bit-cell.show').length;
+    if (shown < cells.length){
+      cells[shown].classList.add('show');   // 点一下，揭示结果行的下一位
+    } else {
+      cells.forEach(function(c){ c.classList.remove('show'); });  // 全显示后重置
+    }
+  }
+  function resetBits(slideEl){
+    slideEl.querySelectorAll('.bits-wrap .bits-result .bit-cell').forEach(function(c){
+      c.classList.remove('show');
+    });
+  }
+
+  document.addEventListener('click', function(e){
+    if (toc.classList.contains('show')) return;
+    if (e.target.closest('.nav')) return;
+    if (e.target.closest('.toc')) return;
+    if (e.target.closest('a')) return;
+
+    // —— 折叠块：交给浏览器原生 details 处理，不参与翻页 ——
+    if (e.target.closest('summary')) return;
+    if (e.target.closest('details')) return;
+    // 兼容课堂练习原有的折叠区
+    if (e.target.closest('.ex-block') || e.target.closest('.ex-ans')) return;
+
+    // 位运算逐位揭示
+    if (e.target.closest('.bits-wrap')) { revealStep(e.target.closest('.bits-wrap')); return; }
+
+    if (e.clientX > window.innerWidth / 2) go(cur + 1); else go(cur - 1);
+    hideHint();
+  });
+
+  var tx = 0, ty = 0;
+  document.addEventListener('touchstart', function(e){
+    tx = e.changedTouches[0].clientX;
+    ty = e.changedTouches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - tx;
+    var dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+      go(dx < 0 ? cur + 1 : cur - 1);
+      hideHint();
+    }
+  }, { passive: true });
+
+  var hintTimer = null;
+  function hideHint(){
+    if (keyhint.classList.contains('hide')) return;
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 500);
+  }
+  hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 6000);
+
+  resize();
+  go(0);
+})();
+</script>
+
+</body>
+</html>
