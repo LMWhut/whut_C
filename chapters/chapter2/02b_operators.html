@@ -949,7 +949,7 @@ printf(<span class="str">"n=%d\n"</span>, n);</pre>
           <thead><tr><th>输入</th><th>n</th><th>结果</th></tr></thead>
           <tbody>
             <tr><td><code class="inline" style="font-size:28px;">12 34⏎</code></td><td class="c-green">2</td><td>a=12, b=34</td></tr>
-            <tr><td><code class="inline" style="font-size:28px;">12⏎</code></td><td class="c-red">1</td><td>a=12, b 原值</td></tr>
+            <tr><td><code class="inline" style="font-size:28px;">12,34⏎</code></td><td class="c-red">1</td><td>a=12, b 原值</td></tr>
             <tr><td><code class="inline" style="font-size:28px;">ab⏎</code></td><td class="c-red">0</td><td>a、b 都保持原值</td></tr>
           </tbody>
         </table>
@@ -1428,9 +1428,9 @@ printf(<span class="str">"%c"</span>, result);        <span class="cmt">// 输�
   </div>
 </section>
 
-<!-- ================= 28 输入三位整数的四种写法 ================= -->
+<!-- ================= 28 输入三位整数：写法对比 ================= -->
 <section class="slide">
-  <div class="s-title">输入"三位整数"的四种写法对比</div>
+  <div class="s-title">输入"三位整数"：写法对比</div>
   <div class="s-body">
 
     <div class="box tip" style="margin-top:0; font-size:28px; line-height:1.55;">
@@ -1438,100 +1438,117 @@ printf(<span class="str">"%c"</span>, result);        <span class="cmt">// 输�
       输入一个三位整数 <code class="inline" style="font-size:26px;">123</code>，求各位数字之和 → <code class="inline" style="font-size:26px;">6</code>
     </div>
 
-    <div class="four-col" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; margin-top:14px;">
+    <div class="two" style="margin-top:16px; align-items:start; gap:24px;">
 
-      <!-- 写法 1：推荐 -->
-      <div class="card green" style="padding:12px 14px;">
-        <h4 style="font-size:26px; margin-bottom:8px; line-height:1.3;">
+      <!-- 写法 1：正确 -->
+      <div class="card green" style="padding:20px 24px;">
+        <h4 style="font-size:30px; margin-bottom:10px; line-height:1.3;">
           ✅ 读整数 + 拆分<br>
-          <span style="font-size:26px; color:#2e8b57;">（推荐）</span>
+          <span style="font-size:24px; color:#2e8b57;">（正确写法，推荐）</span>
         </h4>
-        <pre class="code" style="font-size:26px; padding:8px 12px; line-height:1.4; margin-top:0; white-space:pre-wrap;">int x, a, b, c;
+        <pre class="code" style="font-size:30px; padding:16px 20px; line-height:1.5; margin:0 0 16px 0; white-space:pre-wrap;">int x, a, b, c;
 scanf("%d", &x);
 a = x / 100;
 b = x / 10 % 10;
 c = x % 10;
 printf("%d", a+b+c);</pre>
-        <p style="font-size:26px; line-height:1.5; margin-top:8px;">
-          <b>输入：</b><code class="inline" style="font-size:26px;">123⏎</code><br>
+        <p style="font-size:28px; line-height:1.6; margin-top:0;">
+          <b>输入：</b><code class="inline" style="font-size:26px;">123⏎</code>　　　
           <b>输出：</b><code class="inline" style="font-size:26px;">6</code> ✅
         </p>
-        <p style="font-size:26px; color:#2e8b57; margin-top:6px; line-height:1.4;">
-          与题目格式一致
+        <p style="font-size:26px; color:#2e8b57; margin-top:0px; line-height:1.45;">
+          与题目"输入一个三位整数"格式完全一致
         </p>
       </div>
 
-      <!-- 写法 2：输入三个整数 -->
-      <div class="card red" style="padding:12px 14px;">
-        <h4 style="font-size:26px; margin-bottom:8px; line-height:1.3;">
+      <!-- 写法 2：错误 -->
+      <div class="card red" style="padding:20px 24px;">
+        <h4 style="font-size:30px; margin-bottom:10px; line-height:1.3;">
           ❌ 输入三个整数<br>
-          <span style="font-size:22px; color:#c0392b;">（不推荐）</span>
+          <span style="font-size:24px; color:#c0392b;">（错误写法）</span>
         </h4>
-        <pre class="code" style="font-size:26px; padding:8px 12px; line-height:1.4; margin-top:0; white-space:pre-wrap;">int a, b, c;
-scanf("%d%d%d",
-      &a, &b, &c);
+        <pre class="code" style="font-size:30px; padding:16px 20px; line-height:1.5; margin:0 0 16px 0; white-space:pre-wrap;">int a, b, c;
+scanf("%d%d%d", &a, &b, &c);
 printf("%d", a+b+c);</pre>
-        <p style="font-size:26px; line-height:1.5; margin-top:8px;">
+        <p style="font-size:28px; line-height:1.6; margin-top:0;">
           <b>输入：</b><code class="inline" style="font-size:26px;">1 2 3⏎</code><br>
           <b>输出：</b><code class="inline" style="font-size:26px;">6</code>
         </p>
-        <p style="font-size:26px; color:#c0392b; margin-top:6px; line-height:1.4;">
-          格式与题目不符
-        </p>
-      </div>
-
-      <!-- 写法 3：输入三个字符 -->
-      <div class="card red" style="padding:12px 14px;">
-        <h4 style="font-size:26px; margin-bottom:8px; line-height:1.3;">
-          ❌ 输入三个字符<br>
-          <span style="font-size:22px; color:#c0392b;">（不推荐）</span>
-        </h4>
-        <pre class="code" style="font-size:26px; padding:8px 12px; line-height:1.4; margin-top:0; white-space:pre-wrap;">char a, b, c;
-scanf("%c%c%c",
-      &a, &b, &c);
-printf("%d", 
-       a+b+c-3*'0'); // 转数字再加
-</pre>
-        <p style="font-size:26px; line-height:1.5; margin-top:8px;">
-          <b>输入：</b><code class="inline" style="font-size:26px;">123⏎</code><br>
-          读到 <code class="inline" style="font-size:26px;">'1'</code> <code class="inline" style="font-size:26px;">'2'</code> <code class="inline" style="font-size:26px;">'3'</code>
-        </p>
-        <p style="font-size:26px; color:#c0392b; margin-top:6px; line-height:1.4;">
-          需要转换
-        </p>
-      </div>
-
-      <!-- 写法 4：%1d 逐位读 -->
-      <div class="card orange" style="padding:12px 14px;">
-        <h4 style="font-size:26px; margin-bottom:8px; line-height:1.3;">
-          ⚠️ %1d 逐位读<br>
-          <span style="font-size:26px; color:#b95a05;">（非标准）</span>
-        </h4>
-        <pre class="code" style="font-size:26px; padding:8px 12px; line-height:1.4; margin-top:0; white-space:pre-wrap;">int a, b, c;
-scanf("%1d%1d%1d",
-      &a, &b, &c);
-printf("%d", a+b+c);</pre>
-        <p style="font-size:26px; line-height:1.5; margin-top:8px;">
-          <b>输入：</b><code class="inline" style="font-size:26px;">123⏎</code><br>
-          <b>输出：</b><code class="inline" style="font-size:26px;">6</code>
-        </p>
-        <p style="font-size:26px; color:#b95a05; margin-top:6px; line-height:1.4;">
-          非通用写法，不推荐
+        <p style="font-size:26px; color:#c0392b; margin-top:8px; line-height:1.45;">
+          格式与题目不符，<br>题目要求输入"一个整数"，输入时必须加空格
         </p>
       </div>
 
     </div>
 
-    <div class="box warn" style="margin-top:14px; font-size:26px; line-height:1.55;">
+    <div class="box warn" style="margin-top:16px; font-size:28px; line-height:1.55;">
       <span class="label">结论</span>
-      题目说"输入一个三位整数"，就要用 <code class="inline" style="font-size:26px;">scanf("%d", &amp;x);</code> 读入，再用 <code class="inline" style="font-size:26px;">/</code> 和 <code class="inline" style="font-size:26px;">%</code> 拆分。
-      <br><b>输入格式必须与题目要求完全一致</b>，否则自动评测会判错。
+      题目说"输入一个三位整数"，就要用 <code class="inline" style="font-size:26px;">scanf("%d", &amp;x);</code> 读入，再用 <code class="inline" style="font-size:26px;">/</code> 和 <code class="inline" style="font-size:26px;">%</code> 拆分。<br>
+      <b>输入格式必须与题目要求完全一致</b>，否则自动评测会判错。
     </div>
 
   </div>
 </section>
 
-<!-- ================= 29 输入缓冲区问题 ================= -->
+<!-- ================= 29 输入三位整数：两种投机写法 ================= -->
+<section class="slide">
+  <div class="s-title">输入"三位整数"的两种投机写法</div>
+  <div class="s-body">
+
+    <div class="box red" style="margin-top:0; font-size:28px; line-height:1.55;">
+      <span class="label">投机</span>
+      "投机"指<b>能通过自动评测，但算法上不推荐</b>（如格式特殊、可读性差、不通用等）。
+    </div>
+
+    <div class="two" style="margin-top:20px; align-items:start; gap:30px;">
+
+      <!-- 写法 3：输入三个字符 -->
+      <div class="card red" style="padding:20px 24px;">
+        <h4 style="font-size:30px; margin-bottom:10px; line-height:1.3;">
+          ⚠️ 输入三个字符<br>
+          <span style="font-size:24px; color:#c0392b;">（能过，但算法不推荐）</span>
+        </h4>
+        <pre class="code" style="font-size:30px; padding:16px 20px; line-height:1.5; margin:0 0 16px 0; white-space:pre-wrap;">char a, b, c;
+scanf("%c%c%c", &a, &b, &c);
+printf("%d", a+b+c-3*'0');</pre>
+        <p style="font-size:28px; line-height:1.6; margin-top:0;">
+          <b>输入：</b><code class="inline" style="font-size:26px;">123⏎</code><br>
+          读到 <code class="inline" style="font-size:26px;">'1'</code> <code class="inline" style="font-size:26px;">'2'</code> <code class="inline" style="font-size:26px;">'3'</code>
+        </p>
+        <p style="font-size:26px; color:#c0392b; margin-top:8px; line-height:1.45;">
+          把整数当字符处理，需手动转数字，可读性差，不推荐。
+        </p>
+      </div>
+
+      <!-- 写法 4：%1d 逐位读 -->
+      <div class="card orange" style="padding:20px 24px;">
+        <h4 style="font-size:30px; margin-bottom:10px; line-height:1.3;">
+          ⚠️ %1d 逐位读<br>
+          <span style="font-size:24px; color:#b95a05;">（能过，但算法不推荐）</span>
+        </h4>
+        <pre class="code" style="font-size:30px; padding:16px 20px; line-height:1.5; margin:0 0 16px 0; white-space:pre-wrap;">int a, b, c;
+scanf("%1d%1d%1d", &a, &b, &c);
+printf("%d", a+b+c);</pre>
+        <p style="font-size:28px; line-height:1.6; margin-top:0;">
+          <b>输入：</b><code class="inline" style="font-size:26px;">123⏎</code><br>
+          <b>输出：</b><code class="inline" style="font-size:26px;">6</code>
+        </p>
+        <p style="font-size:26px; color:#b95a05; margin-top:8px; line-height:1.45;">
+          依赖 <code class="inline" style="font-size:24px;">%1d</code> 的宽度限定，代码不通用，不推荐。
+        </p>
+      </div>
+
+    </div>
+
+    <div class="box warn" style="margin-top:20px; font-size:28px; line-height:1.55;">
+      <span class="label">结论</span>
+      这两种写法虽然能通过平台评测，但<b>算法上不推荐</b>，实际工程中建议使用上一页的<b>正规写法</b>。
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= 30 输入缓冲区问题 ================= -->
 <section class="slide">
   <div class="s-title">输入缓冲区问题：一个经典 Bug</div>
   <div class="s-body">
@@ -1563,7 +1580,7 @@ confirm = getchar();    <span class="cmt">// ← 这里读到的是回车符！<
   </div>
 </section>
 
-<!-- ================= 30 练习三 ================= -->
+<!-- ================= 31 练习三 ================= -->
 <section class="slide">
   <div class="s-title">练习三：字符处理</div>
   <div class="s-body">
@@ -1632,7 +1649,7 @@ confirm = getchar();    <span class="cmt">// ← 这里读到的是回车符！<
   </div>
 </section>
 
-<!-- ================= 31 基本语句 ================= -->
+<!-- ================= 32 基本语句 ================= -->
 <section class="slide">
   <div class="s-title">C 语言的基本语句</div>
   <div class="s-body">
@@ -1665,7 +1682,7 @@ confirm = getchar();    <span class="cmt">// ← 这里读到的是回车符！<
   </div>
 </section>
 
-<!-- ================= 32 顺序结构例：圆面积周长 ================= -->
+<!-- ================= 33 顺序结构例：圆面积周长 ================= -->
 <section class="slide">
   <div class="s-title">顺序结构例：求圆的面积和周长</div>
   <div class="s-body">
@@ -1705,7 +1722,7 @@ confirm = getchar();    <span class="cmt">// ← 这里读到的是回车符！<
   </div>
 </section>
 
-<!-- ================= 33 顺序结构例：|1-x^3.6| ================= -->
+<!-- ================= 34 顺序结构例：|1-x^3.6| ================= -->
 <section class="slide">
   <div class="s-title">顺序结构例：已知 \(y = \left|1 - x^{3.6}\right|\)，输入 x，求 y</div>
   <div class="s-body">
@@ -1734,7 +1751,7 @@ confirm = getchar();    <span class="cmt">// ← 这里读到的是回车符！<
   </div>
 </section>
 
-<!-- ================= 34 顺序结构例：三角形面积 ================= -->
+<!-- ================= 35 顺序结构例：三角形面积 ================= -->
 <section class="slide">
   <div class="s-title">顺序结构例：已知三边求三角形面积</div>
   <div class="s-body">
@@ -1777,7 +1794,7 @@ confirm = getchar();    <span class="cmt">// ← 这里读到的是回车符！<
   </div>
 </section>
 
-<!-- ================= 35 结束页 ================= -->
+<!-- ================= 36 结束页 ================= -->
 <section class="slide end">
   <div class="end-inner">
     <h2>谢　谢</h2>
@@ -1893,19 +1910,20 @@ confirm = getchar();    <span class="cmt">// ← 这里读到的是回车符！<
       { i: 26, t: '字符输入输出（基本）' },
       { i: 27, t: '字符与整数运算' },
       { i: 28, t: '连续读 3 个字符' },
-      { i: 29, t: '输入三位整数的四种写法' },
-      { i: 30, t: '输入缓冲区问题' },
-      { i: 31, t: '练习三：字符处理' }
+      { i: 29, t: '输入三位整数：写法对比' },
+      { i: 30, t: '输入三位整数：两种投机写法' },
+      { i: 31, t: '输入缓冲区问题' },
+      { i: 32, t: '练习三：字符处理' }
     ]
   },
   {
     title: '八、综合与小结',
     items: [
-      { i: 32, t: '基本语句' },
-      { i: 33, t: '圆面积周长' },
-      { i: 34, t: '|1-x^3.6| 例题' },
-      { i: 35, t: '三角形面积' },
-      { i: 36, t: '结束页' }
+      { i: 33, t: '基本语句' },
+      { i: 34, t: '圆面积周长' },
+      { i: 35, t: '|1-x^3.6| 例题' },
+      { i: 36, t: '三角形面积' },
+      { i: 37, t: '结束页' }
     ]
   }
 ];
