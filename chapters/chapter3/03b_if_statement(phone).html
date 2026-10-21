@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 3 章（中）if 语句 · 手机版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63; --blue-700:#124f83; --blue-600:#1a6fb5;
+    --blue-400:#4a97d4; --blue-100:#e8f2fb;
+    --orange:#e8720c; --orange-soft:#fdf1e4;
+    --green:#2e8b57; --green-soft:#eaf7ef;
+    --purple:#8e44ad; --purple-soft:#f5ecfa;
+    --red:#c0392b; --red-soft:#fdeceb;
+    --ink:#1d2b36; --muted:#4d6376; --line:#d6e2ee;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.6;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14.5px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 图片 ================= */
+  .img-wrap{
+    text-align:center;
+    margin:16px 0;
+  }
+  .img-wrap img{
+    max-width:100%;
+    height:auto;
+    border-radius:8px;
+    box-shadow:0 4px 12px rgba(10,61,99,.1);
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 大屏适配 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+
+  mjx-container{font-size:1em !important;}
+</style>
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], processEscapes: true },
+    svg: { fontCache: 'global' },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+</head>
+<body>
+
+<!-- ================= 顶部固定栏 ================= -->
+<div class="topbar">
+  <h1>第 3 章（中）if 语句</h1>
+  <button class="btn-toc" id="btnToc">
+    目录 <span class="arrow">▼</span>
+  </button>
+</div>
+
+<!-- ================= 目录浮层 ================= -->
+<div class="toc-panel" id="tocPanel">
+
+  <div class="toc-group open">
+    <div class="toc-group-title">开场 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#s2">本讲内容</a>
+      <a href="#s3">学习目标</a>
+      <a href="#s4">为什么需要选择</a>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">一、单分支 if <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#s5">单分支 if</a>
+      <a href="#s6">判断题（对照流程图）</a>
+      <a href="#s7">表达式类型</a>
+      <a href="#s8">大括号的重要性</a>
+      <a href="#s9">例：信号灯</a>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">二、双分支 if-else <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#s10">双分支 if-else</a>
+      <a href="#s11">例：信号灯</a>
+      <a href="#s12">例：判断三边</a>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">三、条件与嵌套 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#s13">条件运算符 ? :</a>
+      <a href="#s14">常见应用</a>
+      <a href="#s15">短路求值</a>
+      <a href="#s16">嵌套 if（含流程图）</a>
+      <a href="#s17">例：判断 x 的符号</a>
+      <a href="#s18">else if 多分支（含流程图）</a>
+      <a href="#s19">例：分数转等级</a>
+      <a href="#s20">例：闰年天数</a>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">四、易错与练习 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#s21">悬空 else</a>
+      <a href="#s22">悬空 else 对比</a>
+      <a href="#s23">单选练习</a>
+      <a href="#s24">三数排序（方法一）</a>
+      <a href="#s25">三数排序（方法二）</a>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">五、综合与小结 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#s26">随机加法练习</a>
+      <a href="#s27">rand/srand</a>
+      <a href="#s28">输入缓冲区问题</a>
+      <a href="#s29">常见错误</a>
+      <a href="#s30">本讲小结</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ================= 内容区 ================= -->
+<div class="content">
+
+  <!-- 1 本讲内容 -->
+  <div class="section" id="s2">
+    <div class="section-title">本讲内容</div>
+    <div class="card"><h4>❓ 为什么需要选择结构</h4><p>生活中的选择与程序中的选择</p></div>
+    <div class="card orange"><h4>🚪 单分支 if（含流程图）</h4><p>if (表达式) 语句</p></div>
+    <div class="card green"><h4>🔀 双分支 if-else（含流程图）</h4><p>if (表达式) 语句1 else 语句2</p></div>
+    <div class="card purple"><h4>❓ 条件运算符 ? :</h4><p>三目运算符简化写法</p></div>
+    <div class="card red"><h4>🪆 嵌套 if / else if（含流程图）</h4><p>多分支的常用写法</p></div>
+    <div class="card"><h4>⚡ 短路求值（进阶）</h4><p>&& 与 || 的"偷懒"机制</p></div>
+    <div class="card orange"><h4>🧩 综合应用</h4><p>排序、加法练习、闰年</p></div>
+    <div class="card green"><h4>📚 常见错误与小结</h4><p>易错点总结与回顾</p></div>
+  </div>
+
+  <!-- 2 学习目标 -->
+  <div class="section" id="s3">
+    <div class="section-title">本讲学习目标</div>
+    <ul class="feat">
+      <li><span class="k">① 选择结构</span><span class="v">理解生活中的选择，能转换成程序中的选择</span></li>
+      <li><span class="k">② 单分支 if</span><span class="v">掌握 if 语句格式与执行过程（含流程图）</span></li>
+      <li><span class="k">③ 双分支 if-else</span><span class="v">掌握 if-else 语句格式与执行过程（含流程图）</span></li>
+      <li><span class="k">④ 条件运算符</span><span class="v">会用 ? : 简化简单的 if-else</span></li>
+      <li><span class="k">⑤ 短路求值</span><span class="v">理解 && / || 的短路特性，能写出更安全的判断</span></li>
+      <li><span class="k">⑥ 嵌套 if</span><span class="v">会用 else if 链实现多分支（含流程图）</span></li>
+      <li><span class="k">⑦ 常见错误</span><span class="v">大括号、= 与 ==、分号、else 配对、输入缓冲区</span></li>
+    </ul>
+  </div>
+
+  <!-- 3 为什么需要选择 -->
+  <div class="section" id="s4">
+    <div class="section-title">为什么需要选择结构</div>
+    <div class="card">
+      <h4>🏠 生活中的选择</h4>
+      <p>· 如果今天没课，就去图书馆自习；否则去上课。<br>· 如果王者荣耀赢了，再开一局；否则洗洗睡。</p>
+    </div>
+    <div class="card orange">
+      <h4>💻 程序中的选择</h4>
+      <p>· 根据用户输入，执行不同的操作<br>· 判断数据是否满足条件，决定下一步流程</p>
+    </div>
+    <div class="box tip" style="margin-top:12px;">
+      <span class="label">结论</span>选择结构让程序有了"判断力"，能根据不同的输入走不同的路。
+    </div>
+  </div>
+
+  <!-- 4 单分支 if -->
+  <div class="section" id="s5">
+    <div class="section-title">单分支 if 语句（含流程图）</div>
+    <div class="box key" style="margin:0 0 10px;">
+      <span class="label">回顾</span>if 后圆括号内是<b>表达式</b>，值为非 0 即"真"、0 即"假"。
+    </div>
+    <div class="section-sub">格式</div>
+    <pre class="code">if ( 表达式 )
+    内嵌语句;</pre>
+    <div class="section-sub">执行过程</div>
+    <ul>
+      <li>计算表达式的值</li>
+      <li><b>非 0 </b>→ 执行内嵌语句</li>
+      <li><b>0 </b>→ 跳过，执行 if 的下一条</li>
+    </ul>
+    <pre class="code"><span class="kw">int</span> score = <span class="num">85</span>;
+<span class="kw">if</span> (score &gt;= <span class="num">60</span>)
+    printf(<span class="str">"及格！\n"</span>);</pre>
+    
+    <div class="img-wrap">
+      <img src="../../images/chapter3/N-S流程图-单分支语句.png" alt="单分支 if 语句流程图">
+    </div>
+    <div class="box tip" style="margin:12px 0 0;">
+      <span class="label">读图</span><b>真</b> → 执行语句；<b>假</b> → 跳过，两条路都汇合到结束。
+    </div>
+  </div>
+
+  <!-- 5 单分支判断题 -->
+  <div class="section" id="s6">
+    <div class="section-title">单分支 if 判断题（对照流程图）</div>
+    <div class="box key" style="margin:0 0 12px;">
+      <span class="label">问题</span>当 <code class="inline">a &gt; b</code> 时交换 a、b 的值，哪段代码正确？
+    </div>
+    
+    <div class="card red">
+      <h4>❌ 代码段 A</h4>
+      <pre class="code"><span class="kw">if</span> (a &gt; b)
+    t = a;
+a = b;
+b = t;</pre>
+      <div class="img-wrap">
+        <img src="../../images/chapter3/N-S流程图-交换3个整数-代码段A_1.png" alt="代码段 A 的 N-S 流程图" style="max-height:220px;">
+      </div>
+      <p style="margin-top:10px;">只有 <code class="inline">t=a</code> 受 if 控制，<code class="inline">a=b / b=t</code> 在 if 语句外面，总会执行。</p>
+    </div>
+
+    <div class="card green">
+      <h4>✅ 代码段 B</h4>
+      <pre class="code"><span class="kw">if</span> (a &gt; b) {
+    t = a;
+    a = b;
+    b = t;
+}</pre>
+      <div class="img-wrap">
+        <img src="../../images/chapter3/N-S流程图-交换3个整数-代码段B_1.png" alt="代码段 B 的 N-S 流程图" style="max-height:220px;">
+      </div>
+      <p style="margin-top:10px;">三条语句都在 <code class="inline">{}</code> 内，作为一个整体受 if 控制。</p>
+    </div>
+  </div>
+
+  <!-- 6 表达式类型 -->
+  <div class="section" id="s7">
+    <div class="section-title">单分支 if 语句：表达式的类型</div>
+    <div class="box tip" style="margin:0 0 10px;">
+      <span class="label">说明</span>if 后圆括号内的表达式可以是<b>任何类型</b>，只要能算出 0 或非 0。
+    </div>
+    <pre class="code">if (a == b &amp;&amp; x == y)   printf(<span class="str">"a=b, x=y"</span>);
+if (3)    printf(<span class="str">"OK"</span>);   <span class="cmt">// 3 非0，恒真</span>
+if (a)    printf(<span class="str">"%d"</span>, a); <span class="cmt">// 等价于 if(a!=0)</span>
+if (x) ... <span class="cmt">// 等价于 if(x!=0)</span>
+if (!x) ... <span class="cmt">// 等价于 if(x==0)</span></pre>
+    <div class="box warn" style="margin:0;">
+      <span class="label">常见写法</span><br>
+      <code class="inline">if (x)</code> ≡ <code class="inline">if (x != 0)</code><br>
+      <code class="inline">if (!x)</code> ≡ <code class="inline">if (x == 0)</code>
+    </div>
+  </div>
+
+  <!-- 7 大括号 -->
+  <div class="section" id="s8">
+    <div class="section-title">单分支——复合语句（大括号的重要性）</div>
+    <div class="box warn" style="margin:0 0 12px;">
+      <span class="label">问题</span>多条语句必须用大括号 <code class="inline">{ }</code> 括起来，否则只有第一条受 if 控制。
+    </div>
+    
+    <div class="card red">
+      <h4>❌ 错误示例</h4>
+      <pre class="code">if (score &gt;= 60)
+    printf(<span class="str">"及格！\n"</span>);
+printf(<span class="str">"拿学分！\n"</span>);  <span class="cmt">// 总执行</span></pre>
+      <p>第二句不受 if 控制，逻辑错误。</p>
+    </div>
+
+    <div class="card green">
+      <h4>✅ 正确示例</h4>
+      <pre class="code">if (score &gt;= 60) {
+    printf(<span class="str">"及格！\n"</span>);
+    printf(<span class="str">"拿学分！\n"</span>);
+}</pre>
+      <p>两条语句整体受 if 控制。</p>
+    </div>
+
+    <div class="box tip" style="margin:12px 0 0;">
+      <span class="label">结论</span>无论几条语句，<b>推荐总是加大括号</b>，更清晰、更安全。
+    </div>
+  </div>
+
+  <!-- 8 信号灯单分支 -->
+  <div class="section" id="s9">
+    <div class="section-title">例：模拟路口交通信号灯系统</div>
+    <div class="box key">
+      <span class="label">要求</span>输入 <b>g/G</b> → 可通行；<b>r/R</b> → 不可通行；<b>y/Y</b> → 等待。
+    </div>
+    <pre class="code"><span class="kw">char</span> light; 　　<span class="cmt">// 信号灯</span>
+scanf(<span class="str">"%c"</span>, &amp;light);
+
+<span class="kw">if</span> (light == <span class="str">'g'</span> || light == <span class="str">'G'</span>)
+    printf(<span class="str">"Green light on. Go!\n"</span>);
+
+<span class="kw">if</span> (light == <span class="str">'r'</span> || light == <span class="str">'R'</span>)
+    printf(<span class="str">"Red light on. Stop!\n"</span>);
+
+<span class="kw">if</span> (light == <span class="str">'y'</span> || light == <span class="str">'Y'</span>)
+    printf(<span class="str">"Yellow light on. Wait!\n"</span>);</pre>
+    <div class="box tip">
+      <span class="label">思路</span>三个独立的 <code class="inline">if</code> 语句分别处理三种字符，互不干扰。
+    </div>
+    <div class="box warn" style="margin-bottom:0;">
+      <span class="label">运行输出</span>
+      <div class="out" style="font-size:13px;">输入 g ：Green light on. Go!
+输入 r ：Red light on. Stop!
+输入 y ：Yellow light on. Wait!</div>
+    </div>
+  </div>
+
+  <!-- 9 双分支 -->
+  <div class="section" id="s10">
+    <div class="section-title">双分支 if-else 语句</div>
+    <div class="section-sub">格式</div>
+    <pre class="code">if ( 表达式 )
+    语句1;
+else
+    语句2;</pre>
+    <div class="section-sub">执行过程</div>
+    <ul>
+      <li><b>非 0</b> → 执行语句 1</li>
+      <li><b>0</b> → 执行语句 2</li>
+    </ul>
+    <pre class="code"><span class="kw">if</span> (steps &gt; <span class="num">10000</span>)
+    printf(<span class="str">"运动达人！\n"</span>);
+<span class="kw">else</span>
+    printf(<span class="str">"加油哦！\n"</span>);</pre>
+    <div class="box warn">
+      <span class="label">注意</span><code class="inline">else</code> 不能单独存在，必须与 <code class="inline">if</code> 配对。
+    </div>
+    
+    <div class="img-wrap">
+      <img src="../../images/chapter3/N-S流程图-双分支语句.png" alt="双分支 if-else 的 N-S 流程图">
+    </div>
+    <div class="box tip" style="margin:12px 0 0;">
+      <span class="label">读图</span>非此即彼：<b>有且仅有一个</b>分支被执行。
+    </div>
+  </div>
+
+  <!-- 10 信号灯双分支 -->
+  <div class="section" id="s11">
+    <div class="section-title">例：信号灯（双分支写法）</div>
+    <div class="box key">
+      <span class="label">要求</span>输入 <b>g/G </b>提示可通行，其他字符提示不可通行。
+    </div>
+    <pre class="code">char light;  scanf(<span class="str">"%c"</span>, &amp;light);
+
+if (light == <span class="str">'g'</span> || light == <span class="str">'G'</span>)
+    printf(<span class="str">"Green light on. Go!\n"</span>);
+else
+    printf(<span class="str">"Green light not on. Cannot go!\n"</span>);</pre>
+    <div class="box tip">
+      <span class="label">对比</span>单分支用三个独立 if；双分支用一个 if-else 处理"通行/不通行"。
+    </div>
+    <div class="box warn" style="margin-bottom:0;">
+      <span class="label">运行输出</span>
+      <div class="out" style="font-size:13px;">输入 g ： Green light on. Go!
+输入 x ： Green light not on. Cannot go!</div>
+    </div>
+  </div>
+
+  <!-- 11 判断三边 -->
+  <div class="section" id="s12">
+    <div class="section-title">例：判断三边能否构成三角形</div>
+    <div class="box key">
+      <span class="label">分析</span>任意两边之和 &gt; 第三边则可构成三角形，计算面积；否则报错。
+    </div>
+    <pre class="code"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;math.h&gt;</span>
+<span class="kw">int</span> main() {
+  <span class="kw">double</span> a, b, c, s, area;
+  scanf(<span class="str">"%lf %lf %lf"</span>, &amp;a, &amp;b, &amp;c);
+  if (a+b&gt;c &amp;&amp; a+c&gt;b &amp;&amp; b+c&gt;a){
+    s = 0.5*(a+b+c);
+    area = sqrt(s*(s-a)*(s-b)*(s-c));
+    printf(<span class="str">"area=%f\n"</span>, area);
+  } else
+    printf(<span class="str">"Data error!\n"</span>);
+  <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="section-sub">海伦公式</div>
+    <p>
+      \[ s=\frac{1}{2}(a+b+c) \]<br>
+      \[ area=\sqrt{s(s-a)(s-b)(s-c)} \]
+    </p>
+    <div class="box tip">
+      <span class="label">关键</span>判定用 <code class="inline">&amp;&amp;</code> 连三个不等式。
+    </div>
+    <div class="box warn" style="margin-bottom:0;">
+      <span class="label">输入 → 输出</span>
+      <div class="out" style="font-size:13px;">3 4 5 → area=6.000000
+1 2 3 → Data error!</div>
+    </div>
+  </div>
+
+  <!-- 12 条件运算符 -->
+  <div class="section" id="s13">
+    <div class="section-title">条件运算符 ? :</div>
+    <div class="section-sub">格式</div>
+    <pre class="code">表达式1 ? 表达式2 : 表达式3</pre>
+    <div class="section-sub">执行过程</div>
+    <ul>
+      <li>先计算<b>表达式 1</b></li>
+      <li>若为 <b>非 0（真）</b> → 取<b>表达式 2</b> 的值</li>
+      <li>若为 <b>0（假）</b> → 取<b>表达式 3</b> 的值</li>
+    </ul>
+    <div class="box tip">
+      <span class="label">特点</span>它是 C 语言中唯一一个<b>三目运算符</b>，常用于简化简单的 if-else 赋值。
+    </div>
+    
+    <div class="section-sub">示例：求两数最大值</div>
+    <pre class="code">max = (a &gt; b) ? a : b;</pre>
+    <div class="section-sub">等价于 if-else</div>
+    <pre class="code"><span class="kw">if</span> (a &gt; b)
+    max = a;
+<span class="kw">else</span>
+    max = b;</pre>
+    <div class="box key" style="margin-bottom:0;">
+      <span class="label">运行示例</span><br>
+      设 <code class="inline">int a = 5, b = 8;</code><br>
+      执行 <code class="inline">max = (a &gt; b) ? a : b;</code> 后，<b>max 结果为 8</b>。<br>
+      因为 <code class="inline">a &gt; b</code> 为假（0），所以取 <code class="inline">b</code> 的值。
+    </div>
+  </div>
+
+  <!-- 13 条件运算常见应用 -->
+  <div class="section" id="s14">
+    <div class="section-title">条件运算的常见应用</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>目的</th><th>表达式</th></tr></thead>
+        <tbody>
+          <tr><td>求绝对值</td><td><code class="inline">abs = (x &gt;= 0) ? x : -x;</code></td></tr>
+          <tr><td>非负整数奇偶性</td><td><code class="inline">odd = (x % 2 == 1) ? 1 : 0;</code></td></tr>
+          <tr><td>小写转大写</td><td><code class="inline">c = (c&gt;='a'&amp;&amp;c&lt;='z') ? c-32 : c;</code></td></tr>
+          <tr><td>三数最大值</td><td><code class="inline">max=(a&gt;b &amp;&amp; a&gt;c)? a : (b&gt;c ? b:c);</code></td></tr>
+          <tr><td>判断 x 符号</td><td><code class="inline">s = x&gt;0 ? 1 : (x&lt;0 ? -1 : 0);</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box tip">
+      <span class="label">建议</span>当 if-else 的<b>两个分支都是给同一变量赋值</b>时，可用条件运算符简化。
+    </div>
+  </div>
+
+  <!-- 14 短路求值 -->
+  <div class="section" id="s15">
+    <div class="section-title">逻辑运算符的"短路求值"</div>
+    <div class="box key">
+      <span class="label">短路</span><code class="inline">&amp;&amp;</code> 与 <code class="inline">||</code> 一旦能确定整体结果，就不再算后面的表达式：<code class="inline">&amp;&amp;</code> 遇假即停，<code class="inline">||</code> 遇真即停。
+    </div>
+    <pre class="code">int x = 0;
+if (x != 0 &amp;&amp; 1/x &gt; 0.5)   <span class="cmt">// x==0 时右半不执行</span>
+    printf(<span class="str">"ok\n"</span>);      <span class="cmt">// 巧妙避免"除零"</span>
+int a[5]={1,2,3,4,5}, i=9;
+if (i &lt; 5 &amp;&amp; a[i] == 3)   <span class="cmt">// i&gt;=5 时右半不执行</span>
+    printf(<span class="str">"found\n"</span>);    <span class="cmt">// 避免数组越界</span></pre>
+    <div class="box warn">
+      <span class="label">注意</span>短路是"安全特性"，但<b>勿依赖它执行有副作用的语句</b>，可读性差。
+    </div>
+  </div>
+
+  <!-- 15 嵌套 if -->
+  <div class="section" id="s16">
+    <div class="section-title">嵌套 if 语句（含流程图）</div>
+    <div class="section-sub">格式</div>
+    <pre class="code"><span class="kw">if</span> (表达式) {
+    <span class="kw">if</span> (表达式1)
+        语句1;
+    <span class="kw">else</span>
+        语句2;
+} <span class="kw">else</span> {
+    <span class="kw">if</span> (表达式2)
+        语句3;
+    <span class="kw">else</span>
+        语句4;
+}</pre>
+    <div class="box tip">
+      <span class="label">执行</span>从上到下依次判断，遇第一个真条件执行对应语句后跳出。
+    </div>
+    
+    <div class="img-wrap">
+      <img src="../../images/chapter3/N-S流程图-嵌套if语句.png" alt="嵌套 if 语句的 N-S 流程图">
+    </div>
+    <div class="box tip" style="margin:12px 0 0;">
+      <span class="label">读图</span>外层分支里再嵌一层判断，逐层缩小范围。
+    </div>
+  </div>
+
+  <!-- 16 判断 x 符号 -->
+  <div class="section" id="s17">
+    <div class="section-title">例：判断 x 的符号</div>
+    <div class="box key">
+      <span class="label">要求</span>x&gt;0 时 y=1；x=0 时 y=0；x&lt;0 时 y=-1。
+    </div>
+    
+    <div class="section-sub">写法一：按 x&gt;=0 分支</div>
+    <pre class="code">if (x &gt;= 0)
+    if (x == 0) y = 0;
+    else        y = 1;
+else
+    y = -1;</pre>
+
+    <div class="section-sub">写法二：按 x!=0 分支</div>
+    <pre class="code">if (x != 0)
+    if (x &gt; 0) y = 1;
+    else       y = -1;
+else
+    y = 0;</pre>
+
+    <div class="box tip">
+      <span class="label">对比</span>两种写法结果一致，第一种更直观；嵌套时注意 <code class="inline">else</code> 与哪个 <code class="inline">if</code> 配对。
+    </div>
+  </div>
+
+  <!-- 17 else if 多分支 -->
+  <div class="section" id="s18">
+    <div class="section-title">else if 多分支结构（含流程图）</div>
+    <div class="section-sub">格式</div>
+    <pre class="code"><span class="kw">if</span> (表达式1)
+    语句1;
+<span class="kw">else if</span> (表达式2)
+    语句2;
+...
+<span class="kw">else</span>
+    语句n;</pre>
+    <div class="box tip">
+      <span class="label">说明</span>这是双分支在 <code class="inline">else</code> 中嵌套 <code class="inline">if</code> 的<b>简化形式</b>，多分支最常用。
+    </div>
+    
+    <div class="img-wrap">
+      <img src="../../images/chapter3/传统流程图-多分支if语句.png" alt="else if 多分支结构流程图">
+    </div>
+    <div class="box tip" style="margin:12px 0 0;">
+      <span class="label">读图</span>逐层判断，命中即执行并结束；全不中走 else。
+    </div>
+  </div>
+
+  <!-- 18 分数转等级 -->
+  <div class="section" id="s19">
+    <div class="section-title">例：根据分数评定等级</div>
+    <div class="box key">
+      <span class="label">要求</span>≥90→A　≥80→B　≥70→C　≥60→D　&lt;60→E（不及格）
+    </div>
+    <pre class="code">int score;  scanf(<span class="str">"%d"</span>, &amp;score);
+if (score &gt;= 90)      printf(<span class="str">"A\n"</span>);
+else if (score &gt;= 80) printf(<span class="str">"B\n"</span>);
+else if (score &gt;= 70) printf(<span class="str">"C\n"</span>);
+else if (score &gt;= 60) printf(<span class="str">"D\n"</span>);
+else                  printf(<span class="str">"E\n"</span>);</pre>
+    <div class="box warn">
+      <span class="label">关键</span>不用写 <code class="inline">score &lt; 90</code>：前面已按序排除，能走到这行必然 &lt;90。<b>顺序很重要！</b>
+    </div>
+    <div class="box tip" style="margin-bottom:0;">
+      <span class="label">输出</span>
+      <div class="out" style="font-size:13px;">输入 85 → B　　输入 58 → E (不及格)</div>
+    </div>
+  </div>
+
+  <!-- 19 闰年天数 -->
+  <div class="section" id="s20">
+    <div class="section-title">例：输入年、月，输出该月天数</div>
+    <div class="box key">
+      <span class="label">分析</span>大月 31 天；小月 30 天；2 月闰年 29、平年 28。闰年：<code class="inline">(year%4==0 &amp;&amp; year%100!=0) || year%400==0</code>。
+    </div>
+    <pre class="code">int year, month, days;
+scanf(<span class="str">"%d %d"</span>, &amp;year, &amp;month);
+if (month==1||month==3||month==5||month==7||
+    month==8||month==10||month==12)   days = 31;
+else if (month==4||month==6||month==9||month==11) days = 30;
+else {
+  if ((year%4==0 &amp;&amp; year%100!=0) || year%400==0) days = 29;
+  else days = 28;
+}</pre>
+    <div class="box tip" style="margin-bottom:0;">
+      <span class="label">输出</span>
+      <div class="out" style="font-size:13px;">2024 2 → 29　　2023 2 → 28　　2023 4 → 30</div>
+    </div>
+  </div>
+
+  <!-- 20 悬空 else -->
+  <div class="section" id="s21">
+    <div class="section-title">悬空 else：else 到底与哪个 if 配对</div>
+    
+    <div class="section-sub">原始代码</div>
+    <pre class="code"><span class="kw">if</span> (a &gt; b)
+    <span class="kw">if</span> (c &gt; d)
+        x = <span class="num">1</span>;
+    <span class="kw">else</span>
+        x = <span class="num">2</span>;</pre>
+    <div class="box warn">
+      <span class="label">分析</span><code class="inline">else</code> 与<b>离它最近、尚未配对的 if</b> 配对。即内层 <code class="inline">if (c &gt; d)</code>，<b>而非</b>外层 <code class="inline">if (a &gt; b)</code>。
+    </div>
+
+    <div class="section-sub">✅ 用大括号强制配对</div>
+    <pre class="code"><span class="kw">if</span> (a &gt; b) {
+    <span class="kw">if</span> (c &gt; d) 
+        x = <span class="num">1</span>;
+} <span class="kw">else</span>
+    x = <span class="num">2</span>;</pre>
+    <div class="box tip" style="margin-bottom:0;">
+      <span class="label">原理</span>加了花括号 <code class="inline">{ }</code> 之后，内层的 <code class="inline">if...else</code> 就成了一个完整的整体，外层的 <code class="inline">else</code> 就只能和 <b>外层</b>的 <code class="inline">if (a &gt; b)</code> 配对了。
+    </div>
+  </div>
+
+  <!-- 21 悬空 else 对比 -->
+  <div class="section" id="s22">
+    <div class="section-title">悬空 else 对比</div>
+    <div class="box key">
+      <span class="label">思考</span>以下两段代码运行结果一样吗？
+    </div>
+    
+    <div class="section-sub">代码 1</div>
+    <pre class="code">int a=2, b=-1, c=2;
+if (a &lt; b)
+  if (b &lt; 0) c = 0;
+  else    c++;
+printf(<span class="str">"%d\n"</span>, c);</pre>
+
+    <div class="section-sub">代码 2</div>
+    <pre class="code">int a=2,b=-1,c=2;
+if (a &lt; b) {
+  if (b &lt; 0) { c = 0; }
+  else   { c++; }
+}
+printf(<span class="str">"%d\n"</span>, c);</pre>
+
+    <div class="box tip">
+      <span class="label">答案</span>都输出 <code class="inline">c = 2</code>：<code class="inline">a &lt; b</code> 为假，外层整体不执行。嵌套时务必加大括号。
+    </div>
+  </div>
+
+  <!-- 22 单选练习 -->
+  <div class="section" id="s23">
+    <div class="section-title">单选练习</div>
+    <div class="box key">
+      <span class="label">题目</span>以下程序段运行后的输出结果是（　　）。
+    </div>
+    <pre class="code">int x=1, y=0;
+if (!x) y++;
+else if (x == 0)
+    if (x) y += 2;
+    else y += 3;
+printf(<span class="str">"%d\n"</span>, y);</pre>
+    <div class="box tip">
+      <span class="label">分析</span>x=1→<code class="inline">!x=0</code> 跳过；<code class="inline">x==0</code> 为假跳过 else if 整体；y 保持 0，输出 <code class="inline">0</code>。嵌套务必加大括号。
+    </div>
+  </div>
+
+  <!-- 23 三数排序一 -->
+  <div class="section" id="s24">
+    <div class="section-title">综合应用 1：三个数排序（年龄排序）</div>
+    <div class="box key">
+      <span class="label">问题</span>输入三个人的年龄，按从小到大输出。
+    </div>
+    <div class="section-sub">方法一：比较交换，使 a ≤ b ≤ c</div>
+    <pre class="code">if (a &gt; b) { t=a; a=b; b=t; }   <span class="cmt">// 调 a,b</span>
+if (a &gt; c) { t=a; a=c; c=t; }   <span class="cmt">// 调 a,c，a 最小</span>
+if (b &gt; c) { t=b; b=c; c=t; }   <span class="cmt">// 调 b,c，c 最大</span>
+printf(<span class="str">"%d %d %d"</span>, a, b, c);</pre>
+    <div class="box tip">
+      <span class="label">思路</span>三次比较交换即可保证 a ≤ b ≤ c。
+    </div>
+  </div>
+
+  <!-- 24 三数排序二 -->
+  <div class="section" id="s25">
+    <div class="section-title">三数排序（方法二：条件运算符）</div>
+    <pre class="code">min = (a &lt; b &amp;&amp; a &lt; c) ? a : (b &lt; c ? b : c);
+max = (a &gt; b &amp;&amp; a &gt; c) ? a : (b &gt; c ? b : c);
+mid = a + b + c - min - max;
+printf(<span class="str">"%d %d %d"</span>, min, mid, max);</pre>
+    <div class="box warn">
+      <span class="label">提醒</span>方法二虽"巧妙"，但三层嵌套 <code class="inline">? :</code> 可读性下降——再次印证：<b>复杂逻辑用 if 更清楚</b>。
+    </div>
+  </div>
+
+  <!-- 25 随机加法练习 -->
+  <div class="section" id="s26">
+    <div class="section-title">综合应用 2：随机加法练习</div>
+    <div class="box key">
+      <span class="label">要求</span>计算机随机出 100 以内加法题，回答后：正确 → 鼓励；错误 → 询问是否看答案。
+    </div>
+    <pre class="code"><span class="cmt">// 随机加法练习</span>
+srand(time(<span class="num">0</span>));                 <span class="cmt">// 随机种子</span>
+a = rand() % <span class="num">100</span>; 
+b = rand() % <span class="num">100</span>; 
+c = a + b;
+
+printf(<span class="str">"Please compute: %d + %d = "</span>, a, b);
+scanf(<span class="str">"%d"</span>, &amp;d);
+
+<span class="kw">if</span> (c == d)
+    printf(<span class="str">"Right!\n"</span>);
+<span class="kw">else</span> {
+    printf(<span class="str">"Wrong, your answer: %d.\n"</span>, d);
+    printf(<span class="str">"See answer(y/n)?"</span>);
+    scanf(<span class="str">" %c"</span>, &amp;q);            <span class="cmt">// %c 前加空格</span>
+    <span class="kw">if</span> (q == <span class="str">'y'</span> || q == <span class="str">'Y'</span>)
+        printf(<span class="str">"Right answer: %d\n"</span>, c);
+}</pre>
+    <div class="box tip">
+      <span class="label">运行示例</span>
+      <div class="out" style="font-size:13px;">Please compute: 37 + 58 = 95
+Right!
+
+（若输入错误：）
+Please compute: 37 + 58 = 90
+Wrong, your answer: 90.
+See answer(y/n)? y
+Right answer: 95</div>
+    </div>
+    <div class="box warn" style="margin-bottom:0;">
+      <span class="label">避坑</span>读取字符前留个空格：<code class="inline">scanf(" %c", &amp;q);</code>，以跳过上次输入留下的回车符。
+    </div>
+  </div>
+
+  <!-- 26 rand/srand -->
+  <div class="section" id="s27">
+    <div class="section-title">随机数函数 rand() 和 srand()</div>
+    <ul class="feat">
+      <li><span class="k">① rand()</span><span class="v">产生 <code class="inline">[0, 32767)</code> 的伪随机整数</span></li>
+      <li><span class="k">② srand()</span><span class="v">设种子，一般用 <code class="inline">srand(time(0))</code>（当前秒）</span></li>
+      <li><span class="k">③ 头文件</span><span class="v"><code class="inline">#include &lt;stdlib.h&gt;</code> 与 <code class="inline">#include &lt;time.h&gt;</code></span></li>
+    </ul>
+    <pre class="code"><span class="kw">#include</span> <span class="str">&lt;stdlib.h&gt;</span> 
+<span class="kw">#include</span> <span class="str">&lt;time.h&gt;</span>
+<span class="kw">int</span> a, b;
+srand(time(<span class="num">0</span>));      <span class="cmt">// 设定种子</span>
+a = rand() % <span class="num">100</span>;    <span class="cmt">// 0~99 随机数</span>
+b = rand() % <span class="num">100</span>;</pre>
+    <div class="box tip">
+      <span class="label">要点</span>不调用 <code class="inline">srand()</code>，每次运行产生的序列相同。
+    </div>
+  </div>
+
+  <!-- 27 输入缓冲区问题 -->
+  <div class="section" id="s28">
+    <div class="section-title">输入缓冲区残留字符问题</div>
+    <div class="box warn">
+      <span class="label">成因</span><code class="inline">scanf</code> 读取后，输入的换行符 <code class="inline">\n</code> 残留在缓冲区，干扰后续输入。
+    </div>
+    
+    <div class="card red">
+      <h4>❌ 错误示范</h4>
+      <pre class="code">scanf(<span class="str">"%d"</span>, &amp;num);
+ch = getchar();  <span class="cmt">// 读到残留'\n'</span></pre>
+      <p>不会等待输入，直接读到换行符。</p>
+    </div>
+
+    <div class="card green">
+      <h4>✅ 正确示范</h4>
+      <pre class="code">scanf(<span class="str">"%d"</span>, &amp;num);
+getchar();       <span class="cmt">// 清掉 1 个空白</span>
+ch = getchar();  <span class="cmt">// 读到用户输入</span></pre>
+      <p>两次输入间加 getchar() 吃掉残留。</p>
+    </div>
+
+    <div class="box tip">
+      <span class="label">替代</span>① <code class="inline">scanf(" %c", &amp;ch);</code>　② <code class="inline">scanf("%d\n", &amp;num);</code>　③ <code class="inline">while (getchar() != '\n');</code>
+    </div>
+  </div>
+
+  <!-- 28 常见错误 -->
+  <div class="section" id="s29">
+    <div class="section-title">注意事项与常见错误</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>错误类型</th><th>说明 / 正确做法</th></tr></thead>
+        <tbody>
+          <tr><td>忘记大括号</td><td>if 后多条语句未用 <code class="inline">{}</code>，仅第一条受控。即使一条也建议加 <code class="inline">{}</code>。</td></tr>
+          <tr><td>= 误写为 ==</td><td>赋值误用于判断，条件恒真。比较用 <code class="inline">if (a == b)</code>。</td></tr>
+          <tr><td>分号位置错误</td><td><code class="inline">if (a&gt;b);</code> 多分号，if 空转。去掉多余分号。</td></tr>
+          <tr><td>else 未配对</td><td>else 单独出现，无法编译。检查 if-else 配对。</td></tr>
+          <tr><td>悬空 else</td><td>else 与错误的 if 配对。用大括号强制配对。</td></tr>
+          <tr><td>短路误用</td><td>依赖短路执行有副作用语句。把必执行逻辑独立写出。</td></tr>
+          <tr><td>输入缓冲区</td><td>上次换行符影响后续字符读入。加 getchar() 或 <code class="inline">" %c"</code>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 29 本讲小结 -->
+  <div class="section" id="s30">
+    <div class="section-title">本讲小结</div>
+    <ul class="feat">
+      <li><span class="k">① 单分支 if</span><span class="v">if (表达式) 语句；非0执行、0跳过</span></li>
+      <li><span class="k">② 双分支 if-else</span><span class="v">两选一；else 须与 if 配对</span></li>
+      <li><span class="k">③ 复合语句</span><span class="v">多条语句用 <code class="inline">{ }</code> 括起来</span></li>
+      <li><span class="k">④ 条件运算符</span><span class="v"><code class="inline">a?b:c</code>，适合简单赋值</span></li>
+      <li><span class="k">⑤ 短路求值</span><span class="v"><code class="inline">&amp;&amp;</code> 遇假即停、<code class="inline">||</code> 遇真即停</span></li>
+      <li><span class="k">⑥ 多分支</span><span class="v">嵌套 if / else if 链，顺序很重要</span></li>
+      <li><span class="k">⑦ 常见错误</span><span class="v">大括号、= 与 ==、分号、else 配对、短路误用、缓冲区</span></li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ================= 回到顶部按钮 ================= -->
+<button class="backtop" id="backtop" title="回到顶部">↑</button>
+
+<script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>

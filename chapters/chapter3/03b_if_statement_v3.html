@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C 程序设计基础 · 第 3 章（中）if 语句（完善版 v3）</title>
+<style>
+  :root{
+    --fs-title: 48px; --fs-body: 32px; --fs-other: 30px; --fs-list: 29px;
+    --blue-900:#0a3d63; --blue-700:#124f83; --blue-600:#1a6fb5;
+    --blue-400:#4a97d4; --blue-100:#e8f2fb;
+    --orange:#e8720c; --orange-soft:#fdf1e4;
+    --green:#2e8b57; --green-soft:#eaf7ef;
+    --purple:#8e44ad; --purple-soft:#f5ecfa;
+    --red:#c0392b; --red-soft:#fdeceb;
+    --ink:#1d2b36; --muted:#4d6376; --line:#d6e2ee;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{
+    height:100%;overflow:hidden;background:var(--blue-900);
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  #stage{
+    position:fixed;left:50%;top:50%;width:1600px;height:900px;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    transform-origin:center center;background:#fff;overflow:hidden;
+    transition:opacity .22s ease;
+  }
+  body.blackout #stage{opacity:0;}
+  .slide{
+    position:absolute;inset:0;display:none;flex-direction:column;
+    padding:30px 64px 60px;
+    background:linear-gradient(180deg,#ffffff 0%,#f4faff 100%);
+  }
+  .slide.active{display:flex;animation:fadeUp .26s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  @keyframes itemIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
+  .slide.active .s-title{animation:itemIn .42s ease both;}
+  .slide.active .s-body > *{animation:itemIn .42s ease both;}
+  .slide.active .s-body > *:nth-child(1){animation-delay:.08s;}
+  .slide.active .s-body > *:nth-child(2){animation-delay:.16s;}
+  .slide.active .s-body > *:nth-child(3){animation-delay:.24s;}
+  .slide.active .s-body > *:nth-child(4){animation-delay:.32s;}
+  .slide.active .s-body > *:nth-child(5){animation-delay:.40s;}
+  .slide.active .s-body > *:nth-child(6){animation-delay:.48s;}
+  .slide.cover.active .s-title,
+  .slide.cover.active .s-body > *,
+  .slide.end.active .s-title,
+  .slide.end.active .s-body > *{animation:none;}
+  .slide::after{
+    content:"";position:absolute;right:-90px;bottom:-90px;
+    width:300px;height:300px;border-radius:50%;
+    background:radial-gradient(circle,rgba(26,111,181,.10) 0%,rgba(26,111,181,0) 70%);
+    pointer-events:none;
+  }
+  .s-title{
+    flex:0 0 auto;align-self:flex-start;
+    background:linear-gradient(135deg,#1a6fb5 0%,#124f83 100%);
+    color:#fff;font-size:48px;font-weight:700;
+    letter-spacing:1.5px;line-height:1.15;
+    padding:14px 30px 14px 24px;
+    border-left:10px solid var(--orange);
+    border-radius:0 12px 12px 0;margin-bottom:18px;
+    box-shadow:0 6px 16px rgba(18,79,131,.18);
+  }
+  .s-sub{font-size:var(--fs-body);font-weight:700;color:var(--blue-700);
+    border-left:7px solid var(--orange);padding:2px 0 2px 14px;margin:14px 0 10px;}
+  .s-sub:first-child{margin-top:0;}
+  .s-sub.blue{border-left-color:var(--blue-600);}
+  .s-body{flex:1 1 auto;min-height:0;overflow:hidden;font-size:32px;line-height:1.5;color:var(--ink);}
+  .s-body p{margin:8px 0;}
+  .s-body p:first-child{margin-top:0;}
+  .s-body ul,.s-body ol{padding-left:1.5em;margin:8px 0;}
+  .s-body li{margin:4px 0;}
+  .s-body ul>li::marker{color:var(--blue-600);}
+  .s-body ol>li::marker{color:var(--orange);font-weight:800;}
+  b,strong{color:var(--blue-700);}
+  table.tb{width:100%;border-collapse:separate;border-spacing:0;
+    font-size:var(--fs-other);line-height:1.45;margin:6px 0;
+    border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(18,79,131,.08);}
+  table.tb thead th{background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;font-size:var(--fs-other);padding:12px 18px;text-align:left;}
+  table.tb td,table.tb tbody th{padding:11px 18px;background:#fff;
+    border-bottom:1px solid var(--line);vertical-align:top;}
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+  table.tb tbody th{background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;}
+  table.tb tbody tr:nth-child(even) td{background:#f7fafd;}
+  .c-red{color:var(--red);font-weight:600;}
+  .c-green{color:var(--green);font-weight:700;}
+  .box{border-left:7px solid var(--blue-600);background:var(--blue-100);
+    border-radius:0 10px 10px 0;padding:16px 28px;margin:10px 0;
+    font-size:30px;line-height:1.7;}
+  .box .label{display:inline-block;font-weight:800;color:var(--blue-700);margin-right:10px;}
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+  pre.code{background:#0d2b45;color:#d8e9f5;
+    border-left:6px solid var(--orange);border-radius:0 12px 12px 0;
+    padding:14px 22px;margin:8px 0;font-family:Consolas,"Courier New",monospace;
+    font-size:28px;line-height:1.55;white-space:pre;overflow:hidden;
+    box-shadow:0 8px 22px rgba(13,43,69,.22);}
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+  code.inline{font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;padding:2px 8px;
+    font-size:28px;border-radius:5px;}
+  .out{background:#0d2b45;color:#bfe4ff;border-left:6px solid var(--blue-400);
+    border-radius:0 12px 12px 0;padding:12px 22px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;font-size:28px;line-height:1.5;white-space:pre;}
+  .grid{display:grid;gap:26px 14px;}
+  .grid.c2{grid-template-columns:1fr 1fr;}
+  .grid.c3{grid-template-columns:repeat(3,1fr);}
+  .card{background:#fff;border:1px solid var(--line);
+    border-top:7px solid var(--blue-600);border-radius:0 0 16px 16px;
+    padding:22px 28px;box-shadow:0 6px 16px rgba(18,79,131,.08);}
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{font-size:30px;color:var(--blue-700);margin-bottom:8px;
+    display:flex;align-items:center;gap:10px;line-height:1.2;}
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:27px;color:var(--muted);line-height:1.7;margin:0;}
+  .card .ico{font-size:30px;line-height:1;}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+  .feat{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
+  .feat li{display:flex;align-items:center;gap:22px;background:#fff;
+    border:1px solid var(--line);border-left:7px solid var(--blue-600);
+    border-radius:0 12px 12px 0;padding:12px 24px;box-shadow:0 4px 10px rgba(18,79,131,.06);}
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{flex:0 0 auto;width:270px;font-size:30px;font-weight:700;
+    color:var(--blue-700);line-height:1.25;}
+  .feat .v{font-size:27px;color:var(--muted);line-height:1.5;}
+  .slide.cover{background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    padding:0 110px 60px;justify-content:center;}
+  .slide.cover::before{content:"";position:absolute;right:-100px;top:-100px;
+    width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.18) 0%,rgba(232,114,12,0) 70%);}
+  .slide.cover::after{content:"";position:absolute;left:-100px;bottom:-120px;
+    width:440px;height:440px;border-radius:50%;
+    background:radial-gradient(circle,rgba(74,151,212,.18) 0%,rgba(74,151,212,0) 70%);}
+  .cover-inner{position:relative;z-index:2;}
+  .cover-kicker{display:inline-block;font-size:var(--fs-other);letter-spacing:3px;
+    color:#ffd9b3;border:1px solid rgba(255,217,179,.55);
+    padding:8px 24px;margin-bottom:28px;border-radius:999px;}
+  .cover h1{font-size:82px;font-weight:800;color:#fff;
+    letter-spacing:5px;line-height:1.15;margin-bottom:16px;}
+  .cover-bar{width:650px;height:8px;border-radius:4px;
+    background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:22px;}
+  .cover-sub{font-size:40px;color:#a9d8f5;letter-spacing:3px;margin-bottom:36px;}
+  .cover-meta{font-size:var(--fs-other);color:#7fb2dd;letter-spacing:2px;}
+  .slide.end{background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    padding:0 110px 60px;justify-content:center;}
+  .slide.end::before{content:"";position:absolute;right:-100px;bottom:-120px;
+    width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.16) 0%,rgba(232,114,12,0) 70%);}
+  .end-inner{position:relative;z-index:2;}
+  .end h2{font-size:82px;font-weight:800;color:#fff;letter-spacing:10px;margin-bottom:22px;}
+  .end p{font-size:var(--fs-body);color:#a9d8f5;letter-spacing:2px;}
+  .pageinfo{position:absolute;right:40px;top:22px;z-index:20;
+    font-size:var(--fs-other);color:var(--blue-600);letter-spacing:1px;
+    background:rgba(255,255,255,.95);border:1px solid var(--line);
+    border-radius:999px;padding:5px 20px;box-shadow:0 4px 10px rgba(18,79,131,.08);}
+  .pageinfo b{font-size:var(--fs-other);color:var(--orange);}
+  .nav{position:absolute;right:36px;bottom:14px;z-index:20;
+    display:flex;align-items:center;gap:10px;}
+  .nav button{height:50px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-size:var(--fs-other);line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .18s;font-family:inherit;border-radius:12px;width:50px;
+    box-shadow:0 5px 12px rgba(18,79,131,.28);}
+  .nav button:hover{background:linear-gradient(135deg,#e8720c,#c55807);transform:translateY(-2px);}
+  .nav button:disabled{background:#b9cfe4;cursor:not-allowed;box-shadow:none;transform:none;}
+  .nav .tocbtn{width:auto;padding:0 22px;font-weight:700;letter-spacing:1px;}
+  .progress{position:absolute;left:0;bottom:0;height:6px;width:0;z-index:20;
+    background:linear-gradient(90deg,#1a6fb5,#e8720c);transition:width .3s ease;}
+  .keyhint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);
+    z-index:20;font-size:20px;color:#7fa8c4;letter-spacing:1px;
+    background:rgba(255,255,255,.85);border:1px solid var(--line);
+    border-radius:999px;padding:4px 16px;transition:opacity .6s ease;}
+  .keyhint.hide{opacity:0;}
+  .toc{position:absolute;inset:0;z-index:40;background:rgba(10,61,99,.96);
+    display:none;padding:44px 60px 60px;overflow:hidden;}
+  .toc.show{display:block;}
+  .toc h3{font-size:40px;color:#fff;letter-spacing:4px;margin-bottom:6px;}
+  .toc .toc-bar{width:110px;height:6px;border-radius:3px;
+    background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:20px;}
+
+    .toc-list{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: stretch;
+    width: 100%;
+  }
+  .toc-group{
+    flex: 1;
+    background:rgba(255,255,255,.05);border-radius:12px;
+    padding:12px 10px;
+    border-top:5px solid var(--blue-400);
+    box-sizing: border-box;
+  }
+  .toc-group:nth-child(2){border-top-color:var(--orange);}
+  .toc-group:nth-child(3){border-top-color:var(--green);}
+  .toc-group:nth-child(4){border-top-color:var(--purple);}
+  .toc-group:nth-child(5){border-top-color:var(--red);}
+  .toc-group:nth-child(6){border-top-color:#e8a33d;}
+  
+  .toc-group-title{
+    font-size:18px;color:#ffc17a;font-weight:800;
+    letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;
+    border-bottom:1px dashed rgba(255,255,255,.18);line-height:1.25;
+  }
+  .toc-group a{
+    display:block;color:#cfe6f7;font-size:16px;
+    padding:6px 8px;border-radius:6px;
+    cursor:pointer;margin-bottom:2px;
+    text-decoration:none;line-height:1.35;transition:all .16s;
+  }
+  .toc-group a:hover{background:linear-gradient(90deg,#e8720c,#c55807);color:#fff;}
+
+  .toc-close{position:absolute;right:40px;top:22px;
+    background:none;border:1px solid #7fb2dd;color:#cfe6f7;
+    font-size:var(--fs-other);padding:7px 22px;cursor:pointer;font-family:inherit;
+    border-radius:12px;}
+  .toc-close:hover{background:#e8720c;border-color:#e8720c;color:#fff;}
+  svg.flow{display:block;margin:0 auto;}
+  /* 紧凑模式：用于内容较多的页，确保单页投影放得下 */
+  .slide.compact .s-body{font-size:27px;line-height:1.4;}
+  .slide.compact pre.code{font-size:23px;line-height:1.42;}
+  .slide.compact .box{padding:11px 20px;font-size:25px;line-height:1.5;margin:8px 0;}
+  .slide.compact .s-sub{margin:8px 0 5px;font-size:27px;}
+  .slide.compact .out{font-size:23px;padding:10px 18px;}
+  .slide.compact table.tb{font-size:25px;}
+  .slide.compact table.tb td,.slide.compact table.tb th{padding:8px 14px;}
+  .slide.compact .card{padding:16px 20px;}
+  .slide.compact .card p{font-size:24px;}
+  .slide.compact .card h4{font-size:27px;}
+  .small-code pre.code{font-size:24px;line-height:1.45;}
+</style>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], processEscapes: true },
+    svg: { fontCache: 'global' },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+</head>
+<body>
+<div id="stage">
+
+  <!-- 1 封面 -->
+  <section class="slide cover active">
+    <div class="cover-inner">
+      <div class="cover-kicker">武汉理工大学 人工智能学院</div>
+      <h1>C 程序设计基础</h1>
+      <div class="cover-bar"></div>
+      <div class="cover-sub">第 3 章（中）if 语句</div>
+      <div class="cover-meta">主讲：李　民</div>
+    </div>
+  </section>
+
+  <!-- 2 本讲内容 -->
+  <section class="slide">
+    <div class="s-title">本讲内容</div>
+    <div class="s-body">
+      <div class="grid c2">
+        <div class="card"><h4><span class="ico">❓</span>为什么需要选择结构</h4><p>生活中的选择与程序中的选择</p></div>
+        <div class="card orange"><h4><span class="ico">🚪</span>单分支 if（含流程图）</h4><p>if (表达式) 语句</p></div>
+        <div class="card green"><h4><span class="ico">🔀</span>双分支 if-else（含流程图）</h4><p>if (表达式) 语句1 else 语句2</p></div>
+        <div class="card purple"><h4><span class="ico">❓</span>条件运算符 ? :</h4><p>三目运算符简化写法</p></div>
+        <div class="card red"><h4><span class="ico">🪆</span>嵌套 if / else if（含流程图）</h4><p>多分支的常用写法</p></div>
+        <div class="card"><h4><span class="ico">⚡</span>短路求值（进阶）</h4><p>&& 与 || 的"偷懒"机制</p></div>
+        <div class="card orange"><h4><span class="ico">🧩</span>综合应用</h4><p>排序、加法练习、闰年</p></div>
+        <div class="card green"><h4><span class="ico">📚</span>常见错误与小结</h4><p>易错点总结与回顾</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 学习目标 -->
+  <section class="slide">
+    <div class="s-title">本讲学习目标</div>
+    <div class="s-body">
+      <ul class="feat">
+        <li><span class="k">① 选择结构</span><span class="v">理解生活中的选择，能转换成程序中的选择</span></li>
+        <li><span class="k">② 单分支 if</span><span class="v">掌握 if 语句格式与执行过程（含流程图）</span></li>
+        <li><span class="k">③ 双分支 if-else</span><span class="v">掌握 if-else 语句格式与执行过程（含流程图）</span></li>
+        <li><span class="k">④ 条件运算符</span><span class="v">会用 ? : 简化简单的 if-else</span></li>
+        <li><span class="k">⑤ 短路求值</span><span class="v">理解 && / || 的短路特性，能写出更安全的判断</span></li>
+        <li><span class="k">⑥ 嵌套 if</span><span class="v">会用 else if 链实现多分支（含流程图）</span></li>
+        <li><span class="k">⑦ 常见错误</span><span class="v">大括号、= 与 ==、分号、else 配对、输入缓冲区</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4 为什么需要选择结构 -->
+  <section class="slide">
+    <div class="s-title">为什么需要选择结构</div>
+    <div class="s-body">
+      <div class="two">
+        <div class="card">
+          <h4><span class="ico">🏠</span>生活中的选择</h4>
+          <p>
+            · 如果今天没课，就去图书馆自习；否则去上课。<br>
+            · 如果王者荣耀赢了，再开一局；否则洗洗睡。
+          </p>
+        </div>
+        <div class="card orange">
+          <h4><span class="ico">💻</span>程序中的选择</h4>
+          <p>
+            · 根据用户输入，执行不同的操作<br>
+            · 判断数据是否满足条件，决定下一步流程
+          </p>
+        </div>
+      </div>
+      <div class="box tip" style="margin-top:14px;">
+        <span class="label">结论</span>
+        选择结构让程序有了"判断力"，能根据不同的输入走不同的路。
+      </div>
+    </div>
+  </section>
+
+ <!-- 5 【合并】单分支 if 语句 + 流程图 -->
+<section class="slide">
+  <div class="s-title">单分支 if 语句（含流程图）</div>
+  <div class="s-body" style="display:grid;grid-template-columns:1.25fr 1fr;gap:30px;align-items:center;">
+    <div>
+      <div class="box key" style="margin:0 0 10px;padding:11px 18px;font-size:26px;">
+        <span class="label">回顾</span>if 后圆括号内是<b>表达式</b>，值为非 0 即"真"、0 即"假"（关系/逻辑运算符见第3章上）。
+      </div>
+      <div class="s-sub blue" style="margin-top:6px;">格式</div>
+      <pre class="code" style="font-size:25px;margin:4px 0;">if ( 表达式 )
+    内嵌语句;</pre>
+      <div class="s-sub blue" style="margin:8px 0 4px;">执行过程</div>
+      <ul style="font-size:26px;line-height:1.5;margin:0;">
+        <li>计算表达式的值</li>
+        <li><b>非 0 </b>→ 执行内嵌语句</li>
+        <li><b>0 </b>→ 跳过，执行 if 的下一条</li>
+      </ul>
+      <pre class="code" style="font-size:25px;margin-top:10px;"><span class="kw">int</span> score = <span class="num">85</span>;
+<span class="kw">if</span> (score &gt;= <span class="num">60</span>)
+    printf(<span class="str">"及格！\n"</span>);</pre>
+    </div>
+    <div style="text-align:center;">
+      <!-- 这里将图片替换为了你上传的图，请确保图片路径正确 -->
+      <img src="../../images/chapter3/N-S流程图-单分支语句.png" alt="单分支 if 语句流程图" style="max-width:70%; max-height:420px; display:block; margin:0 auto; object-fit:contain;">
+      <div class="box tip" style="margin:12px 0 0;padding:9px 16px;font-size:23px;text-align:left;">
+        <span class="label">读图</span><b>真</b> → 执行语句；<b>假</b> → 跳过，两条路都汇合到结束。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 单分支 if 判断题（加流程图 A/B） -->
+<section class="slide compact">
+  <div class="s-title">单分支 if 判断题（对照流程图）</div>
+  <div class="s-body">
+    <div class="box key" style="margin:0 0 10px;">
+      <span class="label">问题</span>当 <code class="inline">a &gt; b</code> 时交换 a、b 的值，哪段代码正确？
+    </div>
+    <div class="two">
+      
+      <!-- 代码段 A -->
+      <div class="card red">
+        <h4><span class="ico">❌</span>代码段 A</h4>
+        <pre class="code" style="font-size:22px;margin:6px 0;"><span class="kw">if</span> (a &gt; b)
+    t = a;
+a = b;
+b = t;</pre>
+        
+        <div style="text-align:center; margin-top:10px;">
+          <!-- 替换为你上传的 A 流程图 -->
+          <img src="../../images/chapter3/N-S流程图-交换3个整数-代码段A_1.png" alt="代码段 A 的 N-S 流程图" style="max-width:100%; max-height:260px; display:block; margin:0 auto; object-fit:contain;">
+        </div>
+        
+        <p style="margin-top:10px;">只有 <code class="inline">t=a</code> 受 if 控制，<code class="inline">a=b / b=t</code> 在 if 语句外面，总会执行。</p>
+      </div>
+
+      <!-- 代码段 B -->
+      <div class="card green">
+        <h4><span class="ico">✅</span>代码段 B</h4>
+        <pre class="code" style="font-size:22px;margin:6px 0;"><span class="kw">if</span> (a &gt; b) {
+    t = a;
+    a = b;
+    b = t;
+}</pre>
+        
+        <div style="text-align:center; margin-top:10px;">
+          <!-- 替换为你上传的 B 流程图 -->
+          <img src="../../images/chapter3/N-S流程图-交换3个整数-代码段B_1.png" alt="代码段 B 的 N-S 流程图" style="max-width:100%; max-height:260px; display:block; margin:0 auto; object-fit:contain;">
+        </div>
+        
+        <p style="margin-top:10px;">三条语句都在 <code class="inline">{}</code> 内，作为一个整体受 if 控制。</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+  <!-- 7 单分支 if 表达式类型 -->
+  <section class="slide compact">
+    <div class="s-title">单分支 if 语句：表达式的类型</div>
+    <div class="s-body">
+      <div class="box tip" style="margin:0 0 10px;">
+        <span class="label"style="font-size:32px;">说明</span>if 后圆括号内是<b>表达式</b>，值为非 0 即"真"、0 即"假"（关系/逻辑运算符见第3章上）。的表达式可以是<b>任何类型</b>，只要能算出 0 或非 0。
+      </div>
+      <pre class="code" style="margin:0 0 10px;font-size: 32px;line-height: 1.7;">if (a == b &amp;&amp; x == y)   printf(<span class="str">"a=b, x=y"</span>);
+if (3)    printf(<span class="str">"OK"</span>);   <span class="cmt">　　　// 3 非0，恒真</span>
+if (a)    printf(<span class="str">"%d"</span>, a); <span class="cmt">　　　// 等价于 if(a!=0)</span>
+if (x) ... <span class="cmt">　　　　// 等价于 if(x!=0)　　</span>
+if (!x) ... <span class="cmt">　　　　// 等价于 if(x==0)</span></pre>
+      <div class="box warn" style="margin:0;">
+        <span class="label">常见写法</span>　　　　
+        <code class="inline">if (x)</code> ≡ <code class="inline">if (x != 0)</code>　　　　
+        <code class="inline">if (!x)</code> ≡ <code class="inline">if (x == 0)</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 大括号的重要性 -->
+  <section class="slide">
+    <div class="s-title">单分支——复合语句（大括号的重要性）</div>
+    <div class="s-body">
+      <div class="box warn" style="margin:0 0 12px;">
+        <span class="label">问题</span>多条语句必须用大括号 <code class="inline">{ }</code> 括起来，否则只有第一条受 if 控制。
+      </div>
+      <div class="two">
+        <div class="card red">
+          <h4><span class="ico">❌</span>错误示例</h4>
+          <pre class="code" style="font-size:30px;margin:6px 0;">if (score &gt;= 60)
+    printf(<span class="str">"及格！\n"</span>);
+printf(<span class="str">"拿学分！\n"</span>);  <span class="cmt">// 总执行</span></pre>
+          <p style="margin-top:6px;">第二句不受 if 控制，逻辑错误。</p>
+        </div>
+        <div class="card green">
+          <h4><span class="ico">✅</span>正确示例</h4>
+          <pre class="code" style="font-size:30px;margin:6px 0;">if (score &gt;= 60) {
+    printf(<span class="str">"及格！\n"</span>);
+    printf(<span class="str">"拿学分！\n"</span>);
+}</pre>
+          <p style="margin-top:6px;">两条语句整体受 if 控制。</p>
+        </div>
+      </div>
+      <div class="box tip" style="margin:12px 0 0;">
+        <span class="label">结论</span>无论几条语句，<b>推荐总是加大括号</b>，更清晰、更安全。
+      </div>
+    </div>
+  </section>
+
+<!-- 9 例：信号灯（单分支） -->
+<section class="slide compact">
+  <div class="s-title">例：模拟路口交通信号灯系统</div>
+  <div class="s-body">
+    <div class="two wide" style="grid-template-columns: 0.85fr 1.15fr; gap: 24px; align-items: start;">
+      
+      <!-- 左栏：要求 + 思路 + 运行结果 -->
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div class="box key" style="margin:0;">
+          <span class="label">要求</span>输入 <b>g/G</b> → 可通行；<b>r/R</b> → 不可通行；<b>y/Y</b> → 等待。
+        </div>
+        <div class="box tip" style="margin:0;">
+          <span class="label">思路</span>三个独立的 <code class="inline">if</code> 语句分别处理三种字符，互不干扰。
+        </div>
+        <div class="box warn" style="margin:0;">
+          <span class="label">运行输出</span>
+          <div class="out" style="font-size:24px; line-height:1.5; margin-top:8px;">
+输入 g ：Green light on. Go!
+输入 r ：Red light on. Stop!
+输入 y ：Yellow light on. Wait!</div>
+        </div>
+      </div>
+
+      <!-- 右栏：代码 -->
+      <pre class="code" style="font-size:28px; margin:0; padding:14px 20px; line-height:1.5;"><span class="kw">char</span> light; 　　<span class="cmt">// 信号灯</span>
+scanf(<span class="str">"%c"</span>, &amp;light);
+
+<span class="kw">if</span> (light == <span class="str">'g'</span> || light == <span class="str">'G'</span>)
+    printf(<span class="str">"Green light on. Go!\n"</span>);
+
+<span class="kw">if</span> (light == <span class="str">'r'</span> || light == <span class="str">'R'</span>)
+    printf(<span class="str">"Red light on. Stop!\n"</span>);
+
+<span class="kw">if</span> (light == <span class="str">'y'</span> || light == <span class="str">'Y'</span>)
+    printf(<span class="str">"Yellow light on. Wait!\n"</span>);</pre>
+
+    </div>
+  </div>
+</section>
+
+ <!-- 10 【合并】双分支 if-else 语句 + 流程图 -->
+<section class="slide">
+  <div class="s-title">双分支 if-else 语句</div>
+  <div class="s-body" style="display:grid;grid-template-columns:1.25fr 1fr;gap:30px;align-items:center;">
+    
+    <!-- 左侧文本与代码 -->
+    <div>
+      <div class="s-sub blue" style="margin:0 0 4px;">格式</div>
+      <pre class="code" style="font-size:25px;margin:4px 0;">if ( 表达式 )
+    语句1;
+else
+    语句2;</pre>
+      <div class="s-sub blue" style="margin:8px 0 4px;">执行过程</div>
+      <ul style="font-size:26px;line-height:1.5;margin:0;">
+        <li><b>非 0</b> → 执行语句 1</li>
+        <li><b>0</b> → 执行语句 2</li>
+      </ul>
+      <pre class="code" style="font-size:25px;margin-top:10px;"><span class="kw">if</span> (steps &gt; <span class="num">10000</span>)
+    printf(<span class="str">"运动达人！\n"</span>);
+<span class="kw">else</span>
+    printf(<span class="str">"加油哦！\n"</span>);</pre>
+      <div class="box warn" style="margin:10px 0 0;padding:10px 16px;font-size:24px;">
+        <span class="label">注意</span><code class="inline">else</code> 不能单独存在，必须与 <code class="inline">if</code> 配对。
+      </div>
+    </div>
+    
+    <!-- 右侧图片与说明 -->
+    <div style="text-align:center;">
+      <!-- 替换为你上传的 N-S 流程图 -->
+      <img src="../../images/chapter3/N-S流程图-双分支语句.png" alt="双分支 if-else 的 N-S 流程图" style="max-width:70%; max-height:340px; display:block; margin:0 auto; object-fit:contain;">
+      
+      <div class="box tip" style="margin:16px 0 0;padding:9px 16px;font-size:23px;text-align:left;">
+        <span class="label">读图</span>非此即彼：<b>有且仅有一个</b>分支被执行。
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+  <!-- 11 例：信号灯（双分支） -->
+  <section class="slide compact">
+    <div class="s-title">例：信号灯（双分支写法）</div>
+    <div class="s-body">
+      <div class="box key" style="margin:0 0 8px;">
+        <span class="label">要求</span>输入 <b>g/G </b>提示可通行，其他字符提示不可通行。
+      </div>
+      <pre class="code" style="margin:0 0 8px;font-size: 30px;">char light;  scanf(<span class="str">"%c"</span>, &amp;light);
+
+if (light == <span class="str">'g'</span> || light == <span class="str">'G'</span>)
+    printf(<span class="str">"Green light on. Go!\n"</span>);
+else
+    printf(<span class="str">"Green light not on. Cannot go!\n"</span>);</pre>
+      <div class="box tip" style="margin:0 0 6px;">
+        <span class="label">对比</span>单分支用三个独立 if；双分支用一个 if-else 处理"通行/不通行"。
+      </div>
+      <div class="box warn" style="margin:0;">
+        <span class="label">运行输出</span>
+        <div class="out">输入 g ： Green light on. Go!
+输入 x ： Green light not on. Cannot go!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 例：判断三边构成三角形 -->
+  <section class="slide compact">
+    <div class="s-title">例：判断三边能否构成三角形</div>
+    <div class="s-body">
+      <div class="box key" style="margin:0 0 8px;">
+        <span class="label">分析</span>任意两边之和 &gt; 第三边则可构成三角形，计算面积；否则报错。
+      </div>
+      <div class="two">
+        <pre class="code" style="font-size:28px;margin:0 0 6px;"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;math.h&gt;</span>
+<span class="kw">int</span> main() {
+  <span class="kw">double</span> a, b, c, s, area;
+  scanf(<span class="str">"%lf %lf %lf"</span>, &amp;a, &amp;b, &amp;c);
+  if (a+b&gt;c &amp;&amp; a+c&gt;b &amp;&amp; b+c&gt;a){
+    s = 0.5*(a+b+c);
+    area = sqrt(s*(s-a)*(s-b)*(s-c));
+    printf(<span class="str">"area=%f\n"</span>, area);
+  } else
+    printf(<span class="str">"Data error!\n"</span>);
+  <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+        <div>
+          <div class="s-sub blue" style="margin:0 0 4px;">海伦公式</div>
+          <p style="font-size:25px;margin:0 0 8px;">
+            \[ s=\frac{1}{2}(a+b+c) \]
+            \[ area=\sqrt{s(s-a)(s-b)(s-c)} \]
+          </p>
+          <div class="box tip" style="margin:0;padding:9px 14px;font-size:23px;">
+            <span class="label">关键</span>判定用 <code class="inline">&amp;&amp;</code> 连三个不等式。
+          </div>
+          <div class="box warn" style="margin:6px 0 0;padding:9px 14px;font-size:28px;">
+            <span class="label">输入 → 输出</span>
+            <div class="out" style="font-size:28px;margin:4px 0 0;">3 4 5 → area=6.000000
+1 2 3 → Data error!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- 13 条件运算符 -->
+<section class="slide compact">
+  <div class="s-title">条件运算符 ? :</div>
+  <div class="s-body">
+    
+    <div class="two" style="gap:36px; align-items:start; margin-top:10px;">
+      
+      <!-- 左栏：格式与执行过程 -->
+      <div>
+        <div class="s-sub blue" style="margin:0 0 4px;">格式</div>
+        <pre class="code" style="margin:0 0 16px; font-size:28px;">表达式1 ? 表达式2 : 表达式3</pre>
+        
+        <div class="s-sub blue" style="margin:0 0 4px;">执行过程</div>
+        <ul style="font-size:28px; line-height:1.6; margin:0 0 16px;">
+          <li>先计算<b>表达式 1</b></li>
+          <li>若为 <b>非 0（真）</b> → 取<b>表达式 2</b> 的值</li>
+          <li>若为 <b>0（假）</b> → 取<b>表达式 3</b> 的值</li>
+        </ul>
+        
+        <div class="box tip" style="margin:0; font-size:28px;">
+          <span class="label">特点</span>它是 C 语言中唯一一个<b>三目运算符</b>，常用于简化简单的 if-else 赋值。
+        </div>
+      </div>
+
+      <!-- 右栏：代码示例与实际运行 -->
+      <div>
+        <div class="s-sub blue" style="margin:0 0 4px;">示例：求两数最大值</div>
+        <pre class="code" style="margin:0 0 12px; font-size:28px;">max = (a &gt; b) ? a : b;</pre>
+        
+        <div class="s-sub blue" style="margin:0 0 4px;">等价于 if-else</div>
+        <pre class="code" style="margin:0 0 12px; font-size:28px;"><span class="kw">if</span> (a &gt; b)
+    max = a;
+<span class="kw">else</span>
+    max = b;</pre>
+        
+        <div class="box key" style="margin:0; font-size:28px;">
+          <span class="label">运行示例</span><br>
+          设 <code class="inline">int a = 5, b = 8;</code><br>
+          执行 <code class="inline">max = (a &gt; b) ? a : b;</code> 后，<b>max 结果为 8</b>。<br>
+          因为 <code class="inline">a &gt; b</code> 为假（0），所以取 <code class="inline">b</code> 的值。
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+  <!-- 14 条件运算常见应用 -->
+  <section class="slide compact">
+    <div class="s-title">条件运算的常见应用</div>
+    <div class="s-body">
+      <table class="tb">
+        <thead><tr><th style="width:36%">目的</th><th style="width:64%">表达式</th></tr></thead>
+        <tbody>
+          <tr><td>求绝对值</td><td><code class="inline">abs = (x &gt;= 0) ? x : -x;   // x 为int</code></td></tr>
+          <tr><td>非负整数奇偶性</td><td><code class="inline">odd = (x % 2 == 1) ? 1 : 0;</code></td></tr>
+          <tr><td>小写转大写</td><td><code class="inline">c = (c&gt;='a'&amp;&amp;c&lt;='z') ? c-32 : c;</code></td></tr>
+          <tr><td>三数最大值</td><td><code class="inline">max=(a&gt;b &amp;&amp; a&gt;c)? a : (b&gt;c ? b:c);</code></td></tr>
+          <tr><td>判断 x 符号</td><td><code class="inline">s = x&gt;0 ? 1 : (x&lt;0 ? -1 : 0);</code></td></tr>
+        </tbody>
+      </table>
+      <div class="box tip" style="margin:10px 0 0;">
+        <span class="label">建议</span>当 if-else 的<b>两个分支都是给同一变量赋值</b>时，可用条件运算符简化。
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 逻辑运算符的短路求值 -->
+  <section class="slide compact">
+    <div class="s-title">逻辑运算符的"短路求值"</div>
+    <div class="s-body">
+      <div class="box key" style="margin:0 0 8px;">
+        <span class="label">短路</span><code class="inline">&amp;&amp;</code> 与 <code class="inline">||</code> 一旦能确定整体结果，就不再算后面的表达式：<code class="inline">&amp;&amp;</code> 遇假即停，<code class="inline">||</code> 遇真即停。
+      </div>
+      <pre class="code" style="margin:0 0 8px;font-size: 32px;">int x = 0;
+if (x != 0 &amp;&amp; 1/x &gt; 0.5)   <span class="cmt">// x==0 时右半不执行</span>
+    printf(<span class="str">"ok\n"</span>);      <span class="cmt">// 巧妙避免"除零"</span>
+int a[5]={1,2,3,4,5}, i=9;
+if (i &lt; 5 &amp;&amp; a[i] == 3)   <span class="cmt">// i&gt;=5 时右半不执行</span>
+    printf(<span class="str">"found\n"</span>);    <span class="cmt">// 避免数组越界</span></pre>
+      <div class="box warn" style="margin:0;">
+        <span class="label">注意</span>短路是"安全特性"，但<b>勿依赖它执行有副作用的语句</b>，可读性差。
+      </div>
+    </div>
+  </section>
+
+ <!-- 16 【新增流程图】嵌套 if 语句 -->
+<section class="slide compact">
+  <div class="s-title">嵌套 if 语句（含流程图）</div>
+  <div class="s-body" style="display:grid;grid-template-columns:1.1fr 1fr;gap:26px;align-items:center;">
+    
+    <!-- 左侧：格式与执行说明 -->
+    <div>
+      <div class="s-sub blue" style="margin:0 0 4px;">格式</div>
+      <pre class="code" style="font-size:32px;margin:4px 0;line-height: 1.7;"><span class="kw">if</span> (表达式) {
+    <span class="kw">if</span> (表达式1)
+        语句1;
+    <span class="kw">else</span>
+        语句2;
+} <span class="kw">else</span> {
+    <span class="kw">if</span> (表达式2)
+        语句3;
+    <span class="kw">else</span>
+        语句4;
+}</pre>
+      <div class="box tip" style="margin:8px 0 0;padding:9px 14px;font-size:32px;">
+        <span class="label">执行</span>从上到下依次判断，遇第一个真条件执行对应语句后跳出。
+      </div>
+    </div>
+    
+    <!-- 右侧：替换为你上传的图片 -->
+    <div style="text-align:center;">
+      <!-- 请确保图片名与路径正确 -->
+      <img src="../../images/chapter3/N-S流程图-嵌套if语句.png" alt="嵌套 if 语句的 N-S 流程图" style="max-width:80%; max-height:380px; display:block; margin:0 auto; object-fit:contain;">
+      
+      <div class="box tip" style="margin:16px 0 0;padding:8px 14px;font-size:32px;text-align:left;">
+        <span class="label">读图</span>外层分支里再嵌一层判断，逐层缩小范围。
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+  <!-- 17 例：判断 x 的符号 -->
+  <section class="slide">
+    <div class="s-title">例：判断 x 的符号</div>
+    <div class="s-body">
+      <div class="box key" style="margin:0 0 12px;">
+        <span class="label">要求</span>x&gt;0 时 y=1；x=0 时 y=0；x&lt;0 时 y=-1。
+      </div>
+      <div class="two">
+        <pre class="code" style="font-size:32px;margin:0;"><span class="cmt">// 写法一：按 x&gt;=0 分支</span>
+if (x &gt;= 0)
+    if (x == 0) y = 0;
+    else        y = 1;
+else
+    y = -1;</pre>
+        <pre class="code" style="font-size:32px;margin:0;"><span class="cmt">// 写法二：按 x!=0 分支</span>
+if (x != 0)
+    if (x &gt; 0) y = 1;
+    else       y = -1;
+else
+    y = 0;</pre>
+      </div>
+      <div class="box tip" style="margin:12px 0 0;">
+        <span class="label">对比</span>两种写法结果一致，第一种更直观；嵌套时注意 <code class="inline">else</code> 与哪个 <code class="inline">if</code> 配对。
+      </div>
+    </div>
+  </section>
+
+<!-- 18 【新增流程图】else if 多分支结构 -->
+<section class="slide compact">
+  <div class="s-title">else if 多分支结构（含流程图）</div>
+  <div class="s-body" style="display:grid;grid-template-columns:0.8fr 1.2fr;gap:26px;align-items:start;">
+    
+    <!-- 左侧：格式与说明 -->
+    <div>
+      <div class="s-sub blue" style="margin:0 0 4px;">格式</div>
+      <pre class="code" style="font-size:28px;margin:4px 0;"><span class="kw">if</span> (表达式1)
+    语句1;
+<span class="kw">else if</span> (表达式2)
+    语句2;
+...
+<span class="kw">else</span>
+    语句n;</pre>
+      <div class="box tip" style="margin:12px 0 0;padding:10px 16px;font-size:26px;line-height:1.5;">
+        <span class="label">说明</span>这是双分支在 <code class="inline">else</code> 中嵌套 <code class="inline">if</code> 的<b>简化形式</b>，多分支最常用。
+      </div>
+    </div>
+    
+    <!-- 右侧：替换为你上传的图片 -->
+    <div style="text-align:center;">
+      <!-- 请确保图片名与路径正确 -->
+      <img src="../../images/chapter3/传统流程图-多分支if语句.png" alt="else if 多分支结构流程图" style="max-width:130%; max-height:500px; display:block; margin:0 auto; object-fit:contain;">
+      
+      <div class="box tip" style="margin:12px 0 0;padding:9px 16px;font-size:24px;text-align:left;">
+        <span class="label">读图</span>逐层判断，命中即执行并结束；全不中走 else。
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+  <!-- 19 例：分数转等级 -->
+  <section class="slide compact">
+    <div class="s-title">例：根据分数评定等级</div>
+    <div class="s-body">
+      <div class="box key" style="margin:0 0 8px;font-size: 32px;">
+        <span class="label">要求</span>≥90→A　≥80→B　≥70→C　≥60→D　&lt;60→E（不及格）
+      </div>
+      <pre class="code" style="margin:0 0 8px;font-size: 32px;">int score;  scanf(<span class="str">"%d"</span>, &amp;score);
+if (score &gt;= 90)      printf(<span class="str">"A\n"</span>);
+else if (score &gt;= 80) printf(<span class="str">"B\n"</span>);
+else if (score &gt;= 70) printf(<span class="str">"C\n"</span>);
+else if (score &gt;= 60) printf(<span class="str">"D\n"</span>);
+else                  printf(<span class="str">"E\n"</span>);</pre>
+      <div class="box warn" style="margin:0 0 6px;font-size: 32px;">
+        <span class="label">关键</span>不用写 <code class="inline">score &lt; 90</code>：前面已按序排除，能走到这行必然 &lt;90。<b>顺序很重要！</b>
+      </div>
+      <div class="box tip" style="margin:0;font-size: 32px;">
+        <span class="label">输出</span>
+        <div class="out" style="font-size:32px;margin:4px 0 0;">输入 85 → B　　输入 58 → E (不及格)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 例：闰年天数 -->
+  <section class="slide compact">
+    <div class="s-title">例：输入年、月，输出该月天数</div>
+    <div class="s-body">
+      <div class="box key" style="margin:0 0 8px;">
+        <span class="label">分析</span>大月 31 天；小月 30 天；2 月闰年 29、平年 28。闰年：<code class="inline">(year%4==0 &amp;&amp; year%100!=0) || year%400==0</code>。
+      </div>
+      <pre class="code" style="margin:0 0 8px;font-size: 32px;">int year, month, days;
+scanf(<span class="str">"%d %d"</span>, &amp;year, &amp;month);
+if (month==1||month==3||month==5||month==7||
+    month==8||month==10||month==12)   days = 31;
+else if (month==4||month==6||month==9||month==11) days = 30;
+else {
+  if ((year%4==0 &amp;&amp; year%100!=0) || year%400==0) days = 29;
+  else days = 28;
+}</pre>
+      <div class="box tip" style="margin:0;font-size: 32px;">
+        <span class="label">输出</span>
+        <div class="out" style="font-size:32px;margin:4px 0 0;">2024 2 → 29　　2023 2 → 28　　2023 4 → 30</div>
+      </div>
+    </div>
+  </section>
+
+<!-- 21 悬空 else -->
+<section class="slide compact">
+  <div class="s-title">悬空 else：else 到底与哪个 if 配对</div>
+  <div class="s-body">
+    
+    <div class="two" style="gap:40px; align-items:start; margin-top:10px;">
+      
+      <!-- 左栏：错误代码与分析 -->
+      <div>
+        <div class="s-sub blue" style="margin:0 0 6px; font-size:28px;">原始代码</div>
+        <pre class="code" style="margin:0 0 16px; font-size:32px; line-height:1.5;"><span class="kw">if</span> (a &gt; b)
+    <span class="kw">if</span> (c &gt; d)
+        x = <span class="num">1</span>;
+    <span class="kw">else</span>
+        x = <span class="num">2</span>;</pre>
+        
+        <div class="box warn" style="margin:0; font-size:28px; line-height:1.6;">
+          <span class="label">分析</span><br>
+          <code class="inline">else</code> 与<b>离它最近、尚未配对的 if</b> 配对。<br>
+          即内层 <code class="inline">if (c &gt; d)</code>，<b>而非</b>外层 <code class="inline">if (a &gt; b)</code>。
+        </div>
+      </div>
+
+      <!-- 右栏：修正代码与说明 -->
+      <div>
+        <div class="s-sub blue" style="margin:0 0 6px; font-size:28px;">✅ 用大括号强制配对</div>
+        <pre class="code" style="margin:0 0 16px; font-size:32px; line-height:1.5;"><span class="kw">if</span> (a &gt; b) {
+    <span class="kw">if</span> (c &gt; d) 
+        x = <span class="num">1</span>;
+} <span class="kw">else</span>
+    x = <span class="num">2</span>;</pre>
+
+        <div class="box tip" style="margin:0; font-size:28px; line-height:1.6;">
+          <span class="label">原理</span><br>
+          加了花括号 <code class="inline">{ }</code> 之后，内层的 <code class="inline">if...else</code> 就成了一个完整的整体，外层的 <code class="inline">else</code> 就只能和 <b>外层</b>的 <code class="inline">if (a &gt; b)</code> 配对了。
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+  <!-- 22 悬空 else 对比 -->
+  <section class="slide compact">
+    <div class="s-title">悬空 else 对比</div>
+    <div class="s-body">
+      <div class="box key" style="margin:0 0 8px;font-size: 32px;">
+        <span class="label">思考</span>以下两段代码运行结果一样吗？
+      </div>
+      <div class="two">
+        <pre class="code" style="font-size:32px;margin:0;">int a=2, b=-1, c=2;
+if (a &lt; b)
+  if (b &lt; 0) c = 0;
+  else    c++;
+printf(<span class="str">"%d\n"</span>, c);</pre>
+        <pre class="code" style="font-size:32px;margin:0;">int a=2,b=-1,c=2;
+if (a &lt; b) {
+  if (b &lt; 0) { c = 0; }
+  else   { c++; }
+}
+printf(<span class="str">"%d\n"</span>, c);</pre>
+      </div>
+      <div class="box tip" style="margin:8px 0 0;font-size: 32px;">
+        <span class="label">答案</span>都输出 <code class="inline">c = 2</code>：<code class="inline">a &lt; b</code> 为假，外层整体不执行。嵌套时务必加大括号。
+      </div>
+    </div>
+  </section>
+
+  <!-- 23 单选练习 -->
+  <section class="slide">
+    <div class="s-title">单选练习</div>
+    <div class="s-body">
+      <div class="box key" style="margin:0 0 12px;">
+        <span class="label">题目</span>以下程序段运行后的输出结果是（　　）。
+      </div>
+      <pre class="code" style="margin:0 0 12px;">int x=1, y=0;
+if (!x) y++;
+else if (x == 0)
+    if (x) y += 2;
+    else y += 3;
+printf(<span class="str">"%d\n"</span>, y);</pre>
+      <div class="box tip" style="margin:0;">
+        <span class="label">分析</span>x=1→<code class="inline">!x=0</code> 跳过；<code class="inline">x==0</code> 为假跳过 else if 整体；y 保持 0，输出 <code class="inline">0</code>。嵌套务必加大括号。
+      </div>
+    </div>
+  </section>
+
+  <!-- 24 三数排序 -->
+  <section class="slide">
+    <div class="s-title">综合应用 1：三个数排序（年龄排序）</div>
+    <div class="s-body">
+      <div class="box key" style="margin:0 0 12px;">
+        <span class="label">问题</span>输入三个人的年龄，按从小到大输出。
+      </div>
+      <div class="s-sub blue" style="margin:0 0 4px;">方法一：比较交换，使 a ≤ b ≤ c</div>
+      <pre class="code" style="margin:0 0 10px;">if (a &gt; b) { t=a; a=b; b=t; }   <span class="cmt">// 调 a,b</span>
+if (a &gt; c) { t=a; a=c; c=t; }   <span class="cmt">// 调 a,c，a 最小</span>
+if (b &gt; c) { t=b; b=c; c=t; }   <span class="cmt">// 调 b,c，c 最大</span>
+printf(<span class="str">"%d %d %d"</span>, a, b, c);</pre>
+      <div class="box tip" style="margin:0;">
+        <span class="label">思路</span>三次比较交换即可保证 a ≤ b ≤ c。
+      </div>
+    </div>
+  </section>
+
+  <!-- 25 三数排序（方法二） -->
+  <section class="slide">
+    <div class="s-title">三数排序（方法二：条件运算符）</div>
+    <div class="s-body">
+      <pre class="code" style="margin:0 0 12px;font-size: 32px;">min = (a &lt; b &amp;&amp; a &lt; c) ? a : (b &lt; c ? b : c);
+max = (a &gt; b &amp;&amp; a &gt; c) ? a : (b &gt; c ? b : c);
+mid = a + b + c - min - max;
+printf(<span class="str">"%d %d %d"</span>, min, mid, max);</pre>
+      <div class="box warn" style="margin:0;font-size: 32px;">
+        <span class="label">提醒</span>方法二虽"巧妙"，但三层嵌套 <code class="inline">? :</code> 可读性下降——再次印证：<b>复杂逻辑用 if 更清楚</b>。
+      </div>
+    </div>
+  </section>
+
+<!-- 26 综合应用 2：随机加法练习 -->
+<section class="slide compact">
+  <div class="s-title">综合应用 2：随机加法练习</div>
+  <div class="s-body">
+    <div class="two wide" style="grid-template-columns: 0.8fr 1.2fr; gap: 24px; align-items: start; margin-top: 10px;">
+      
+      <!-- 左栏：要求、运行结果与提示 -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="box key" style="margin:0; font-size:28px; line-height:1.6;">
+          <span class="label">要求</span><br>
+          计算机随机出 100 以内加法题，回答后：<br>
+          · 正确 → 鼓励；<br>
+          · 错误 → 询问是否看答案。
+        </div>
+        
+        <div class="box tip" style="margin:0; font-size:26px;">
+          <span class="label">运行示例</span>
+          <div class="out" style="font-size:24px; margin-top:8px; line-height:1.25;">Please compute: 37 + 58 = 95
+Right!
+
+（若输入错误：）
+Please compute: 37 + 58 = 90
+Wrong, your answer: 90.
+See answer(y/n)? y
+Right answer: 95</div>
+        </div>
+
+        <div class="box warn" style="margin:0; font-size:26px; line-height:1.25;">
+          <span class="label">避坑</span>
+          读取字符前留个空格：<code class="inline">scanf(" %c", &amp;q);</code>，以跳过上次输入留下的回车符。
+        </div>
+      </div>
+
+      <!-- 右栏：代码 -->
+      <pre class="code" style="margin:0; font-size:26px; line-height:1.25; padding:16px 20px;"><span class="cmt">// 随机加法练习</span>
+srand(time(<span class="num">0</span>));                 <span class="cmt">// 随机种子</span>
+a = rand() % <span class="num">100</span>; 
+b = rand() % <span class="num">100</span>; 
+c = a + b;
+
+printf(<span class="str">"Please compute: %d + %d = "</span>, a, b);
+scanf(<span class="str">"%d"</span>, &amp;d);
+
+<span class="kw">if</span> (c == d)
+    printf(<span class="str">"Right!\n"</span>);
+<span class="kw">else</span> {
+    printf(<span class="str">"Wrong, your answer: %d.\n"</span>, d);
+    printf(<span class="str">"See answer(y/n)?"</span>);
+    scanf(<span class="str">" %c"</span>, &amp;q);            <span class="cmt">// %c 前加空格</span>
+    <span class="kw">if</span> (q == <span class="str">'y'</span> || q == <span class="str">'Y'</span>)
+        printf(<span class="str">"Right answer: %d\n"</span>, c);
+}</pre>
+      
+    </div>
+  </div>
+</section>
+
+  <!-- 27 rand / srand 函数 -->
+  <section class="slide">
+    <div class="s-title">随机数函数 rand() 和 srand()</div>
+    <div class="s-body">
+      <ul class="feat"style="margin-top:6px; font-size: 32px;">
+        <li><span class="k">① rand()</span><span class="v">产生 <code class="inline">[0, 32767)</code> 的伪随机整数</span></li>
+        <li><span class="k">② srand()</span><span class="v">设种子，一般用 <code class="inline">srand(time(0))</code>（当前秒）</span></li>
+        <li><span class="k">③ 头文件</span><span class="v"><code class="inline">#include &lt;stdlib.h&gt;</code> 与 <code class="inline">#include &lt;time.h&gt;</code></span></li>
+      </ul>
+      <pre class="code" style="margin-top:12px;"><span class="kw">#include</span> <span class="str">&lt;stdlib.h&gt;</span> 
+<span class="kw">#include</span> <span class="str">&lt;time.h&gt;</span>
+<span class="kw">int</span> a, b;
+srand(time(<span class="num">0</span>));      <span class="cmt">// 设定种子</span>
+a = rand() % <span class="num">100</span>;    <span class="cmt">// 0~99 随机数</span>
+b = rand() % <span class="num">100</span>;</pre>
+      <div class="box tip" style="margin-top:10px;">
+        <span class="label">要点</span>不调用 <code class="inline">srand()</code>，每次运行产生的序列相同。
+      </div>
+    </div>
+  </section>
+
+  <!-- 28 输入缓冲区问题 -->
+  <section class="slide">
+    <div class="s-title">输入缓冲区残留字符问题</div>
+    <div class="s-body">
+      <div class="box warn" style="margin:0 0 12px;">
+        <span class="label">成因</span><code class="inline">scanf</code> 读取后，输入的换行符 <code class="inline">\n</code> 残留在缓冲区，干扰后续输入。
+      </div>
+      <div class="two">
+        <div class="card red">
+          <h4><span class="ico">❌</span>错误示范</h4>
+          <pre class="code" style="font-size:24px;margin:6px 0;">scanf(<span class="str">"%d"</span>, &amp;num);
+ch = getchar();  <span class="cmt">// 读到残留'\n'</span></pre>
+          <p style="margin-top:6px;">不会等待输入，直接读到换行符。</p>
+        </div>
+        <div class="card green">
+          <h4><span class="ico">✅</span>正确示范</h4>
+          <pre class="code" style="font-size:24px;margin:6px 0;">scanf(<span class="str">"%d"</span>, &amp;num);
+getchar();       <span class="cmt">// 清掉 1 个空白</span>
+ch = getchar();  <span class="cmt">// 读到用户输入</span></pre>
+          <p style="margin-top:6px;">两次输入间加 getchar() 吃掉残留。</p>
+        </div>
+      </div>
+      <div class="box tip" style="margin-top:12px;">
+        <span class="label">替代</span>① <code class="inline">scanf(" %c", &amp;ch);</code>　② <code class="inline">scanf("%d\n", &amp;num);</code>　③ <code class="inline">while (getchar() != '\n');</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- 29 注意事项与常见错误 -->
+  <section class="slide">
+    <div class="s-title">注意事项与常见错误</div>
+    <div class="s-body">
+      <table class="tb">
+        <thead><tr><th style="width:20%">错误类型</th><th style="width:50%">说明</th><th style="width:30%">正确做法</th></tr></thead>
+        <tbody>
+          <tr><td>忘记大括号</td><td>if 后多条语句未用 <code class="inline">{}</code>，仅第一条受控</td><td>即使一条也建议加 <code class="inline">{}</code></td></tr>
+          <tr><td>= 误写为 ==</td><td>赋值误用于判断，条件恒真</td><td>比较用 <code class="inline">if (a == b)</code></td></tr>
+          <tr><td>分号位置错误</td><td><code class="inline">if (a&gt;b);</code> 多分号，if 空转</td><td>去掉多余分号</td></tr>
+          <tr><td>else 未配对</td><td>else 单独出现，无法编译</td><td>检查 if-else 配对</td></tr>
+          <tr><td>悬空 else</td><td>else 与错误的 if 配对</td><td>用大括号强制配对</td></tr>
+          <tr><td>短路误用</td><td>依赖短路执行有副作用语句</td><td>把必执行逻辑独立写出</td></tr>
+          <tr><td>输入缓冲区</td><td>上次换行符影响后续字符读入</td><td>加 getchar() 或 <code class="inline">" %c"</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 30 本讲小结 -->
+  <section class="slide">
+    <div class="s-title">本讲小结</div>
+    <div class="s-body">
+      <ul class="feat">
+        <li><span class="k">① 单分支 if</span><span class="v">if (表达式) 语句；非0执行、0跳过（含流程图）</span></li>
+        <li><span class="k">② 双分支 if-else</span><span class="v">两选一；else 须与 if 配对（含流程图）</span></li>
+        <li><span class="k">③ 复合语句</span><span class="v">多条语句用 <code class="inline">{ }</code> 括起来</span></li>
+        <li><span class="k">④ 条件运算符</span><span class="v"><code class="inline">a?b:c</code>，适合简单赋值</span></li>
+        <li><span class="k">⑤ 短路求值</span><span class="v"><code class="inline">&amp;&amp;</code> 遇假即停、<code class="inline">||</code> 遇真即停</span></li>
+        <li><span class="k">⑥ 多分支</span><span class="v">嵌套 if / else if 链（含流程图），顺序很重要</span></li>
+        <li><span class="k">⑦ 常见错误</span><span class="v">大括号、= 与 ==、分号、else 配对、短路误用、缓冲区</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 31 结束页 -->
+  <section class="slide end">
+    <div class="end-inner">
+      <h2>谢　谢</h2>
+      <p>下一讲：第 3 章（下）switch 语句</p>
+    </div>
+  </section>
+
+  <!-- 导航 UI -->
+  <div class="pageinfo"><b id="cur">1</b> / <span id="total">31</span></div>
+
+  <div class="nav">
+    <button class="tocbtn" id="btnToc">目录</button>
+    <button id="btnPrev">‹</button>
+    <button id="btnNext">›</button>
+  </div>
+
+  <div class="keyhint" id="keyhint">← → 翻页　·　空格下一页　·　B 黑屏　·　O 目录　·　Esc 关闭</div>
+  <div class="progress" id="progress"></div>
+
+  <div class="toc" id="toc">
+    <button class="toc-close" id="btnTocClose">关闭 ✕</button>
+    <h3>目录</h3>
+    <div class="toc-bar"></div>
+    <div class="toc-list" id="tocList"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var stage = document.getElementById('stage');
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length, cur = 0;
+  var curEl = document.getElementById('cur');
+  var bar = document.getElementById('progress');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+  var toc = document.getElementById('toc');
+  var tocList = document.getElementById('tocList');
+  var keyhint = document.getElementById('keyhint');
+
+  document.getElementById('total').textContent = total;
+
+    var tocGroups = [
+    { 
+      title: '开场', 
+      items: [
+        { i: 0, t: '封面' }, 
+        { i: 1, t: '本讲内容' }, 
+        { i: 2, t: '学习目标' },
+        { i: 3, t: '为什么需要选择' }
+      ]
+    },
+    { 
+      title: '一、单分支 if', 
+      items: [
+        { i: 4, t: '单分支 if' }, 
+        { i: 5, t: '判断题（对照流程图）' },
+        { i: 6, t: '表达式类型' }, 
+        { i: 7, t: '大括号的重要性' }, 
+        { i: 8, t: '例：信号灯' }
+      ]
+    },
+    { 
+      title: '二、双分支 if-else', 
+      items: [
+        { i: 9, t: '双分支 if-else' }, 
+        { i: 10, t: '例：信号灯' }, 
+        { i: 11, t: '例：判断三边' }
+      ]
+    },
+    { 
+      title: '三、条件与嵌套', 
+      items: [
+        { i: 12, t: '条件运算符 ? :' }, 
+        { i: 13, t: '常见应用' }, 
+        { i: 14, t: '短路求值' },
+        { i: 15, t: '嵌套 if（含流程图）' }, 
+        { i: 16, t: '例：判断 x 的符号' },
+        { i: 17, t: 'else if 多分支（含流程图）' }, 
+        { i: 18, t: '例：分数转等级' },
+        { i: 19, t: '例：闰年天数' }
+      ]
+    },
+    { 
+      title: '四、易错与练习', 
+      items: [
+        { i: 20, t: '悬空 else' },
+        { i: 21, t: '悬空 else 对比' }, 
+        { i: 22, t: '单选练习' },
+        { i: 23, t: '三数排序（方法一）' }, 
+        { i: 24, t: '三数排序（方法二）' }
+      ]
+    },
+    { 
+      title: '五、综合与小结', 
+      items: [
+        { i: 25, t: '随机加法练习' }, 
+        { i: 26, t: 'rand/srand' },
+        { i: 27, t: '输入缓冲区问题' }, 
+        { i: 28, t: '常见错误' },
+        { i: 29, t: '本讲小结' }, 
+        { i: 30, t: '结束页' }
+      ]
+    }
+  ];
+
+  tocGroups.forEach(function(group){
+    var g = document.createElement('div');
+    g.className = 'toc-group';
+    var h = document.createElement('div');
+    h.className = 'toc-group-title';
+    h.textContent = group.title;
+    g.appendChild(h);
+    group.items.forEach(function(item){
+      var a = document.createElement('a');
+      a.textContent = item.t;
+      a.onclick = function(){ go(item.i); closeToc(); };
+      g.appendChild(a);
+    });
+    tocList.appendChild(g);
+  });
+
+  function resize(){
+    var s = Math.min(window.innerWidth/1600, window.innerHeight/900);
+    stage.style.setProperty('--s', s);
+  }
+  window.addEventListener('resize', resize);
+
+  function go(i){
+    cur = Math.max(0, Math.min(total-1, i));
+    slides.forEach(function(s,k){ s.classList.toggle('active', k===cur); });
+    curEl.textContent = cur + 1;
+    bar.style.width = ((cur+1)/total*100) + '%';
+    btnPrev.disabled = (cur===0);
+    btnNext.disabled = (cur===total-1);
+  }
+  btnPrev.onclick = function(){ go(cur-1); this.blur(); hideHint(); };
+  btnNext.onclick = function(){ go(cur+1); this.blur(); hideHint(); };
+
+  function openToc(){ toc.classList.add('show'); }
+  function closeToc(){ toc.classList.remove('show'); }
+  document.getElementById('btnToc').onclick = function(){
+    toc.classList.contains('show') ? closeToc() : openToc(); this.blur();
+  };
+  document.getElementById('btnTocClose').onclick = function(){ closeToc(); this.blur(); };
+
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    if (toc.classList.contains('show')) {
+      if (k==='Escape'||k==='o'||k==='O'){ e.preventDefault(); closeToc(); }
+      return;
+    }
+    if (k==='ArrowRight'||k==='ArrowDown'||k==='PageDown'||k===' '||k==='Enter'){
+      e.preventDefault(); go(cur+1); hideHint();
+    } else if (k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'||k==='Backspace'){
+      e.preventDefault(); go(cur-1); hideHint();
+    } else if (k==='Home'){ e.preventDefault(); go(0); hideHint(); }
+    else if (k==='End'){ e.preventDefault(); go(total-1); hideHint(); }
+    else if (k==='o'||k==='O'){ e.preventDefault(); openToc(); }
+    else if (k==='b'||k==='B'||k==='.'){ e.preventDefault(); document.body.classList.toggle('blackout'); }
+    else if (k>='1'&&k<='6'){
+      var map = { '1':4, '2':9, '3':12, '4':15, '5':23, '6':29 };
+      e.preventDefault(); go(map[k]); hideHint();
+    }
+  });
+
+  var wheelLock = false;
+  document.addEventListener('wheel', function(e){
+    if (toc.classList.contains('show') || wheelLock) return;
+    wheelLock = true;
+    setTimeout(function(){ wheelLock = false; }, 420);
+    if (e.deltaY > 0) go(cur+1); else go(cur-1);
+    hideHint();
+  }, { passive:true });
+
+  document.addEventListener('click', function(e){
+    if (toc.classList.contains('show')) return;
+    if (e.target.closest('.nav')||e.target.closest('.toc')||e.target.closest('a')) return;
+    if (e.clientX > window.innerWidth/2) go(cur+1); else go(cur-1);
+    hideHint();
+  });
+
+  var tx=0, ty=0;
+  document.addEventListener('touchstart', function(e){
+    tx = e.changedTouches[0].clientX; ty = e.changedTouches[0].clientY;
+  }, { passive:true });
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - tx;
+    var dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)) go(dx<0?cur+1:cur-1);
+    hideHint();
+  }, { passive:true });
+
+  var hintTimer = null;
+  function hideHint(){
+    if (keyhint.classList.contains('hide')) return;
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 500);
+  }
+  hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 6000);
+
+  resize();
+  go(0);
+})();
+</script>
+
+</body>
+</html>
