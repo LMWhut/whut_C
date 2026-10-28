@@ -204,15 +204,16 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    gap: 12px;
+    gap: 16px; /* 增加列间距 */
     align-items: stretch;
     width: 100%;
   }
   .toc-group{
     flex: 1;
-    background:rgba(255,255,255,.05);border-radius:12px;
-    padding:12px 10px;
-    border-top:5px solid var(--blue-400);
+    background:rgba(255,255,255,.08); /* 背景稍微提亮一点 */
+    border-radius:14px;
+    padding:18px 16px; /* 增加内边距 */
+    border-top:6px solid var(--blue-400);
     box-sizing: border-box;
   }
   .toc-group:nth-child(2){border-top-color:var(--orange);}
@@ -222,17 +223,32 @@
   .toc-group:nth-child(6){border-top-color:#e8a33d;}
   
   .toc-group-title{
-    font-size:18px;color:#ffc17a;font-weight:800;
-    letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;
-    border-bottom:1px dashed rgba(255,255,255,.18);line-height:1.25;
+    font-size:24px; /* 标题字号由 18px 放大到 24px */
+    color:#ffc17a;
+    font-weight:800;
+    letter-spacing:1.5px;
+    margin-bottom:12px;
+    padding-bottom:10px;
+    border-bottom:1px dashed rgba(255,255,255,.25);
+    line-height:1.25;
   }
   .toc-group a{
-    display:block;color:#cfe6f7;font-size:16px;
-    padding:6px 8px;border-radius:6px;
-    cursor:pointer;margin-bottom:2px;
-    text-decoration:none;line-height:1.35;transition:all .16s;
+    display:block;
+    color:#cfe6f7;
+    font-size:22px; /* 条目字号由 16px 放大到 22px */
+    padding:10px 12px; /* 增加点击区域的舒适度 */
+    border-radius:8px;
+    cursor:pointer;
+    margin-bottom:6px;
+    text-decoration:none;
+    line-height:1.4;
+    transition:all .16s;
   }
-  .toc-group a:hover{background:linear-gradient(90deg,#e8720c,#c55807);color:#fff;}
+  .toc-group a:hover{
+    background:linear-gradient(90deg,#e8720c,#c55807);
+    color:#fff;
+    font-weight:bold;
+  }
 
   .toc-close{position:absolute;right:40px;top:22px;
     background:none;border:1px solid #7fb2dd;color:#cfe6f7;
@@ -734,7 +750,7 @@ Cannot go!</div>
       <table class="tb"style="font-size:32px; margin:0 0 16px;">
         <thead><tr><th style="width:20%">目的</th><th style="width:80%">表达式</th></tr></thead>
         <tbody>
-          <tr><td>求绝对值</td><td><code class="inline">abs = (x &gt;= 0) ? x : -x; </code>    // x 为int</td></tr>
+          <tr><td>求绝对值</td><td><code class="inline">abs = (x &gt;= 0) ? x : -x; </code>   　　　　 // x 为int</td></tr>
           <tr><td>非负整数奇偶性</td><td><code class="inline">odd = (x % 2 == 1) ? 1 : 0;</code></td></tr>
           <tr><td>小写转大写</td><td><code class="inline">c = (c&gt;='a' &amp;&amp; c&lt;='z') ? c-32 : c;</code></td></tr>
           <tr><td>三数最大值</td><td><code class="inline">max=(a&gt;b &amp;&amp; a&gt;c)? a : (b&gt;c ? b:c);</code></td></tr>
@@ -747,26 +763,8 @@ Cannot go!</div>
     </div>
   </section>
 
-  <!-- 15 逻辑运算符的短路求值 -->
-  <section class="slide compact">
-    <div class="s-title">逻辑运算符的"短路求值"</div>
-    <div class="s-body">
-      <div class="box key" style="margin:0 0 8px;font-size:32px;">
-        <span class="label">短路</span><code class="inline">&amp;&amp;</code> 与 <code class="inline">||</code> 一旦能确定整体结果，就不再算后面的表达式：<code class="inline">&amp;&amp;</code> 遇假即停，<code class="inline">||</code> 遇真即停。
-      </div>
-      <pre class="code" style="margin:0 0 8px;font-size: 32px;line-height: 1.7;">int x = 0;
-if (x != 0 &amp;&amp; 1/x &gt; 0.5)   <span class="cmt">// x==0 时右半不执行</span>
-    printf(<span class="str">"ok\n"</span>);      <span class="cmt">// 巧妙避免"除零"</span>
-int a[5]={1,2,3,4,5}, i=9;
-if (i &lt; 5 &amp;&amp; a[i] == 3)   <span class="cmt">// i&gt;=5 时右半不执行</span>
-    printf(<span class="str">"found\n"</span>);    <span class="cmt">// 避免数组越界</span></pre>
-      <div class="box warn" style="margin:0;font-size:32px;">
-        <span class="label">注意</span>短路是"安全特性"，但<b>勿依赖它执行有副作用的语句</b>，可读性差。
-      </div>
-    </div>
-  </section>
 
-<!-- 16 【新增流程图】嵌套 if 语句 -->
+<!-- 15 【新增流程图】嵌套 if 语句 -->
 <section class="slide">
   <div class="s-title">嵌套 if 语句</div>
   <div class="s-body" style="display:grid; grid-template-columns: 1.3fr 0.9fr; gap:30px; align-items:start;">
@@ -826,34 +824,222 @@ if (i &lt; 5 &amp;&amp; a[i] == 3)   <span class="cmt">// i&gt;=5 时右半不�
   </div>
 </section>
 
-  <!-- 17 例：判断 x 的符号 -->
+<!-- 16 例：判断 x 的符号（三种嵌套写法对比） -->
+<section class="slide">
+  <div class="s-title">例：判断 x 的符号（三种嵌套写法）</div>
+  <div class="s-body">
+    
+    <div class="box key" style="margin:0 0 12px; font-size:32px;">
+      <span class="label">要求</span>  <b>x &gt; 0 </b>时 <b>y = 1</b>；<b>x = 0 </b>时 <b>y = 0</b>；<b>x &lt; 0 </b>时 <b>y = -1</b>。
+    </div>
+    
+    <!-- 单行三列：三种嵌套写法 -->
+    <div class="grid c3" style="gap:16px; align-items:start;">
+      
+      <!-- 写法一 -->
+      <div class="card" style="padding:14px 16px;">
+        <div class="s-sub blue" style="margin-top:0; font-size:28px;">写法一：按 &ge; 0 分</div>
+        <pre class="code" style="font-size:28px; margin:0; padding:12px; line-height:1.5;"><span class="kw">if</span> (x &gt;= <span class="num">0</span>)
+    <span class="kw">if</span> (x == <span class="num">0</span>) y = <span class="num">0</span>;
+    <span class="kw">else</span>        y = <span class="num">1</span>;
+<span class="kw">else</span>
+    y = <span class="num">-1</span>;</pre>
+        <div class="box warn" style="margin-top:12px; padding:8px 12px; font-size:28px; line-height:1.4;">
+          此写法完整嵌套了 if-else，逻辑正确，省略了大括号。
+        </div>
+      </div>
+
+      <!-- 写法二 -->
+      <div class="card" style="padding:14px 16px;">
+        <div class="s-sub blue" style="margin-top:0; font-size:28px;">写法二：按 &ne; 0 分</div>
+        <pre class="code" style="font-size:28px; margin:0; padding:12px; line-height:1.5;"><span class="kw">if</span> (x != <span class="num">0</span>)
+    <span class="kw">if</span> (x &gt; <span class="num">0</span>) y = <span class="num">1</span>;
+    <span class="kw">else</span>       y = <span class="num">-1</span>;
+<span class="kw">else</span>
+    y = <span class="num">0</span>;</pre>
+        <div class="box tip" style="margin-top:12px; padding:8px 12px; font-size:28px; line-height:1.4;">
+          先判非零，内层判正负。
+        </div>
+      </div>
+
+      <!-- 写法三 -->
+      <div class="card green" style="padding:14px 16px;">
+        <div class="s-sub blue" style="margin-top:0; font-size:28px; color:var(--green); border-left-color:var(--green);">写法三：if 嵌在 else 里</div>
+        <pre class="code" style="font-size:28px; margin:0; padding:12px; line-height:1.5;"><span class="kw">if</span> (x &gt; <span class="num">0</span>) {
+    y = <span class="num">1</span>;
+} <span class="kw">else</span> {
+    <span class="kw">if</span> (x == <span class="num">0</span>) y = <span class="num">0</span>;
+    <span class="kw">else</span>        y = <span class="num">-1</span>;
+}</pre>
+        <div class="box tip" style="margin-top:12px; padding:8px 12px; font-size:28px; line-height:1.4;">
+          ✅ 利用大括号 <code class="inline">&#123; &#125;</code> , 外层 else 处理 &le;0，内层细分 =0 与 &lt;0。
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 底部总结 -->
+    <div class="box red" style="margin-top:16px; padding:14px 24px; font-size:30px;">
+      <span class="label">关键提醒</span>
+      C 语言<b>完全无视代码缩进</b>（这与 Python 截然不同），程序究竟是哪个 if 与哪个 else 配对，<b>只看大括号和“就近配对”规则</b>。<br>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- 17 例：引出 else if -->
+<section class="slide">
+  <div class="s-title">最佳实践：引出 else if 结构</div>
+  <div class="s-body" style="display:flex; flex-direction:column; height:100%;">
+    
+    <div class="box key" style="margin:0 0 16px; font-size:32px;">
+      <span class="label">思考</span>如果像前一页写法一那样不断嵌套，代码会越来越往右缩进，变得极难阅读。<br>C 语言提供了什么样的简化写法？
+    </div>
+    
+    <!-- 三列布局 -->
+    <div class="grid c3" style="gap:20px; align-items:stretch; flex:1;">
+      
+      <!-- 第一列：嵌套但不加外层括号（原第二列内容） -->
+      <div class="card" style="padding:14px 16px; border-top-color:var(--purple);">
+        <div class="s-sub blue" style="margin-top:0; font-size:28px; color:var(--purple); border-left-color:var(--purple);">1. 嵌套但不加外层大括号</div>
+        <pre class="code" style="font-size:28px; line-height:1.4; margin:0; padding:12px 14px;"><span class="kw">if</span> (x &gt; <span class="num">0</span>)
+    y = <span class="num">1</span>;
+<span class="kw">else</span>
+    <span class="kw">if</span> (x == <span class="num">0</span>)
+        y = <span class="num">0</span>;
+    <span class="kw">else</span>
+        y = <span class="num">-1</span>;</pre>
+        <div class="box tip" style="margin-top:12px; padding:10px 14px; font-size:26px; line-height:1.5;">
+          省去了外层的大括号，代码看起来稍微短了一点，但依然保留了“阶梯状”的嵌套结构。
+        </div>
+      </div>
+      
+      <!-- 第二列：else if 扁平化（原第三列内容） -->
+      <div class="card green" style="padding:14px 16px;">
+        <div class="s-sub blue" style="margin-top:0; font-size:28px; color:var(--green); border-left-color:var(--green);">2. 扁平化写法：else if</div>
+        <pre class="code" style="font-size:28px; line-height:1.4; margin:0; padding:12px 14px;"><span class="kw">if</span> (x &gt; <span class="num">0</span>)
+    y = <span class="num">1</span>;
+<span class="kw">else if</span> (x == <span class="num">0</span>)
+    y = <span class="num">0</span>;
+<span class="kw">else</span>
+    y = <span class="num">-1</span>;</pre>
+        <div class="box tip" style="margin-top:12px; padding:10px 14px; font-size:26px; line-height:1.5;">
+          平级展开，没有层层缩进，看起来最舒服，这也是我们<b>推荐的最佳写法</b>。
+        </div>
+      </div>
+
+      <!-- 第三列：放原来的底部结论 -->
+      <div class="box key" style="margin:0; padding:20px 24px; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:36px; font-weight:800; color:var(--purple); margin-bottom:12px;">结论</div>
+        <div style="font-size:30px; line-height:1.6; color:var(--ink);">
+          <code class="inline" style="font-size:30px;">else if</code> 本质上就是<b>“嵌套在 else 里的 if”去掉了多余的大括号</b>。<br><br>
+          它不仅让代码排版变扁平，<b>还能天然避免“悬空 else”造成的配对混乱</b>，是处理多分支的最佳选择！
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- 18 悬空 else（配对陷阱） -->
+<section class="slide">
+  <div class="s-title">经典陷阱：悬空 else</div>
+  <div class="s-body">
+    
+    <div class="box red" style="margin:0 0 16px; font-size:32px;">
+      <span class="label">问题</span>C 语言中，如果省略大括号，<code class="inline">else</code> 到底与哪个 <code class="inline">if</code> 配对？
+      <br>比如：若 a > b 且 c > d，x = 1；若 a < b，x=2；请写出代码。
+    </div>
+
+    <div class="two" style="gap:40px; align-items:start;">
+      
+      <!-- 左侧：原始代码与解析 -->
+      <div>
+        <div class="s-sub blue" style="margin:0 0 6px; font-size:32px;">原始代码（缩进有误导性）</div>
+        <pre class="code" style="margin:0 0 16px; font-size:32px; line-height:1.6;"><span class="kw">if</span> (a &gt; b)
+    <span class="kw">if</span> (c &gt; d)
+        x = <span class="num">1</span>;
+<span class="kw">else</span> x = <span class="num">2</span>;</pre>
+        
+        <div class="box warn" style="margin:0; font-size:28px; line-height:1.6;">
+          <span class="label">真相</span><br>
+          虽然缩进看着像外层，但 C 语言规定：<code class="inline">else</code> 永远与<b>离它最近、尚未配对的 if</b> 配对， 即与内层 <code class="inline">if (c &gt; d)</code>配对，<b>而非</b>外层 <code class="inline">if (a &gt; b)</code>。
+        </div>
+      </div>
+
+      <!-- 右侧：修正代码与说明 -->
+      <div>
+        <div class="s-sub blue" style="margin:0 0 6px; font-size:32px; color:var(--green); border-left-color:var(--green);">✅ 修正：用大括号强制配对</div>
+        <pre class="code" style="margin:0 0 16px; font-size:32px; line-height:1.6;"><span class="kw">if</span> (a &gt; b) {
+    <span class="kw">if</span> (c &gt; d) 
+        x = <span class="num">1</span>;
+} <span class="kw">else</span>
+    x = <span class="num">2</span>;</pre>
+
+        <div class="box tip" style="margin:0; font-size:28px; line-height:1.6;">
+          <span class="label">原理</span>
+              加了花括号 <code class="inline">&#123; &#125;</code> 之后，内层的 <code class="inline">if</code> 就成了一个完整的整体，<code class="inline">else</code> 就只能和 <b>外层</b>的 <code class="inline">if (a &gt; b)</code> 配对了。
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+  <!-- 19 例：引出 else if -->
   <section class="slide">
-    <div class="s-title">例：判断 x 的符号</div>
+    <div class="s-title">最佳实践：引出 else if 结构</div>
     <div class="s-body">
-      <div class="box key" style="margin:0 0 12px;font-size:32px;">
-        <span class="label">要求</span>x&gt;0 时 y=1；x=0 时 y=0；x&lt;0 时 y=-1。
+      <div class="box key" style="margin:0 0 16px; font-size:32px;">
+        <span class="label">思考</span>如果像写法三那样不断嵌套，代码会越来越往右缩进，变得极难阅读。C 语言提供了什么样的简化写法？
       </div>
-      <div class="two">
-        <pre class="code" style="font-size:32px;margin:0;"><span class="cmt">// 写法一：按 x&gt;=0 分支</span>
-if (x &gt;= 0)
-    if (x == 0) y = 0;
-    else   y = 1;
-else
-    y = -1;</pre>
-        <pre class="code" style="font-size:32px;margin:0;"><span class="cmt">// 写法二：按 x!=0 分支</span>
-if (x != 0)
-    if (x &gt; 0) y = 1;
-    else  y = -1;
-else
-    y = 0;</pre>
+      
+      <div class="two" style="gap:30px; align-items:start;">
+        
+        <!-- 左侧：标准嵌套 -->
+        <div>
+          <div class="s-sub blue" style="margin-top:0; font-size:32px;">加了大括号的嵌套（层级深）</div>
+          <pre class="code" style="font-size:32px; line-height:1.6; margin:0;"><span class="kw">if</span> (x &gt; <span class="num">0</span>) {
+    y = <span class="num">1</span>;
+} <span class="kw">else</span> {
+    <span class="kw">if</span> (x == <span class="num">0</span>) {
+        y = <span class="num">0</span>;
+    } <span class="kw">else</span> {
+        y = <span class="num">-1</span>;
+    }
+}</pre>
+        
+        </div>
+        
+        <!-- 右侧：else if 扁平化 -->
+        <div>
+          <div class="s-sub blue" style="margin-top:0; font-size:32px; color:var(--green); border-left-color:var(--green);">✅ 扁平化写法：else if</div>
+          <pre class="code" style="font-size:32px; line-height:1.6; margin:0;"><span class="kw">if</span> (x &gt; <span class="num">0</span>)
+    y = <span class="num">1</span>;
+<span class="kw">else if</span> (x == <span class="num">0</span>)
+    y = <span class="num">0</span>;
+<span class="kw">else</span>
+    y = <span class="num">-1</span>;</pre>
+          <div class="box tip" style="margin-top:12px; font-size:28px; line-height:1.5;">
+            C 语言允许将 <code class="inline" style="font-size:24px;">else</code> 和下一个 <code class="inline" style="font-size:24px;">if</code> 连写在一起，形成平级的多分支结构。
+          </div>
+        </div>
+
       </div>
-      <div class="box tip" style="margin:12px 0 0;font-size:32px;">
-        <span class="label">对比</span>两种写法结果一致，第一种更直观；嵌套时注意 <code class="inline">else</code> 与哪个 <code class="inline">if</code> 配对。
+
+      <div class="box key" style="margin-top:20px; font-size:30px;">
+        <span class="label">结论</span>
+        <code class="inline" style="font-size:30px;">else if</code> 本质上就是<b>“嵌套在 else 里的 if”去掉了多余的大括号</b>。<br>
+        它既保留了多分支的逻辑，又让代码排版变得扁平、清晰，是处理多分支的最佳选择！
       </div>
+
     </div>
   </section>
 
-<!-- 18 【新增流程图】else if 多分支结构 -->
+
+<!-- 20 【新增流程图】else if 多分支结构 -->
 <section class="slide">
   <div class="s-title">else if 多分支结构</div>
   <!-- 调整为 1.3 : 0.9 的左右比例，并顶部对齐 -->
@@ -899,7 +1085,7 @@ else
     <!-- 右侧：放大的流程图与说明 -->
     <div style="text-align:center;">
       <!-- 图片顶部与左侧对齐 -->
-      <img src="../../images/chapter3/传统流程图-多分支if语句.png" alt="else if 多分支结构流程图" style="max-width: 100%; max-height: 450px; display:block; margin:0 auto; object-fit:contain;">
+      <img src="../../images/chapter3/传统流程图-多分支if语句.png" alt="else if 多分支结构流程图" style="max-width: 120%; max-height: 500px; display:block; margin:0 auto; object-fit:contain;">
       
       <div class="box tip" style="margin:20px 0 0; padding:12px 20px; font-size:32px; text-align:left;">
         <span class="label">读图</span>逐层判断，命中即执行并结束；全不中则走 else。
@@ -909,7 +1095,7 @@ else
   </div>
 </section>
 
-<!-- 19 例：分数转等级 -->
+<!-- 21 例：分数转等级 -->
 <section class="slide">
   <div class="s-title">例：根据分数评定等级</div>
   <div class="s-body" style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:30px; align-items:start;">
@@ -949,7 +1135,7 @@ scanf(<span class="str">"%d"</span>, &amp;score);
   </div>
 </section>
 
-  <!-- 20 例：闰年天数 -->
+  <!-- 22 例：闰年天数 -->
   <section class="slide compact">
     <div class="s-title">例：输入年、月，输出该月天数</div>
     <div class="s-body">
@@ -972,75 +1158,129 @@ else {
     </div>
   </section>
 
-<!-- 21 悬空 else -->
-<section class="slide compact">
-  <div class="s-title">悬空 else：else 到底与哪个 if 配对</div>
-  <div class="s-body">
+<!-- 23 如何测试：边界值分析 -->
+<section class="slide">
+  <div class="s-title">代码写完了？别忘了测试边界值！</div>
+  <div class="s-body" style="display:flex; flex-direction:column; height:100%;">
     
-    <div class="two" style="gap:40px; align-items:start; margin-top:10px;">
+    <div class="box key" style="margin:0 0 16px; font-size:32px;">
+      <span class="label">核心思想</span>
+      写对普通数据不难，难的是<b>处理极端情况（边界值）</b>。输入刚好等于条件的分界点时，程序能正确执行吗？
+    </div>
+
+    <div class="two" style="gap:30px; align-items:stretch; flex:1;">
       
-      <!-- 左栏：错误代码与分析 -->
+      <!-- 左侧：分数等级代码与测试点 -->
       <div>
-        <div class="s-sub blue" style="margin:0 0 6px; font-size:32px;">原始代码</div>
-        <pre class="code" style="margin:0 0 16px; font-size:32px; line-height:1.5;"><span class="kw">if</span> (a &gt; b)
-    <span class="kw">if</span> (c &gt; d)
-        x = <span class="num">1</span>;
-    <span class="kw">else</span>
-        x = <span class="num">2</span>;</pre>
+        <div class="s-sub blue" style="margin-top:0; font-size:32px;">案例：分数等级（≥90 为 A）</div>
+        <pre class="code" style="font-size:30px; line-height:1.5; margin:0 0 16px;"><span class="kw">if</span> (score &gt;= <span class="num">90</span>)      printf(<span class="str">"A\n"</span>);
+<span class="kw">else if</span> (score &gt;= <span class="num">80</span>) printf(<span class="str">"B\n"</span>);
+<span class="kw">else if</span> (score &gt;= <span class="num">60</span>) printf(<span class="str">"C\n"</span>);
+<span class="kw">else</span>                  printf(<span class="str">"D\n"</span>);</pre>
         
-        <div class="box warn" style="margin:0; font-size:32px; line-height:1.6;">
-          <span class="label">分析</span><br>
-          <code class="inline">else</code> 与<b>离它最近、尚未配对的 if</b> 配对。<br>
-          即内层 <code class="inline">if (c &gt; d)</code>，<b>而非</b>外层 <code class="inline">if (a &gt; b)</code>。
+        <div class="box warn" style="margin:0; font-size:28px;">
+          <span class="label">找边界</span><br>
+          分界点在哪里？<b>90、80、60</b>。<br>
+          所以测试时，不能只测 95、85、65（中间值），必须测分界点左右！
         </div>
       </div>
 
-      <!-- 右栏：修正代码与说明 -->
+      <!-- 右侧：边界测试表 -->
       <div>
-        <div class="s-sub blue" style="margin:0 0 6px; font-size:32px;">✅ 用大括号强制配对</div>
-        <pre class="code" style="margin:0 0 16px; font-size:32px; line-height:1.5;"><span class="kw">if</span> (a &gt; b) {
-    <span class="kw">if</span> (c &gt; d) 
-        x = <span class="num">1</span>;
-} <span class="kw">else</span>
-    x = <span class="num">2</span>;</pre>
+        <div class="s-sub blue" style="margin-top:0; font-size:32px;">测试用例设计（边界值分析）</div>
+        <table class="tb" style="font-size:28px; line-height:1.4;">
+          <thead>
+            <tr><th>测试场景</th><th>输入 score</th><th>预期输出</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>最高分</td><td>100</td><td>A</td></tr>
+            <tr><td>A 的边界（内）</td><td>90</td><td>A</td></tr>
+            <tr><td>A 的边界（外）</td><td><b class="c-red">89</b></td><td>B</td></tr>
+            <tr><td>B 的边界（内）</td><td>80</td><td>B</td></tr>
+            <tr><td>B 的边界（外）</td><td><b class="c-red">79</b></td><td>C</td></tr>
+            <tr><td>C 的边界（内）</td><td>60</td><td>C</td></tr>
+            <tr><td>C 的边界（外）</td><td><b class="c-red">59</b></td><td>D</td></tr>
+            <tr><td>非法输入</td><td>-5</td><td>D（未做校验）</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-        <div class="box tip" style="margin:0; font-size:32px; line-height:1.6;">
-          <span class="label">原理</span><br>
-          加了花括号 <code class="inline">{ }</code> 之后，内层的 <code class="inline">if...else</code> 就成了一个完整的整体，外层的 <code class="inline">else</code> 就只能和 <b>外层</b>的 <code class="inline">if (a &gt; b)</code> 配对了。
+    </div>
+
+    <!-- 底部结论 -->
+    <div class="box tip" style="margin-top:16px; padding:14px 24px; font-size:28px; line-height:1.6;">
+      <span class="label">进阶</span>
+      如果输入了 <code class="inline">-5</code> 或 <code class="inline">150</code> 这样的非法分数，上述代码会进入 <code class="inline">else</code> 打印 "D"。<br>
+      所以在实际开发中，需要先用 <code class="inline">if (score &gt; 100 || score &lt; 0)</code> 拦截非法数据，再进行等级判断，这叫做<b>“防御性编程”</b>。
+    </div>
+
+  </div>
+</section>
+
+<!-- 24 悬空 else 对比 -->
+<section class="slide compact">
+  <div class="s-title">悬空 else 对比</div>
+  <div class="s-body">
+    <div class="box key" style="margin:0 0 12px;font-size: 32px;">
+      <span class="label">思考</span>以下三段代码运行结果一样吗？它们分别是怎么配对的？
+    </div>
+    
+    <!-- 三列布局 -->
+    <div class="grid c3" style="gap:16px; align-items:start;">
+      
+      <!-- 列 1：内层配对 -->
+      <div class="card" style="padding:14px 16px; border-top-color:var(--red);">
+        <div class="s-sub blue" style="margin-top:0; font-size:30px; color:var(--red); border-left-color:var(--red);">1. 无大括号（内层配对）</div>
+        <pre class="code" style="font-size:30px;margin:0;line-height:1.5;"><span class="kw">int</span> a=<span class="num">2</span>, b=<span class="num">-1</span>, c=<span class="num">2</span>;
+<span class="kw">if</span> (a &lt; b)
+    <span class="kw">if</span> (b &lt; 0) c = <span class="num">0</span>;
+    <span class="kw">else</span>    c++;
+printf(<span class="str">"%d\n"</span>, c);</pre>
+        <div class="box warn" style="margin-top:12px; padding:8px 12px; font-size:28px; line-height:1.4;">
+          <code class="inline">else</code> 与最近的内层 <code class="inline">if</code> 配对。
         </div>
       </div>
 
+      <!-- 列 2：内层加括号 -->
+      <div class="card" style="padding:14px 16px; border-top-color:var(--blue-600);">
+        <div class="s-sub blue" style="margin-top:0; font-size:26px;">2. 内层加大括号</div>
+        <pre class="code" style="font-size:30px;margin:0;line-height:1.5;"><span class="kw">int</span> a=<span class="num">2</span>,b=<span class="num">-1</span>,c=<span class="num">2</span>;
+<span class="kw">if</span> (a &lt; b) {
+  <span class="kw">if</span> (b &lt; 0) { c = <span class="num">0</span>; }
+  <span class="kw">else</span>   { c++; }
+}
+printf(<span class="str">"%d\n"</span>, c);</pre>
+        <div class="box tip" style="margin-top:12px; padding:8px 12px; font-size:28px; line-height:1.4;">
+          内层 <code class="inline">if-else</code> 被大括号包成了一个整体，外层的 <code class="inline">if</code> 控制它。
+        </div>
+      </div>
+
+      <!-- 列 3：外层配对（强制） -->
+      <div class="card" style="padding:14px 16px; border-top-color:var(--green);">
+        <div class="s-sub blue" style="margin-top:0; font-size:30px; color:var(--green); border-left-color:var(--green);">3. 外层强制配对</div>
+        <pre class="code" style="font-size:30px;margin:0;line-height:1.5;"><span class="kw">int</span> a=<span class="num">2</span>,b=<span class="num">-1</span>,c=<span class="num">2</span>;
+<span class="kw">if</span> (a &lt; b) {
+  <span class="kw">if</span> (b &lt; 0) { c = <span class="num">0</span>; }
+} <span class="kw">else</span> {
+  c++;
+}
+printf(<span class="str">"%d\n"</span>, c);</pre>
+        <div class="box tip" style="margin-top:12px; padding:8px 12px; font-size:28px; line-height:1.4;">
+          外层大括号封闭了内层 <code class="inline">if</code>，外层的 <code class="inline">else</code> 与<b>外层 if</b> 配对。
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 底部答案 -->
+    <div class="box key" style="margin-top:20px;font-size: 32px;">
+      <span class="label">答案</span>三段代码输出结果<b>都是 2</b>。<br>
+      因为 <code class="inline">a &lt; b</code>（即 2 &lt; -1）为假，所以无论外层还是内层，整体都不执行，<code class="inline">c</code> 保持初始值 2。
     </div>
   </div>
 </section>
 
-  <!-- 22 悬空 else 对比 -->
-  <section class="slide compact">
-    <div class="s-title">悬空 else 对比</div>
-    <div class="s-body">
-      <div class="box key" style="margin:0 0 8px;font-size: 32px;">
-        <span class="label">思考</span>以下两段代码运行结果一样吗？
-      </div>
-      <div class="two">
-        <pre class="code" style="font-size:32px;margin:0;line-height:1.7;">int a=2, b=-1, c=2;
-if (a &lt; b)
-  if (b &lt; 0) c = 0;
-  else    c++;
-printf(<span class="str">"%d\n"</span>, c);</pre>
-        <pre class="code" style="font-size:32px;margin:0;line-height:1.7;">int a=2,b=-1,c=2;
-if (a &lt; b) {
-  if (b &lt; 0) { c = 0; }
-  else   { c++; }
-}
-printf(<span class="str">"%d\n"</span>, c);</pre>
-      </div>
-      <div class="box tip" style="margin:8px 0 0;font-size: 32px;">
-        <span class="label">答案</span>都输出 <code class="inline">2</code>：<code class="inline">a &lt; b</code> 为假，外层整体不执行。嵌套时务必加大括号。
-      </div>
-    </div>
-  </section>
-
-  <!-- 23 单选练习 -->
+  <!-- 25 单选练习 -->
   <section class="slide">
     <div class="s-title">单选练习</div>
     <div class="s-body">
@@ -1054,12 +1294,12 @@ else if (x == 0)
     else y += 3;
 printf(<span class="str">"%d\n"</span>, y);</pre>
       <div class="box tip" style="margin:0;font-size: 32px;">
-        <span class="label">分析</span>x=1→<code class="inline">!x=0</code> 跳过；<code class="inline">x==0</code> 为假跳过 else if 整体；y 保持 0，输出 <code class="inline">0</code>。嵌套务必加大括号。
+        <span class="label">分析</span>x=1→<code class="inline">!x=0</code> 跳过；<code class="inline">x==0</code> 为假跳过 else if 整体；y 保持 0，<b>输出 <code class="inline">0</code></b>。<b>嵌套务必加大括号</b>。
       </div>
     </div>
   </section>
 
-  <!-- 24 三数排序 -->
+  <!-- 26 三数排序 -->
   <section class="slide">
     <div class="s-title">综合应用 1：三个数排序（年龄排序）</div>
     <div class="s-body">
@@ -1072,26 +1312,85 @@ if (a &gt; c) { t=a; a=c; c=t; }   <span class="cmt">// 调 a,c，a 最小</span
 if (b &gt; c) { t=b; b=c; c=t; }   <span class="cmt">// 调 b,c，c 最大</span>
 printf(<span class="str">"%d %d %d"</span>, a, b, c);</pre>
       <div class="box tip" style="margin:0;font-size: 32px;">
-        <span class="label">思路</span>三次比较交换即可保证 a ≤ b ≤ c。
+        <span class="label">思路</span>三次比较交换，保证 a ≤ b ≤ c。
       </div>
     </div>
   </section>
 
-  <!-- 25 三数排序（方法二） -->
+<!-- 27 综合应用 1：三个数排序（两种逻辑对比） -->
+<section class="slide">
+  <div class="s-title">综合应用 1：三个数排序（方法二，保持原值不变）</div>
+  <div class="s-body" style="display:flex; flex-direction:column; height:100%;">
+    
+      <!-- 左右双栏 -->
+    <div class="two" style="gap:24px; align-items:stretch; flex:1;">
+          <!-- 左侧：基于嵌套的穷举 -->
+      <div style="display:flex; flex-direction:column;">
+        <div class="s-sub blue" style="margin-top:0; font-size:30px; color:var(--green); border-left-color:var(--green);">写法一：逻辑嵌套（if 嵌套）</div>
+        <pre class="code" style="font-size:30px; line-height:1.3; margin:0; flex:1; padding:14px 18px;"><span class="cmt">// 逐层缩小范围，层层嵌套</span>
+<span class="kw">if</span> (a &gt; b) {
+    <span class="kw">if</span> (a &gt; c) {
+        <span class="kw">if</span> (b &gt; c) printf(<span class="str">"%d %d %d"</span>, c, b, a);
+        <span class="kw">else</span>   printf(<span class="str">"%d %d %d"</span>, b, c, a);
+    } <span class="kw">else</span> {
+        printf(<span class="str">"%d %d %d"</span>, b, a, c);
+    }
+} <span class="kw">else</span> {
+    <span class="kw">if</span> (b &gt; c) {
+        <span class="kw">if</span> (a &gt; c) printf(<span class="str">"%d %d %d"</span>, c, a, b);
+        <span class="kw">else</span>   printf(<span class="str">"%d %d %d"</span>, a, c, b);
+    } <span class="kw">else</span> {
+        printf(<span class="str">"%d %d %d"</span>, a, b, c);
+    }
+}</pre>
+      </div>
+      
+      <!-- 右侧：基于大小关系的 else if 穷举 -->
+      <div style="display:flex; flex-direction:column;">
+        <div class="s-sub blue" style="margin-top:0; font-size:30px;">方法二：条件穷举（else if）</div>
+        <pre class="code" style="font-size:30px; line-height:1.4; margin:0; flex:1; padding:14px 18px;"><span class="cmt">// 罗列 6 种大小的所有可能</span>
+<span class="kw">if</span> (a &lt;= b &amp;&amp; b &lt;= c) 
+    printf(<span class="str">"%d %d %d"</span>, a, b, c);
+<span class="kw">else if</span> (a &lt;= c &amp;&amp; c &lt; b) 
+    printf(<span class="str">"%d %d %d"</span>, a, c, b);
+<span class="kw">else if</span> (b &lt;= a &amp;&amp; a &lt;= c) 
+    printf(<span class="str">"%d %d %d"</span>, b, a, c);
+<span class="kw">else if</span> (b &lt;= c &amp;&amp; c &lt; a) 
+    printf(<span class="str">"%d %d %d"</span>, b, c, a);
+<span class="kw">else if</span> (c &lt;= a &amp;&amp; a &lt;= b) 
+    printf(<span class="str">"%d %d %d"</span>, c, a, b);
+<span class="kw">else</span> 
+    printf(<span class="str">"%d %d %d"</span>, c, b, a);</pre>
+      </div>
+    </div>
+
+    </div>
+</section>
+
+  <!-- 28 三数排序（方法二） -->
   <section class="slide">
-    <div class="s-title">三数排序（方法二：条件运算符）</div>
+    <div class="s-title">三数排序（方法三：条件运算符）</div>
     <div class="s-body">
       <pre class="code" style="margin:0 0 12px;font-size: 32px;">min = (a &lt; b &amp;&amp; a &lt; c) ? a : (b &lt; c ? b : c);
 max = (a &gt; b &amp;&amp; a &gt; c) ? a : (b &gt; c ? b : c);
 mid = a + b + c - min - max;
 printf(<span class="str">"%d %d %d"</span>, min, mid, max);</pre>
       <div class="box warn" style="margin:0;font-size: 32px;">
-        <span class="label">提醒</span>方法二虽"巧妙"，但三层嵌套 <code class="inline">? :</code> 可读性下降——再次印证：<b>复杂逻辑用 if 更清楚</b>。
+        <span class="label">提醒</span>方法三虽"巧妙"，但三层嵌套 <code class="inline">? :</code> 可读性下降——再次印证：<b>复杂逻辑用 if 更清楚</b>。
       </div>
+
+    <!-- 底部结论 -->
+    <div class="box tip" style="margin-top:16px; padding:14px 24px; font-size:30px; line-height:1.7;">
+      <span class="label"><--（上一页的方法二）写法对比总结</span><br>
+      · <b>写法二</b>逻辑更具层次：先按 a 和 b 的大小分成两大阵营，再在各个阵营里比较 c，如同查字典一样逐层排查。<br>
+      · <b>写法一</b>思路极其直白：把 3 个数所有可能的大小关系（3! = 6 种）都列出来，直接对应输出。<br>
+      · <b>局限：</b>如果变成 4 个数排序，写法一将变成 24 个分支，写法二会嵌套成“阶梯状”。所以实际工程中排序不会用这种穷举法，而是用前一页的<b>比较交换法</b>。
     </div>
+    </div>
+    
   </section>
 
-<!-- 26 综合应用 2：随机加法练习 -->
+<!-- 29 综合应用 2：随机加法练习 -->
 <section class="slide compact">
   <div class="s-title">综合应用 2：随机加法练习</div>
   <div class="s-body">
@@ -1108,13 +1407,13 @@ printf(<span class="str">"%d %d %d"</span>, min, mid, max);</pre>
         
         <div class="box tip" style="margin:0; font-size:28px;">
           <span class="label">运行示例</span>
-          <div class="out" style="font-size:28px; margin-top:8px; line-height:1.4;">Please compute: 37 + 58 = 95
+          <div class="out" style="font-size:28px; margin-top:8px; line-height:1.4;">Please compute: 37 + 58 = 95⏎
 Right!
 
-（若输入错误：）
-Please compute: 37 + 58 = 90
+（若输入的答案错误：）
+Please compute: 37 + 58 = 90⏎
 Wrong, your answer: 90.
-See answer(y/n)? y
+See answer(y/n)? y⏎
 Right answer: 95</div>
         </div>
 
@@ -1148,7 +1447,7 @@ scanf(<span class="str">"%d"</span>, &amp;d);
   </div>
 </section>
 
-  <!-- 27 rand / srand 函数 -->
+  <!-- 30 rand / srand 函数 -->
   <section class="slide">
     <div class="s-title">随机数函数 rand() 和 srand()</div>
     <div class="s-body">
@@ -1171,7 +1470,7 @@ b = rand() % <span class="num">100</span>;</pre>
 
  
 
-  <!-- 28 注意事项与常见错误 -->
+  <!-- 31 注意事项与常见错误 -->
   <section class="slide">
     <div class="s-title">注意事项与常见错误</div>
     <div class="s-body">
@@ -1179,7 +1478,7 @@ b = rand() % <span class="num">100</span>;</pre>
         <thead><tr><th style="width:20%">错误类型</th><th style="width:50%">说明</th><th style="width:30%">正确做法</th></tr></thead>
         <tbody>
           <tr><td>忘记大括号</td><td>if 后多条语句未用 <code class="inline">{}</code>，仅第一条受控</td><td>即使一条也建议加 <code class="inline">{}</code></td></tr>
-          <tr><td>= 误写为 ==</td><td>赋值误用于判断，条件恒真</td><td>比较用 <code class="inline">if (a == b)</code></td></tr>
+          <tr><td>= 误写为 ==</td><td>赋值误用于判断</td><td>比较用 <code class="inline">if (a == b)</code></td></tr>
           <tr><td>分号位置错误</td><td><code class="inline">if (a&gt;b);</code> 多分号，if 空转</td><td>去掉多余分号</td></tr>
           <tr><td>else 未配对</td><td>else 单独出现，无法编译</td><td>检查 if-else 配对</td></tr>
           <tr><td>悬空 else</td><td>else 与错误的 if 配对</td><td>用大括号强制配对</td></tr>
@@ -1190,7 +1489,7 @@ b = rand() % <span class="num">100</span>;</pre>
     </div>
   </section>
 
-  <!-- 29 本讲小结 -->
+  <!-- 32 本讲小结 -->
   <section class="slide">
     <div class="s-title">本讲小结</div>
     <div class="s-body">
@@ -1283,32 +1582,35 @@ b = rand() % <span class="num">100</span>;</pre>
       items: [
         { i: 12, t: '条件运算符 ? :' }, 
         { i: 13, t: '常见应用' }, 
-        { i: 14, t: '短路求值' },
-        { i: 15, t: '嵌套 if' }, 
-        { i: 16, t: '例：判断 x 的符号' },
-        { i: 17, t: 'else if 多分支' }, 
-        { i: 18, t: '例：分数转等级' },
-        { i: 19, t: '例：闰年天数' }
+        { i: 14, t: '嵌套 if' }, 
+        { i: 15, t: '例：x 的符号（三种写法）' },
+        { i: 16, t: '引出 else if' }, 
+        { i: 17, t: '悬空 else 陷阱' }, 
+        { i: 18, t: '引出 else if 结构' }, 
+        { i: 19, t: 'else if 多分支结构' }, 
+        { i: 20, t: '例：分数转等级' }
       ]
     },
     { 
       title: '四、易错与练习', 
       items: [
-        { i: 20, t: '悬空 else' },
-        { i: 21, t: '悬空 else 对比' }, 
-        { i: 22, t: '单选练习' },
-        { i: 23, t: '三数排序（方法一）' }, 
-        { i: 24, t: '三数排序（方法二）' }
+        { i: 21, t: '例：闰年天数' },
+        { i: 22, t: '测试边界数据' },
+        { i: 23, t: '悬空 else 对比' }, 
+        { i: 24, t: '单选练习' },
+        { i: 25, t: '三数排序（方法一）' }, 
+        { i: 26, t: '三数排序（方法二）' },
+        { i: 27, t: '三数排序（方法三）' }
       ]
     },
     { 
       title: '五、综合与小结', 
       items: [
-        { i: 25, t: '随机加法练习' }, 
-        { i: 26, t: 'rand/srand' },
-        { i: 27, t: '常见错误' },
-        { i: 28, t: '本讲小结' }, 
-        { i: 29, t: '结束页' }
+        { i: 28, t: '随机加法练习' }, 
+        { i: 29, t: 'rand/srand' },
+        { i: 30, t: '常见错误' },
+        { i: 31, t: '本讲小结' }, 
+        { i: 32, t: '结束页' }
       ]
     }
   ];
