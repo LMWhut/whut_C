@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 3 章（下）switch 语句 · 手机复习版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Source Han Sans SC",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.55;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 可折叠答案 ================= */
+  .ex-block{
+    background:#f6f0fb;
+    border-left:5px solid var(--purple);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;
+    margin-bottom:12px;
+  }
+  .ex-q{font-size:15.5px;font-weight:700;margin-bottom:8px;color:var(--ink);}
+  details.ex-ans summary{
+    cursor:pointer;font-weight:800;color:var(--purple);
+    font-size:14.5px;list-style:none;outline:none;
+    display:flex;align-items:center;
+  }
+  details.ex-ans summary::-webkit-details-marker{display:none;}
+  details.ex-ans summary::before{
+    content:"▸ 显示参考答案";transition:all .2s;
+  }
+  details.ex-ans[open] summary::before{
+    content:"▾ 收起参考答案";
+  }
+  details.ex-ans .ans{
+    margin-top:10px;padding-top:10px;
+    border-top:1px dashed rgba(142,68,173,.3);
+    font-size:14.5px;color:var(--ink);line-height:1.65;
+  }
+  details.ex-ans .ans b{color:var(--green);}
+
+  /* ================= 页脚 ================= */
+  .footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:24px 16px 40px;
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 大屏适配 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部固定栏 ================= -->
+<div class="topbar">
+  <h1>第 3 章（下）switch 语句</h1>
+  <button class="btn-toc" id="btnToc">
+    目录 <span class="arrow">▼</span>
+  </button>
+</div>
+
+<!-- ================= 目录浮层 ================= -->
+<div class="toc-panel" id="tocPanel">
+
+  <div class="toc-group open">
+    <div class="toc-group-title">开场 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec1">本讲内容</a>
+      <a href="#sec2">为什么需要 switch</a>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">一、switch 基础 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec3">基本格式与执行过程</a>
+      <a href="#sec4">核心陷阱：漏写 break</a>
+      <a href="#sec5">善用穿透合并分支</a>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">二、基础应用 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec6">练习：星期名（整数 vs 字符）</a>
+      <a href="#sec7">总结：整数与字符的差异</a>
+      <a href="#sec8">综合应用：判断分数段（整数）</a>
+      <a href="#sec9">进阶：分数段（实数版）</a>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">三、综合案例 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec10">案例：月份天数（初版）</a>
+      <a href="#sec11">案例：月份天数（实现对比）</a>
+      <a href="#sec12">案例：月份天数（测试分析）</a>
+      <a href="#sec13">案例：BMI（switch 巧妙用法）</a>
+      <a href="#sec14">案例：BMI（对比分析）</a>
+      <a href="#sec15">案例：简易计算器</a>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">四、总结与对比 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec16">switch vs if-else</a>
+      <a href="#sec17">避坑：非标准范围写法</a>
+      <a href="#sec18">常见错误汇总</a>
+      <a href="#sec19">本讲小结</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ================= 内容区 ================= -->
+<div class="content">
+
+  <!-- ===== 1 本讲内容 ===== -->
+  <div class="section" id="sec1">
+    <div class="section-title">本讲内容</div>
+    <div class="card"><h4>📋 switch 基本格式</h4><p>表达式、case、default、break 的写法与规则。</p></div>
+    <div class="card orange"><h4>▶️ 执行过程</h4><p>求值 → 匹配 → 执行 → 跳出；含流程图。</p></div>
+    <div class="card green"><h4>⚠️ break 与“穿透”</h4><p>去掉 break 会怎样？含追踪练习与正向应用。</p></div>
+    <div class="card purple"><h4>📅 例：星期名 / 信号灯 / 成绩</h4><p>输入分支，输出对应结果。</p></div>
+    <div class="card red"><h4>🔗 多 case 共用 / 字符分类 / 嵌套</h4><p>穿透写法、char 与 switch、嵌套。</p></div>
+    <div class="card"><h4>📊 综合案例</h4><p>月份天数、BMI、售货机、简单计算器。</p></div>
+  </div>
+
+  <!-- ===== 2 为什么需要 switch ===== -->
+  <div class="section" id="sec2">
+    <div class="section-title">为什么需要 switch 语句？</div>
+    <div class="box key">
+      <span class="label">痛点</span>当条件判断有<b>很多个分支</b>时，用 if-else if 会显得非常臃肿和重复。
+    </div>
+    <div class="section-sub">用 if-else 写（繁琐）</div>
+<pre class="code"><span class="kw">if</span> (choice == <span class="num">1</span>)
+    printf(<span class="str">"查话费"</span>);
+<span class="kw">else if</span> (choice == <span class="num">2</span>)
+    printf(<span class="str">"查流量"</span>);
+<span class="kw">else if</span> (choice == <span class="num">3</span>)
+    printf(<span class="str">"办套餐"</span>);
+<span class="kw">else</span>
+    printf(<span class="str">"退出"</span>);</pre>
+    <div class="section-sub">用 switch 写（清爽）</div>
+<pre class="code"><span class="kw">switch</span> (choice) {
+    <span class="kw">case</span> <span class="num">1</span>: printf(<span class="str">"查话费"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>: printf(<span class="str">"查流量"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>: printf(<span class="str">"办套餐"</span>); <span class="kw">break</span>;
+    <span class="kw">default</span>: printf(<span class="str">"退出"</span>);
+}</pre>
+    <div class="box tip">
+      <span class="label">结论</span>对于<b>等值判断</b>（等于几），使用 switch 结构更清晰、更易读。
+    </div>
+  </div>
+
+  <!-- ===== 3 基本格式与执行过程 ===== -->
+  <div class="section" id="sec3">
+    <div class="section-title">switch 语句：基本格式与执行过程</div>
+    <div class="section-sub">基本格式</div>
+<pre class="code"><span class="kw">switch</span> (表达式) {
+    <span class="kw">case</span> 常量1:
+        语句组1; <span class="kw">break</span>;
+    <span class="kw">case</span> 常量2:
+        语句组2; <span class="kw">break</span>;
+    ...
+    <span class="kw">default</span>:
+        语句组n;
+}</pre>
+    <div class="section-sub">执行过程</div>
+    <ul>
+      <li><b>计算：</b>计算表达式的值</li>
+      <li><b>匹配：</b>依次与常量比较</li>
+      <li><b>执行：</b>命中即执行，遇 break 跳出</li>
+      <li><b>兜底：</b>全不中则走 default</li>
+    </ul>
+    <div class="box warn">
+      <span class="label">硬性规定</span><br>
+      ① switch 后的表达式必须是 <b>整型</b>（int/char/enum）。<br>
+      ② case 后必须是<b>常量</b>（如 <code class="inline">1</code>、<code class="inline">'A'</code>），不能是变量。<br>
+      ③ 每个 case 后要加<b>冒号</b>。<br>
+      ④ <b>break</b> 用于跳出；省略会穿透。<br>
+      ⑤ case 值必须<b>互不相同</b>。
+    </div>
+    <div class="box key">
+      <span class="label">流程图</span>开始 → 计算表达式 → 与 case 常量比较 → 匹配则执行对应语句组 → 遇 break 跳出 / 否则穿透 → 结束。
+    </div>
+  </div>
+
+  <!-- ===== 4 核心陷阱：漏写 break ===== -->
+  <div class="section" id="sec4">
+    <div class="section-title">核心陷阱：漏写 break 的后果</div>
+    <div class="box red">
+      <span class="label">注意</span>如果漏写了 <code class="inline">break;</code>，程序不会跳出 switch，而是会继续往下执行，这叫 <b>穿透（Fall-through）</b>。
+    </div>
+    <div class="section-sub">❌ 漏写 break（发生穿透）</div>
+<pre class="code"><span class="kw">int</span> score = <span class="num">1</span>;
+<span class="kw">switch</span> (score) {
+    <span class="kw">case</span> <span class="num">1</span>: printf(<span class="str">"A\n"</span>);
+    <span class="kw">case</span> <span class="num">2</span>: printf(<span class="str">"B\n"</span>);
+    <span class="kw">case</span> <span class="num">3</span>: printf(<span class="str">"C\n"</span>);
+}</pre>
+    <div class="out">// 输出结果
+A
+B
+C</div>
+    <div class="section-sub">✅ 正确写法（加了 break）</div>
+<pre class="code"><span class="kw">int</span> score = <span class="num">1</span>;
+<span class="kw">switch</span> (score) {
+    <span class="kw">case</span> <span class="num">1</span>: printf(<span class="str">"A\n"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>: printf(<span class="str">"B\n"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>: printf(<span class="str">"C\n"</span>); <span class="kw">break</span>;
+}</pre>
+    <div class="out">// 输出结果
+A</div>
+    <div class="box warn">
+      <span class="label">结论</span>一旦匹配上某个 case，如果没有遇到 break，就会像滑梯一样把后面的代码全执行一遍。在绝大多数业务场景下，这都是<b>严重的逻辑漏洞</b>。
+    </div>
+  </div>
+
+  <!-- ===== 5 善用穿透合并分支 ===== -->
+  <div class="section" id="sec5">
+    <div class="section-title">正向应用：善用穿透合并分支</div>
+    <div class="box tip">
+      <span class="label">技巧</span>有时我们会<b>故意</b>省略 break，让多个 case 共用一段代码，使逻辑更简洁。
+    </div>
+    <div class="section-sub">示例：成绩等级合并</div>
+<pre class="code"><span class="kw">switch</span> (grade) {
+    <span class="kw">case</span> <span class="str">'A'</span>:
+    <span class="kw">case</span> <span class="str">'B'</span>:
+    <span class="kw">case</span> <span class="str">'C'</span>:
+        printf(<span class="str">"及格\n"</span>);      <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'D'</span>:
+        printf(<span class="str">"不及格\n"</span>);    <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        printf(<span class="str">"Error\n"</span>);
+}</pre>
+    <div class="box tip">多个 case 连续写在一起，表示它们共用同一段执行语句。</div>
+    <div class="section-sub">练习：判断工作日与周末</div>
+<pre class="code"><span class="kw">int</span> day = <span class="num">3</span>; <span class="cmt">// 周三</span>
+<span class="kw">switch</span> (day) {
+    <span class="kw">case</span> <span class="num">1</span>: <span class="kw">case</span> <span class="num">2</span>: <span class="kw">case</span> <span class="num">3</span>: 
+    <span class="kw">case</span> <span class="num">4</span>: <span class="kw">case</span> <span class="num">5</span>:
+        printf(<span class="str">"工作日\n"</span>);   <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">6</span>: <span class="kw">case</span> <span class="num">7</span>:
+        printf(<span class="str">"休息日\n"</span>);   <span class="kw">break</span>;
+    <span class="kw">default</span>:   printf(<span class="str">"输入错误\n"</span>);
+}</pre>
+    <div class="box key"><span class="label">输出</span>如果 day = 3，程序连续穿透 3、4、5，最终打印“工作日”。</div>
+  </div>
+
+  <!-- ===== 6 练习：星期名（整数 vs 字符） ===== -->
+  <div class="section" id="sec6">
+    <div class="section-title">练习：输入 1~7，输出星期名（整数 vs 字符）</div>
+    <div class="section-sub">写法一：用整数判断</div>
+<pre class="code"><span class="kw">int</span> d;
+scanf(<span class="str">"%d"</span>, &amp;d);
+
+<span class="kw">switch</span> (d) {
+    <span class="kw">case</span> <span class="num">1</span>: printf(<span class="str">"Monday"</span>);    <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>: printf(<span class="str">"Tuesday"</span>);   <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>: printf(<span class="str">"Wednesday"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">4</span>: printf(<span class="str">"Thursday"</span>);  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">5</span>: printf(<span class="str">"Friday"</span>);    <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">6</span>: printf(<span class="str">"Saturday"</span>);  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">7</span>: printf(<span class="str">"Sunday"</span>);    <span class="kw">break</span>;
+    <span class="kw">default</span>: printf(<span class="str">"Error"</span>);    <span class="kw">break</span>;
+}</pre>
+    <div class="box tip"><span class="label">输入</span><b>数字 3</b> → 输出 Wednesday</div>
+    <div class="section-sub">写法二：用字符判断</div>
+<pre class="code"><span class="kw">char</span> d;
+scanf(<span class="str">"%c"</span>, &amp;d); <span class="cmt">// 注意这里是 %c</span>
+
+<span class="kw">switch</span> (d) {
+    <span class="kw">case</span> <span class="str">'1'</span>: printf(<span class="str">"Monday"</span>);    <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'2'</span>: printf(<span class="str">"Tuesday"</span>);   <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'3'</span>: printf(<span class="str">"Wednesday"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'4'</span>: printf(<span class="str">"Thursday"</span>);  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'5'</span>: printf(<span class="str">"Friday"</span>);    <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'6'</span>: printf(<span class="str">"Saturday"</span>);  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'7'</span>: printf(<span class="str">"Sunday"</span>);    <span class="kw">break</span>;
+    <span class="kw">default</span>: printf(<span class="str">"Error"</span>);    <span class="kw">break</span>;
+}</pre>
+    <div class="box warn">
+      <span class="label">输入</span><b>字符 3</b> → 输出 Wednesday<br>
+      <b>区别</b>：<code class="inline">case '3'</code> 里存的是 ASCII 码 51，不是数值 3！
+    </div>
+  </div>
+
+  <!-- ===== 7 总结：整数与字符的差异 ===== -->
+  <div class="section" id="sec7">
+    <div class="section-title">总结：整数与字符在 switch 中的差异</div>
+    <div class="box key">
+      <span class="label">核心结论</span>
+      在 C 语言中，<code class="inline">case</code> 后面跟的数据必须与 <code class="inline">switch</code> 括号里的变量类型<b>完全一致</b>。用 <code class="inline">int</code> 就要配数字，用 <code class="inline">char</code> 就要配字符。
+    </div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>对比维度</th><th>用整数判断（推荐）</th><th>用字符判断</th></tr></thead>
+        <tbody>
+          <tr><th>变量定义</th><td><code class="inline">int d;</code></td><td><code class="inline">char d;</code></td></tr>
+          <tr><th>输入格式</th><td><code class="inline">scanf("%d", &amp;d);</code></td><td><code class="inline">scanf("%c", &amp;d);</code></td></tr>
+          <tr><th>case 写法</th><td><code class="inline">case 1:</code></td><td><code class="inline">case '1':</code></td></tr>
+          <tr><th>输入 3 的底层值</th><td>数值 <b>3</b></td><td>字符 <b>'3'</b> (ASCII 码 51)</td></tr>
+          <tr><th>多字符输入容错</th><td style="color:var(--green);"><b>较好。</b>输入 13 会匹配失败，走 default。</td><td style="color:var(--red);"><b>极差。</b>输入 13 会截断为 '1'，导致误判。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box tip"><span class="label">为什么推荐用 %d？</span>对于“1~7”这类数字输入，用 <code class="inline">%d</code> 读入更安全。遇到非法输入（如 13）可以直接被 <code class="inline">default</code> 拦截。</div>
+    <div class="box warn"><span class="label">什么时候用 %c？</span>只有当菜单选项是真正的“字母”（如 A、B、C 或 y/n）时，才使用 <code class="inline">%c</code> 配合单引号。</div>
+  </div>
+
+  <!-- ===== 8 综合应用：判断分数段（整数版） ===== -->
+  <div class="section" id="sec8">
+    <div class="section-title">综合应用：判断分数段（整数版）</div>
+    <div class="box key">
+      <span class="label">核心思路</span>
+      利用 <code class="inline">score / 10</code> 进行<b>整除</b>，把连续的分数段“降维”成 0~10 的固定整数，从而使用 <code class="inline">switch</code> 进行精准匹配。
+    </div>
+<pre class="code"><span class="kw">int</span> score;
+scanf(<span class="str">"%d"</span>, &amp;score);
+
+<span class="kw">switch</span> (score / <span class="num">10</span>) {
+    <span class="kw">case</span> <span class="num">10</span>: printf(<span class="str">"满分！\n"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">9</span>:  printf(<span class="str">"优秀 (90~99)\n"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">8</span>:  printf(<span class="str">"良好 (80~89)\n"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">7</span>:  printf(<span class="str">"中等 (70~79)\n"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">6</span>:  printf(<span class="str">"及格 (60~69)\n"</span>); <span class="kw">break</span>;
+    <span class="str">default</span>: printf(<span class="str">"不及格 (&lt;60)\n"</span>); <span class="kw">break</span>;
+}</pre>
+    <div class="box tip">
+      <span class="label">运行示例</span>
+      输入: 95 → 输出: 优秀 (90~99)<br>
+      输入: 59 → 输出: 不及格 (&lt;60)
+    </div>
+    <div class="box warn">
+      <span class="label">思考：这样写严谨吗？</span><br>
+      如果输入了 <b>-5</b> 或 <b>105</b> 会怎样？<br>
+      · <code class="inline">-5 / 10</code> 结果是 0，会输出“不及格”。<br>
+      · <code class="inline">105 / 10</code> 结果是 10，会输出“满分”。<br>
+      <b>工程建议：</b>在 switch 前，先用 <code class="inline">if (score &lt; 0 || score &gt; 100)</code> 拦截非法分数！
+    </div>
+    <div class="box key"><span class="label">进阶思考</span>如果成绩是带有小数的实数（如 <code class="inline">89.5</code> 分），<code class="inline">switch</code> 还能用吗？</div>
+  </div>
+
+  <!-- ===== 9 进阶拓展：如果成绩是带小数的实数？ ===== -->
+  <div class="section" id="sec9">
+    <div class="section-title">进阶拓展：如果成绩是带小数的实数？</div>
+    <div class="box red">
+      <span class="label">核心原则</span>
+      <code class="inline">switch</code> 的表达式<b>绝对不能是浮点数</b>。必须先用四舍五入把小数转换为整数。
+    </div>
+    <div class="section-sub">写法一：手写四舍五入</div>
+<pre class="code"><span class="cmt">// 加 0.5 后强转，实现四舍五入</span>
+<span class="kw">int</span> s = (<span class="kw">int</span>)(score + <span class="num">0.5</span>);</pre>
+    <div class="section-sub">写法二：使用 round() 函数</div>
+<pre class="code"><span class="kw">#include</span> <span class="str">&lt;math.h&gt;</span>
+<span class="cmt">// 标准库四舍五入，返回浮点数</span>
+<span class="kw">int</span> s = (<span class="kw">int</span>)round(score);</pre>
+    <div class="box tip"><span class="label">round() 函数</span>返回值仍是浮点数，必须用 <code class="inline">(int)</code> 强转。</div>
+    <div class="box warn">
+      <span class="label">异常测试</span>
+      如果输入 <code class="inline">105.5</code>，如果不拦截，四舍五入后整除得到 10，会错误输出“满分”！通过前置 <code class="inline">if</code> 拦截，即可提示“成绩输入错误”。
+    </div>
+    <div class="section-sub">完整代码（含非法输入拦截）</div>
+<pre class="code"><span class="kw">#include</span> <span class="str">&lt;math.h&gt;</span>
+
+    <span class="kw">double</span> score;
+    scanf(<span class="str">"%lf"</span>, &amp;score);
+    
+    <span class="cmt">// 1. 先拦截非法数据 (-1 ~ 101 以外)</span>
+    <span class="kw">if</span> (score &lt; <span class="num">0</span> || score &gt; <span class="num">100</span>) {
+        printf(<span class="str">"成绩输入错误！\n"</span>);
+        <span class="kw">return</span> <span class="num">0</span>;
+    }
+    
+    <span class="cmt">// 2. 将合法浮点数四舍五入转整数</span>
+    <span class="kw">int</span> s = (<span class="kw">int</span>)round(score);
+    
+    <span class="cmt">// 3. 利用整除进行分段匹配</span>
+    <span class="kw">switch</span> (s / <span class="num">10</span>) {
+        <span class="kw">case</span> <span class="num">10</span>: printf(<span class="str">"满分！\n"</span>); <span class="kw">break</span>;
+        ......
+        <span class="kw">default</span>:  printf(<span class="str">"不及格 (&lt;60)\n"</span>); <span class="kw">break</span>;
+    }</pre>
+  </div>
+
+  <!-- ===== 10 综合案例 1：判断某月有多少天（初版） ===== -->
+  <div class="section" id="sec10">
+    <div class="section-title">综合案例 1：判断某月有多少天</div>
+<pre class="code"><span class="kw">int</span> year, month, days;
+scanf(<span class="str">"%d %d"</span>, &amp;year, &amp;month);
+
+<span class="kw">switch</span> (month) {
+    <span class="kw">case</span> <span class="num">1</span>: <span class="kw">case</span> <span class="num">3</span>: <span class="kw">case</span> <span class="num">5</span>:
+    <span class="kw">case</span> <span class="num">7</span>: <span class="kw">case</span> <span class="num">8</span>: <span class="kw">case</span> <span class="num">10</span>: <span class="kw">case</span> <span class="num">12</span>:
+        days = <span class="num">31</span>;  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">4</span>: <span class="kw">case</span> <span class="num">6</span>: <span class="kw">case</span> <span class="num">9</span>: <span class="kw">case</span> <span class="num">11</span>:
+        days = <span class="num">30</span>;  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>:
+        <span class="kw">if</span> ((year%<span class="num">4</span>==<span class="num">0</span> &amp;&amp; year%<span class="num">100</span>!=<span class="num">0</span>) || year%<span class="num">400</span>==<span class="num">0</span>)
+            days = <span class="num">29</span>;
+        <span class="kw">else</span>
+            days = <span class="num">28</span>;
+        <span class="kw">break</span>;
+}
+
+printf(<span class="str">"%d年%d月有%d天\n"</span>, year, month, days);</pre>
+    <div class="box tip"><span class="label">思路</span>把多个相同天数的月份合并到一组，这是 switch 穿透最经典的用法。</div>
+    <div class="box key"><span class="label">2 月处理</span>2 月是特例，所以单独列出，内部使用 <code class="inline">if-else</code> 判断是否闰年。</div>
+    <div class="box warn"><span class="label">问题</span>如果输入数据异常（数据不符合要求）时，应该如何处理？可以直接加 <code class="inline">default: printf("输入错误！");</code> 吗？</div>
+  </div>
+
+  <!-- ===== 11 综合案例 1：月份天数（实现对比） ===== -->
+  <div class="section" id="sec11">
+    <div class="section-title">综合案例 1：判断某月有多少天（实现对比）</div>
+    <div class="section-sub">方法一：switch + 前置拦截</div>
+<pre class="code"><span class="kw">if</span> (month &lt; <span class="num">1</span> || month &gt; <span class="num">12</span>) {
+    printf(<span class="str">"月份错误\n"</span>);
+} <span class="kw">else</span> {
+    <span class="kw">switch</span> (month) {
+      <span class="kw">case</span> <span class="num">1</span>: <span class="kw">case</span> <span class="num">3</span>: <span class="kw">case</span> <span class="num">5</span>:
+      <span class="kw">case</span> <span class="num">7</span>: <span class="kw">case</span> <span class="num">8</span>: <span class="kw">case</span> <span class="num">10</span>: <span class="kw">case</span> <span class="num">12</span>:
+            days = <span class="num">31</span>;  <span class="kw">break</span>;
+      <span class="kw">case</span> <span class="num">4</span>: <span class="kw">case</span> <span class="num">6</span>: <span class="kw">case</span> <span class="num">9</span>: <span class="kw">case</span> <span class="num">11</span>:
+            days = <span class="num">30</span>;  <span class="kw">break</span>;
+      <span class="kw">case</span> <span class="num">2</span>:
+        <span class="kw">if</span> ((year%<span class="num">4</span>==<span class="num">0</span> &amp;&amp; year%<span class="num">100</span>!=<span class="num">0</span>) || year%<span class="num">400</span>==<span class="num">0</span>)
+                days = <span class="num">29</span>;
+        <span class="kw">else</span> days = <span class="num">28</span>;
+        <span class="kw">break</span>;
+    }
+    printf(<span class="str">"%d年%d月有%d天\n"</span>, year, month, days);
+}</pre>
+    <div class="section-sub">方法二：if-else + 前置拦截</div>
+<pre class="code"><span class="kw">if</span> (month &lt; <span class="num">1</span> || month &gt; <span class="num">12</span>) {
+    printf(<span class="str">"月份错误\n"</span>);
+} <span class="kw">else</span> {
+    <span class="kw">if</span> (month == <span class="num">2</span>) {
+      <span class="kw">if</span> ((year%<span class="num">4</span>==<span class="num">0</span> &amp;&amp; year%<span class="num">100</span>!=<span class="num">0</span>) || year%<span class="num">400</span>==<span class="num">0</span>)
+            days = <span class="num">29</span>;
+      <span class="kw">else</span>
+            days = <span class="num">28</span>;
+    } <span class="kw">else if</span> (month==<span class="num">4</span>||month==<span class="num">6</span>||month==<span class="num">9</span>||month==<span class="num">11</span>) {
+        days = <span class="num">30</span>;
+    } <span class="kw">else</span> {
+        days = <span class="num">31</span>;
+    }
+    printf(<span class="str">"%d年%d月有%d天\n"</span>, year, month, days);
+}</pre>
+    <div class="box tip"><span class="label">方法一</span>逻辑严谨，先用 if 拦截非法输入，再用 switch 利用穿透合并 7 个大月。结构清晰，拓展性最好。</div>
+    <div class="box key"><span class="label">方法二</span>逻辑严谨，将非法数据挡在外面，使用 if-else 实现。</div>
+  </div>
+
+  <!-- ===== 12 综合案例 1：月份天数（测试与分析） ===== -->
+  <div class="section" id="sec12">
+    <div class="section-title">综合案例 1：月份天数（测试与优劣分析）</div>
+    <div class="section-sub">测试用例设计（含边界）</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>测试目的</th><th>输入 (年 月)</th><th>预期输出</th></tr></thead>
+        <tbody>
+          <tr><td>大月</td><td>2023 12</td><td>31 天</td></tr>
+          <tr><td>小月</td><td>2023 11</td><td>30 天</td></tr>
+          <tr><td>平年 2 月</td><td>2023 2</td><td>28 天</td></tr>
+          <tr><td>闰年 2 月</td><td>2024 2</td><td>29 天</td></tr>
+          <tr><td style="color:var(--red);">非法边界</td><td style="color:var(--red);">2023 0 / 13</td><td style="color:var(--red);">错误提示</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box warn">
+      <span class="label">思考</span>
+      如果不加前置拦截，输入 <code class="inline">month = 13</code> 时，程序会直接执行最后的 <code class="inline">else</code> 分支并抛出错误，同时也避免了使用未初始化的 <code class="inline">days</code> 变量。
+    </div>
+    <div class="box tip">
+      <span class="label">优劣分析</span>
+      <b>方法一（switch 前置拦截）</b>结构清晰，拓展性最好。<br>
+      <b>方法二（if 前置拦截）</b>逻辑严谨，将非法数据挡在外面。
+    </div>
+  </div>
+
+  <!-- ===== 13 综合案例 2：计算 BMI（switch 巧妙用法） ===== -->
+  <div class="section" id="sec13">
+    <div class="section-title">综合案例 2：计算 BMI（switch 巧妙用法）</div>
+<pre class="code"><span class="kw">double</span> weight, height, bmi;
+scanf(<span class="str">"%lf %lf"</span>, &amp;weight, &amp;height);
+bmi = weight / (height * height);
+
+<span class="kw">int</span> z = <span class="num">1</span> * (bmi &lt; <span class="num">18</span>)
+      + <span class="num">2</span> * (<span class="num">18</span> &lt;= bmi &amp;&amp; bmi &lt; <span class="num">25</span>)
+      + <span class="num">3</span> * (<span class="num">25</span> &lt;= bmi &amp;&amp; bmi &lt; <span class="num">27</span>)
+      + <span class="num">4</span> * (bmi &gt;= <span class="num">27</span>);
+
+<span class="kw">switch</span> (z) {
+    <span class="kw">case</span> <span class="num">1</span>: printf(<span class="str">"Underweight.\n"</span>);  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>: printf(<span class="str">"Normal.\n"</span>);       <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>: printf(<span class="str">"Overweight.\n"</span>);   <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">4</span>: printf(<span class="str">"Obese.\n"</span>);        <span class="kw">break</span>;
+}</pre>
+    <div class="box warn">
+      <span class="label">为何这样写？</span>
+      因为 switch 不能直接判断区间（如 <code class="inline">18 &lt;= bmi &lt; 25</code>）。但关系表达式的结果是 0 或 1，乘以对应的数字后，就能把“区间判定”变成了“固定数值判定”。
+    </div>
+    <div class="box tip"><span class="label">启示</span>如果遇到范围判断，<b>首选还是用 if-else</b>。这题用 switch 纯属“炫技”，真实工程中可读性不高。</div>
+  </div>
+
+  <!-- ===== 14 综合案例 2：BMI（switch vs if-else） ===== -->
+  <div class="section" id="sec14">
+    <div class="section-title">综合案例 2：计算 BMI（switch vs if-else）</div>
+    <div class="section-sub">✅ 正常写法：if-else（处理区间）</div>
+<pre class="code"><span class="kw">double</span> weight, height, bmi;
+scanf(<span class="str">"%lf %lf"</span>, &amp;weight, &amp;height);
+bmi = weight / (height * height);
+
+<span class="kw">if</span> (bmi &lt; <span class="num">18</span>)
+    printf(<span class="str">"Underweight.\n"</span>);
+<span class="kw">else if</span> (bmi &lt; <span class="num">25</span>)
+    printf(<span class="str">"Normal.\n"</span>);
+<span class="kw">else if</span> (bmi &lt; <span class="num">27</span>)
+    printf(<span class="str">"Overweight.\n"</span>);
+<span class="kw">else</span>
+    printf(<span class="str">"Obese.\n"</span>);</pre>
+    <div class="section-sub">⚠️ 炫技写法：switch（强行构造整数）</div>
+<pre class="code"><span class="kw">double</span> weight, height, bmi;
+scanf(<span class="str">"%lf %lf"</span>, &amp;weight, &amp;height);
+bmi = weight / (height * height);
+
+<span class="kw">int</span> z = <span class="num">1</span> * (bmi &lt; <span class="num">18</span>)
+      + <span class="num">2</span> * (<span class="num">18</span> &lt;= bmi &amp;&amp; bmi &lt; <span class="num">25</span>)
+      + <span class="num">3</span> * (<span class="num">25</span> &lt;= bmi &amp;&amp; bmi &lt; <span class="num">27</span>)
+      + <span class="num">4</span> * (bmi &gt;= <span class="num">27</span>);
+
+<span class="kw">switch</span> (z) {
+    <span class="kw">case</span> <span class="num">1</span>: printf(<span class="str">"Underweight.\n"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>: printf(<span class="str">"Normal.\n"</span>);      <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>: printf(<span class="str">"Overweight.\n"</span>);  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">4</span>: printf(<span class="str">"Obese.\n"</span>);       <span class="kw">break</span>;
+}</pre>
+    <div class="box tip">
+      <span class="label">对比分析</span><br>
+      · <b>if-else 法：</b>天然支持区间判断，利用 <code class="inline">else if</code> 的顺序性，代码简洁、逻辑清晰。是实际工程中的绝对首选。<br>
+      · <b>switch 法：</b>利用关系表达式结果为 0/1 的特性，通过乘法累加构造出整数 1~4。虽然语法上没错，但如果区间分得更细，这段表达式会变得极其灾难。
+    </div>
+  </div>
+
+  <!-- ===== 15 综合案例 3：简易四则运算计算器 ===== -->
+  <div class="section" id="sec15">
+    <div class="section-title">综合案例 3：简易四则运算计算器</div>
+<pre class="code"><span class="kw">int</span> d1, d2, result, valid = <span class="num">1</span>;
+<span class="kw">char</span> op;
+scanf(<span class="str">"%d %c %d"</span>, &amp;d1, &amp;op, &amp;d2);
+
+<span class="kw">switch</span> (op) {
+    <span class="kw">case</span> <span class="str">'+'</span>: result = d1 + d2;  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'-'</span>: result = d1 - d2;  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'*'</span>: result = d1 * d2;  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'/'</span>: 
+        <span class="kw">if</span> (d2 != <span class="num">0</span>) result = d1 / d2;
+        <span class="kw">else</span> {
+            printf(<span class="str">"除数不能为0\n"</span>);
+            valid = <span class="num">0</span>;
+        }
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:  printf(<span class="str">"运算符无效\n"</span>);   valid = <span class="num">0</span>;
+}
+
+<span class="kw">if</span> (valid)
+    printf(<span class="str">"%d %c %d = %d\n"</span>, d1, op, d2, result);</pre>
+    <div class="box tip">
+      <span class="label">知识点融合</span><br>
+      ① <b>switch 支持字符</b>：因为字符底层就是 ASCII 整数。<br>
+      ② <b>与 if 结合</b>：在除法分支里，嵌套 if 防止除数为 0。<br>
+      ③ <b>状态标志位</b>：用 <code class="inline">valid</code> 记录本次运算是否成功，只有成功时才输出结果。
+    </div>
+    <div class="box warn">
+      <span class="label">运行示例</span>
+      输入: 5 * 2 → 输出: 5 * 2 = 10<br>
+      输入: 5 / 0 → 输出: 除数不能为0
+    </div>
+  </div>
+
+  <!-- ===== 16 switch 与 if-else 的对比 ===== -->
+  <div class="section" id="sec16">
+    <div class="section-title">switch 与 if-else 的对比</div>
+    <div class="card green">
+      <h4>✅ 用 switch 更好</h4>
+      <p>· 判断条件是<b>等值判断</b>（等于具体某个数字或字符）。<br>· 分支数量非常多（3 个以上）。<br>· 希望代码结构像菜单一样清晰。</p>
+    </div>
+    <div class="card orange">
+      <h4>⚠️ 用 if-else 更好</h4>
+      <p>· 判断条件是<b>范围</b>（如 score >= 60）。<br>· 判断条件是<b>浮点数</b>或<b>字符串</b>。<br>· 逻辑是区间性质，而不是精准匹配。</p>
+    </div>
+    <div class="box key"><span class="label">核心原则</span><b>精准匹配用 switch，区间判断用 if-else。</b></div>
+  </div>
+
+  <!-- ===== 17 拓展与避坑：警惕非标准的范围写法 ===== -->
+  <div class="section" id="sec17">
+    <div class="section-title">拓展与避坑：警惕非标准的范围写法</div>
+    <div class="box red">
+      <span class="label">⚠️ 注意</span>
+      如果在网上看到 <code class="inline">case 'a' ... 'z':</code> 这种写法，<b>千万不要在考试、作业和正式工程中使用！</b>
+    </div>
+    <div class="section-sub">❌ GCC 扩展语法（不推荐）</div>
+<pre class="code"><span class="cmt">// 仅部分编译器支持，不是标准 C</span>
+<span class="kw">switch</span>(c) {
+    <span class="kw">case</span> <span class="str">'a'</span> ... <span class="str">'z'</span>:
+        printf(<span class="str">"小写字母"</span>);
+        <span class="kw">break</span>;
+}</pre>
+    <div class="box warn">
+      <span class="label">为什么不行？</span><br>
+      ① <b>非标准 C</b>：C99/C11 等标准规定 case 后必须是单个常量。这是 GCC 的私有扩展，用 MSVC 等编译器会直接报错。<br>
+      ② <b>考试大坑</b>：期末考试和考研 408 经常出选择题，问 case 后面能不能接范围？答案必须是“不能”。
+    </div>
+    <div class="section-sub">✅ 标准写法 1：if-else（强烈推荐）</div>
+<pre class="code"><span class="cmt">// 只要是范围判断，首选 if</span>
+<span class="kw">if</span> (c &gt;= <span class="str">'a'</span> &amp;&amp; c &lt;= <span class="str">'z'</span>) {
+    printf(<span class="str">"小写字母"</span>);
+}</pre>
+    <div class="section-sub">✅ 标准写法 2：穿透合并（仅限短范围）</div>
+<pre class="code"><span class="cmt">// 如果是 abc 连续三个字母</span>
+<span class="kw">switch</span>(c) {
+    <span class="kw">case</span> <span class="str">'a'</span>: <span class="kw">case</span> <span class="str">'b'</span>: <span class="kw">case</span> <span class="str">'c'</span>:
+        printf(<span class="str">"在 a-c 之间"</span>);
+        <span class="kw">break</span>;
+}</pre>
+    <div class="box key">
+      <span class="label">铁律</span>
+      <b>switch 专门用于“精准匹配”，if-else 专门用于“范围判断”。</b><br>
+      遇到范围判断（无论是数字区间还是字母区间），请老老实实切回 <code class="inline">if-else</code>，既标准又清晰。
+    </div>
+  </div>
+
+  <!-- ===== 18 switch 常见错误汇总 ===== -->
+  <div class="section" id="sec18">
+    <div class="section-title">switch 常见错误汇总</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th style="width:25%">错误类型</th><th style="width:25%">错误代码示例</th><th style="width:50%">原因与正确做法</th></tr></thead>
+        <tbody>
+          <tr><td>表达式类型错误</td><td><code class="inline">switch (3.14)</code></td><td>switch 只能接受<b>整型</b>（char/short/int/enum）。</td></tr>
+          <tr><td>case 后面不是常量</td><td><code class="inline">int n=1; case n:</code></td><td>case 后面必须跟<b>常量</b>（字面量或宏），不能是变量。</td></tr>
+          <tr><td>漏写 break</td><td><code class="inline">case 1: printf("A");</code></td><td>会一直穿透执行下去，直到遇到 break。必须补上。</td></tr>
+          <tr><td>case 常量重复</td><td><code class="inline">case 1: ... case 1: ...</code></td><td>同一个 switch 里，case 的值不能相同，编译器会报错。</td></tr>
+          <tr><td>在 case 里定义变量</td><td><code class="inline">case 1: int x = 5;</code></td><td>容易引起作用域混乱。如需定义，请用大括号 <code class="inline">{ }</code> 包起来。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== 19 本讲小结 ===== -->
+  <div class="section" id="sec19">
+    <div class="section-title">本讲小结</div>
+    <ul class="feat">
+      <li><span class="k">① 应用场景</span><span class="v">处理多分支的等值判断</span></li>
+      <li><span class="k">② 核心结构</span><span class="v"><code class="inline">switch</code>、<code class="inline">case</code>、<code class="inline">default</code>、<code class="inline">break</code></span></li>
+      <li><span class="k">③ 硬性规则</span><span class="v">表达式必须是整型；case 必须是常量且互不相同</span></li>
+      <li><span class="k">④ 穿透现象</span><span class="v">漏写 break 会继续执行后续代码；巧妙利用可合并分支</span></li>
+      <li><span class="k">⑤ 场景对比</span><span class="v">精准匹配用 switch，范围判断用 if-else</span></li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    C 程序设计基础 · 第 3 章（下）switch 语句<br>
+    手机复习版 · 武汉理工大学 人工智能学院
+  </div>
+
+</div>
+
+<!-- ================= 回到顶部按钮 ================= -->
+<button class="backtop" id="backtop" title="回到顶部">↑</button>
+
+<script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
