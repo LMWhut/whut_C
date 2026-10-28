@@ -1508,7 +1508,105 @@ flags &amp;= ~(<span class="num">1</span> &lt;&lt; <span class="num">2</span>); 
   </div>
 </section>
 
-  <!-- ========== 29 常见错误（二）位运算 ========== -->
+<!-- ========== 29 典型应用（四）：综合应用 — 题目描述 ========== -->
+<section class="slide">
+  <div class="s-title">典型应用（四）：综合应用 — 中控指令处理</div>
+  <div class="s-body">
+    <div class="box key" style="margin-top:0;font-size:30px; padding:16px 28px;">
+      <span class="label">题目描述</span>
+      在一个简易的智能家居中控系统中，用一个整数 <code class="inline">flags</code> 来记录 3 个设备（灯、门、窗）的开关状态。<br>
+      系统接收外部指令 <code class="inline">op</code>（操作类型）和 <code class="inline">x</code>（设备编号），请根据指令完成对应操作。
+    </div>
+
+    <div class="two" style="grid-template-columns:1fr 1fr; gap:28px; align-items:stretch; margin-top:20px;">
+      <!-- 左栏：状态定义与输入说明 -->
+      <div class="card orange" style="padding:20px 24px;">
+        <h4 style="font-size:28px; margin-bottom:12px;"><span class="ico">⚙️</span>状态定义与输入输出</h4>
+        <ul style="font-size:26px; color:var(--muted); line-height:1.6; margin-left:20px;">
+          <li>设备编号（位）：<b>0 = 灯，1 = 门，2 = 窗</b>；</li>
+          <li><b>初始状态</b>：<code class="inline">flags = 0</code>（全关）；</li>
+          <li><b>输入格式</b>：<code class="inline">op x</code>（如 <code class="inline">1 0</code> 表示点亮 0 号灯）；</li>
+          <li><b>输出要求</b>：如果是测试指令，输出 <code class="inline">Device x is ON/OFF</code>。</li>
+        </ul>
+      </div>
+
+      <!-- 右栏：指令说明表 -->
+      <div class="card green" style="padding:20px 24px;">
+        <h4 style="font-size:28px; margin-bottom:12px;"><span class="ico">📜</span>指令说明（操作类型 op）</h4>
+        <table class="tb" style="font-size:26px; margin-top:0; box-shadow:none;">
+          <tbody>
+            <tr><td><b>1</b>: 置 1 (打开/点亮)</td><td>将第 <code class="inline">x</code> 位置 1</td></tr>
+            <tr><td><b>2</b>: 清 0 (关闭/熄灭)</td><td>将第 <code class="inline">x</code> 位清 0</td></tr>
+            <tr><td><b>3</b>: 翻转 (切换状态)</td><td>将第 <code class="inline">x</code> 位取反</td></tr>
+            <tr><td><b>4</b>: 测试 (查询状态)</td><td>检查第 <code class="inline">x</code> 位是 1 还是 0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="box tip" style="margin-top:24px; font-size:26px;">
+      <span class="label">样例测试</span>
+      输入：<code class="inline">1 0</code>⏎ (点亮灯) 　　　　输出：<code class="inline">Device 0 is ON</code> (灯亮) <br>
+      　　　　　输入: <code class="inline">4 0</code>⏎ (测试灯状态)　　　输出：<code class="inline">Final flags: 1</code> (输出最终状态值)
+      
+    </div>
+  </div>
+</section>
+
+<!-- ========== 30 典型应用（四）：综合应用 — 代码实现 ========== -->
+<section class="slide">
+  <div class="s-title">典型应用（四）：综合应用 — 代码实现</div>
+  <div class="s-body">
+    <div class="two wide" style="grid-template-columns:1.15fr 0.85fr;gap:34px;align-items:start;">
+      
+      <!-- 左栏：代码 -->
+      <div>
+        <pre class="code" style="font-size:26px; padding:18px 24px; line-height:1.4; margin-top:0;"><span class="kw">int</span> flags = <span class="num">0</span>; <span class="cmt">// 初始全关</span>
+<span class="kw">int</span> op, x;
+<span class="kw">scanf</span>(<span class="str">"%d %d"</span>, &amp;op, &amp;x);
+
+<span class="kw">switch</span> (op) {
+  <span class="kw">case</span> <span class="num">1</span>: 
+      flags |= (<span class="num">1</span> &lt;&lt; x); <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="num">2</span>: 
+      flags &amp;= ~(<span class="num">1</span> &lt;&lt; x); <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="num">3</span>: 
+      flags ^= (<span class="num">1</span> &lt;&lt; x); <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="num">4</span>: 
+      <span class="kw">if</span> (flags &amp; (<span class="num">1</span> &lt;&lt; x)) 
+          <span class="kw">printf</span>(<span class="str">"Device %d is ON\n"</span>, x);
+      <span class="kw">else</span> 
+          <span class="kw">printf</span>(<span class="str">"Device %d is OFF\n"</span>, x);
+      <span class="kw">break</span>;
+}</pre>
+      </div>
+
+      <!-- 右栏：原理解析 -->
+      <div>
+        <div class="box tip" style="margin-top:0; font-size:28px; line-height:1.6;">
+          <span class="label">掩码构造</span>
+          <code class="inline">1 &lt;&lt; x</code> 生成只有第 x 位为 1 的单点掩码（如 <code class="inline">x=1</code> 时掩码为 <code class="inline">0010</code>）。
+        </div>
+        
+        <div class="box key" style="font-size:28px; line-height:1.6;">
+          <span class="label">操作对应</span>
+          - <b>置 1</b>：用 <code class="inline">|=</code> 确保该位变 1；<br>
+          - <b>清 0</b>：用 <code class="inline">&amp;= ~</code> 确保该位变 0；<br>
+          - <b>翻转</b>：用 <code class="inline">^=</code> 使该位翻转；<br>
+          - <b>测试</b>：用 <code class="inline">&amp;</code> 判断结果是否为非 0。
+        </div>
+
+        <div class="box warn" style="margin-bottom:0; font-size:28px; line-height:1.6;">
+          <span class="label">工程意义</span>
+          将 <code class="inline">switch</code> 选择结构和位运算完美结合，是底层开发中处理硬件寄存器、标志位的标准模式。
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+  <!-- ========== 31 常见错误（二）位运算 ========== -->
   <section class="slide">
     <div class="s-title">常见错误（二）：位运算</div>
     <div class="s-body">
@@ -1540,7 +1638,7 @@ flags &amp;= ~(<span class="num">1</span> &lt;&lt; <span class="num">2</span>); 
     </div>
   </section>
 
-<!-- ========== 30 课堂练习 · 位运算 ========== -->
+<!-- ========== 32 课堂练习 · 位运算 ========== -->
 <section class="slide">
   <div class="s-title">课堂练习 · 位运算</div>
   <div class="s-body">
@@ -1584,7 +1682,7 @@ flags &amp;= ~(<span class="num">1</span> &lt;&lt; <span class="num">2</span>); 
   </div>
 </section>
 
-<!-- ========== 31 本讲小结 ========== -->
+<!-- ========== 33 本讲小结 ========== -->
 <section class="slide">
   <div class="s-title">本讲小结 · 知识脉络</div>
   <div class="s-body">
@@ -1623,7 +1721,7 @@ flags &amp;= ~(<span class="num">1</span> &lt;&lt; <span class="num">2</span>); 
   </div>
 </section>
 
-  <!-- ========== 32 结束页 ========== -->
+  <!-- ========== 33 结束页 ========== -->
   <section class="slide end">
     <div class="end-inner">
       <h2>本讲结束</h2>
@@ -1632,7 +1730,7 @@ flags &amp;= ~(<span class="num">1</span> &lt;&lt; <span class="num">2</span>); 
   </section>
 
   <!-- 导航 UI -->
-  <div class="pageinfo"><b id="cur">1</b> / <span id="total">32</span></div>
+  <div class="pageinfo"><b id="cur">1</b> / <span id="total">33</span></div>
 
   <div class="nav">
     <button class="tocbtn" id="btnToc" title="目录（按 O 键）">目录</button>
@@ -1716,15 +1814,16 @@ flags &amp;= ~(<span class="num">1</span> &lt;&lt; <span class="num">2</span>); 
         { i: 25, t: '置位/清位/翻转/测试' }, 
         { i: 26, t: '异或交换' }, 
         { i: 27, t: '状态标志压缩' },
-        { i: 28, t: '常见错误(二)' }
+        { i: 28, t: '综合应用: 中控指令' },
+        { i: 30, t: '常见错误(二)' }
       ]
     },
     { 
       title: '练习与小结', 
       items: [
-        { i: 29, t: '课堂练习·位运算' }, 
-        { i: 30, t: '本讲小结' }, 
-        { i: 31, t: '结束页' }
+        { i: 31, t: '课堂练习·位运算' }, 
+        { i: 32, t: '本讲小结' }, 
+        { i: 33, t: '结束页' }
       ]
     }
   ];
