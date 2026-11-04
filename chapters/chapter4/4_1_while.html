@@ -1059,14 +1059,13 @@ printf(<span class="str">"%lld\n"</span>, t);</pre>
 <span class="kw">double</span> pi = <span class="num">0</span>;
 <span class="kw">double</span> denominator = <span class="num">1.0</span>;<span class="cmt">// 分母</span>
 <span class="kw">int</span> sign = <span class="num">1</span>;             <span class="cmt">// 符号 (+1/-1)</span>
-
 <span class="kw">while</span> (fabs(term) &gt;= <span class="num">1e-6</span>) {
     pi = pi + term;       <span class="cmt">// 累加</span>
     denominator += <span class="num">2</span>;     <span class="cmt">// 分母+2</span>
     sign = -sign;         <span class="cmt">// 变号</span>
     term = sign / denominator; <span class="cmt">// 下一项</span>
 }
-pi = pi * <span class="num">4</span>;</pre>
+pi = (pi + term) * <span class="num">4</span>;</pre>
       </div>
 
       <!-- 右侧：如何思考次数不定 -->
