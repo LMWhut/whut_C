@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 4 章（一）while 语句 · 手机版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Source Han Sans SC",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.55;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 页脚 ================= */
+  .footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:24px 16px 40px;
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 移动端布局微调 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部固定栏 ================= -->
+<div class="topbar">
+  <h1>第 4 章（一）while 语句</h1>
+  <button class="btn-toc" id="btnToc">
+    目录 <span class="arrow">▼</span>
+  </button>
+</div>
+
+<!-- ================= 目录浮层 ================= -->
+<div class="toc-panel" id="tocPanel">
+  <div class="toc-group open">
+    <div class="toc-group-title">开场 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec1">本讲内容</a>
+      <a href="#sec2">学习目标</a>
+      <a href="#sec3">为什么需要循环</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">一、基础与语法 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec4">循环四要素</a>
+      <a href="#sec5">语法与 N-S 盒图</a>
+      <a href="#sec6">while 怎么执行</a>
+      <a href="#sec7">while 与 if 的差别</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">二、次数确定 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec8">1 到 100 求和</a>
+      <a href="#sec9">为什么拿这道题</a>
+      <a href="#sec10">跟踪与边界</a>
+      <a href="#sec11">求 n 的阶乘</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">三、次数不定 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec12">算到足够精确（求 π）</a>
+      <a href="#sec13">输入控制与结束标志</a>
+      <a href="#sec14">求最大值避坑</a>
+      <a href="#sec15">while(1)+break 写法</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">四、多个字符 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec16">不知道读几个字符</a>
+      <a href="#sec17">凯撒密码加密</a>
+      <a href="#sec18">凯撒密码解密</a>
+      <a href="#sec19">异或加密</a>
+      <a href="#sec20">边读边改综合</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">五、错误与收尾 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec21">分号陷阱</a>
+      <a href="#sec22">忘记推进</a>
+      <a href="#sec23">累加器未清零</a>
+      <a href="#sec24">浮点比相等</a>
+      <a href="#sec25">随堂检测</a>
+      <a href="#sec26">本讲小结</a>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 内容区 ================= -->
+<div class="content">
+
+  <!-- ===== 1 本讲内容 ===== -->
+  <div class="section" id="sec1">
+    <div class="section-title">本讲内容</div>
+    <div class="card"><h4>🔁 为什么要循环</h4><p>100 个数，要写 100 行</p></div>
+    <div class="card orange"><h4>⚙️ 语法与执行流程</h4><p>先判断、后执行</p></div>
+    <div class="card green"><h4>🔢 次数确定</h4><p>1 到 100、n 的阶乘：数得清</p></div>
+    <div class="card purple"><h4>❓ 次数不定</h4><p>算够准为止、读到结束为止</p></div>
+    <div class="card"><h4>🔤 多个字符</h4><p>边读边处理，不存也能算</p></div>
+    <div class="card red"><h4>⚠️ 四个典型错误</h4><p>分号、不推进、不清零、浮点比较</p></div>
+  </div>
+
+  <!-- ===== 2 学习目标 ===== -->
+  <div class="section" id="sec2">
+    <div class="section-title">本讲学习目标</div>
+    <ul class="feat">
+      <li><span class="k">① 会识别</span><span class="v">看出"<b>有规律重复</b>"的那部分</span></li>
+      <li><span class="k">② 会写四要素</span><span class="v">初值、条件、循环体、推进</span></li>
+      <li><span class="k">③ 会读流程</span><span class="v">先判断，后执行，循环可能一次都不做</span></li>
+      <li><span class="k">④ 会分三类</span><span class="v">次数确定、次数不确定、多个字符</span></li>
+      <li><span class="k">⑤ 会避坑</span><span class="v">分号、死循环、未初始化、浮点比较</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== 3 为什么需要循环 ===== -->
+  <div class="section" id="sec3">
+    <div class="section-title">为什么需要循环：100 个数，要写 100 行</div>
+    <div class="box"><span class="label">顺序写法</span>输入 100 个数求和</div>
+<pre class="code"><span class="cmt">/* 先声明 a1 到 a100，共 100 个变量 */</span>
+scanf(<span class="str">"%d"</span>, &amp;a1);    <span class="cmt">// 第 1 个</span>
+scanf(<span class="str">"%d"</span>, &amp;a2);    <span class="cmt">// 第 2 个</span>
+scanf(<span class="str">"%d"</span>, &amp;a3);    <span class="cmt">// 第 3 个</span>
+<span class="cmt">/* …… 中间还要写 97 行 */</span>
+scanf(<span class="str">"%d"</span>, &amp;a100);   <span class="cmt">// 第 100 个</span>
+s = a1 + a2 + a3 + … + a100;</pre>
+    <div class="box warn"><span class="label">① 繁琐</span>100 行复制粘贴，<b>极易抄错</b>。</div>
+    <div class="box warn"><span class="label">② 难改</span>改成 200 个？<b>整段重写</b>。</div>
+    <div class="box warn"><span class="label">③ 死局</span>个数由用户定，<b>根本没法写</b>。</div>
+    <div class="box key"><span class="label">症结</span>这 100 行<b>一模一样，只是数据在变</b>。重复的事应该交给循环——下面压成 6 行。</div>
+  </div>
+
+  <!-- ===== 4 循环四要素 ===== -->
+  <div class="section" id="sec4">
+    <div class="section-title">写循环，先想清四件事</div>
+    <div class="card">
+      <h4>1. 从哪儿开始？</h4>
+      <p>准备初值：<b>i = 1</b></p>
+    </div>
+    <div class="card orange">
+      <h4>2. 什么条件继续？</h4>
+      <p>判断条件：<b>i &lt;= 100</b></p>
+    </div>
+    <div class="card green">
+      <h4>3. 每轮做什么？</h4>
+      <p>执行循环体：<b>s = s + i</b></p>
+    </div>
+    <div class="card purple">
+      <h4>4. 怎么走向结束？</h4>
+      <p>推进变量：<b>i = i + 1</b></p>
+    </div>
+    <div class="box key"><span class="label">口诀</span>准备初值、判断条件、执行循环体、推进变量——<b>缺一个，循环就不可能对。</b></div>
+    <div class="box tip"><span class="label">最容易漏</span>漏了推进，条件永远成立，<b>程序就卡死在那儿</b>。</div>
+  </div>
+
+  <!-- ===== 5 语法格式与 N-S 盒图 ===== -->
+  <div class="section" id="sec5">
+    <div class="section-title">while 的语法格式与 N-S 盒图</div>
+    <div class="section-sub">格式</div>
+<pre class="code"><span class="kw">while</span> ( 表达式 )
+    内嵌语句;</pre>
+    <div class="section-sub">示例</div>
+<pre class="code"><span class="kw">int</span> i = <span class="num">1</span>, s = <span class="num">0</span>;
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    s = s + i;
+    i++;
+}</pre>
+    <div class="section-sub">执行过程</div>
+    <ul>
+      <li>计算 while 后表达式的值，<b>非 0 即“真”</b>、<b>0 即“假”</b>。</li>
+      <li><b>非 0</b> → 执行循环体，并<b>转回表达式</b>重新判断</li>
+      <li><b>0</b> → 结束 while 语句，执行下一条</li>
+    </ul>
+    <div class="box tip">
+      <span class="label">三条规矩</span><br>
+      ① 循环体有多条语句时必须用 <code class="inline">{ }</code> 括成复合语句。<br>
+      ② <code class="inline">while (n)</code> 与 <code class="inline">while (n != 0)</code> 等价。<br>
+      ③ 循环体中必须有让条件趋向于假的语句。
+    </div>
+  </div>
+
+  <!-- ===== 6 while 怎么执行 ===== -->
+  <div class="section" id="sec6">
+    <div class="section-title">while 怎么执行：先准备，再判断，后执行</div>
+    <div class="section-sub">代码对照</div>
+<pre class="code"><span class="cmt">// ① 准备（循环前）</span>
+<span class="kw">int</span> i = <span class="num">1</span>, s = <span class="num">0</span>; 
+
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {  <span class="cmt">// ② 判断</span>
+    s = s + i;    <span class="cmt">// ③ 执行（循环体）</span>
+    i = i + <span class="num">1</span>;    <span class="cmt">// ④ 推进</span>
+}                 <span class="cmt">// 回到 ②</span></pre>
+    <div class="section-sub">执行过程</div>
+    <div class="card">
+      <h4>1. 准备初值</h4>
+      <p>进入循环前，必须给变量赋好初值（如 <code class="inline">i=1, s=0</code>）</p>
+    </div>
+    <div class="card orange">
+      <h4>2. 判断条件</h4>
+      <p>算括号里的值：为 0 → 结束整个循环</p>
+    </div>
+    <div class="card green">
+      <h4>3. 执行循环体</h4>
+      <p>非 0 时，执行花括号内的所有语句</p>
+    </div>
+    <div class="card purple">
+      <h4>4. 推进变量</h4>
+      <p>执行完后，<b>回到第 2 步</b>重新判断</p>
+    </div>
+    <div class="box warn"><span class="label">核心逻辑</span>非 0 就是真，0 才是假。因此 <code class="inline">while (1)</code> 是死循环，而 <b>漏写推进</b>也会死循环。</div>
+  </div>
+
+  <!-- ===== 7 while 和 if 的差别 ===== -->
+  <div class="section" id="sec7">
+    <div class="section-title">while 和 if 只差一个字，差在哪</div>
+    <div class="card">
+      <h4>if 为真进一次</h4>
+<pre class="code"><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">if</span> (i &lt;= <span class="num">100</span>) {
+    printf(<span class="str">"%d "</span>, i);
+    i++;
+}</pre>
+      <div class="out">输出：1</div>
+    </div>
+    <div class="card orange">
+      <h4>while 为真反复进</h4>
+<pre class="code"><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    printf(<span class="str">"%d "</span>, i);
+    i++;
+}</pre>
+      <div class="out">输出：1 2 3 … 100</div>
+    </div>
+    <div class="box key"><span class="label">一句话</span><b>if 只问一次"要不要做"；while 每做完一遍，都要回来再问一次。</b></div>
+  </div>
+
+  <!-- ===== 8 次数确定：1+2+…+100 ===== -->
+  <div class="section" id="sec8">
+    <div class="section-title">次数确定（一）：1+2+…+100</div>
+<pre class="code"><span class="cmt">/* 求 1+2+…+100 */</span>
+<span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main() {
+  <span class="kw">int</span> i = <span class="num">1</span>;      <span class="cmt">// 循环变量</span>
+  <span class="kw">int</span> s = <span class="num">0</span>;      <span class="cmt">// 累加器</span>
+  <span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    s = s + i;
+    i = i + <span class="num">1</span>;
+  }
+  printf(<span class="str">"s = %d\n"</span>, s);
+  <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">输出：s = 5050</div>
+  </div>
+
+  <!-- ===== 9 为什么拿这道题讲循环 ===== -->
+  <div class="section" id="sec9">
+    <div class="section-title">为什么拿这道题讲循环？</div>
+    <div class="box warn"><span class="label">人类直觉</span>(1 + 100) × 100 ÷ 2 = 5050。利用等差数列公式，人类一步到位。</div>
+    <div class="box key"><span class="label">计算机笨办法</span>不会背公式，只能老老实实<b>加 100 次</b>。</div>
+    <div class="box red"><span class="label">公式解决最规整的一个</span>一旦变形，公式彻底失效，只能靠循环死算：</div>
+    <div class="out">① 阶乘型：1! + 2! + 3! + ... + n!
+② 分数型：1/1 + 1/2 + 1/3 + ...</div>
+  </div>
+
+  <!-- ===== 10 手工跟踪与边界 ===== -->
+  <div class="section" id="sec10">
+    <div class="section-title">手工跟踪与边界：差一个就是错</div>
+    <div class="section-sub">跟着跑一遍</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>轮次</th><th>i</th><th>s</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>第 1 轮</td><td>1</td><td>1</td><td>加 1</td></tr>
+          <tr><td>第 2 轮</td><td>2</td><td>3</td><td>加 2</td></tr>
+          <tr><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+          <tr><td>第 100 轮</td><td>100</td><td>5050</td><td>加 100</td></tr>
+          <tr><td>第 101 次</td><td style="color:red">101</td><td style="color:red">5050</td><td style="color:red">只有判断</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="section-sub">边界试一遍</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>条件</th><th>次数</th><th>结果 s</th></tr></thead>
+        <tbody>
+          <tr><td>i &lt;= 100</td><td>100</td><td>5050 ✔</td></tr>
+          <tr><td>i &lt; 101</td><td>100</td><td>5050 ✔</td></tr>
+          <tr><td>i &lt;= 99</td><td>99</td><td style="color:red">4950 错</td></tr>
+          <tr><td>i != 101</td><td>100</td><td style="color:red">危险</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box warn"><span class="label">注意边界</span>循环体执行 <b>100 次</b>，条件算了 <b>101 次</b>——最后那次只有判断，没有执行。写边界要考虑：<b>最后一个数满足条件吗？</b></div>
+  </div>
+
+  <!-- ===== 11 次数确定：求 n! ===== -->
+  <div class="section" id="sec11">
+    <div class="section-title">次数确定（二）：同一种套路，求 n!</div>
+<pre class="code"><span class="cmt">/* 求 n! = 1×2×…×n */</span>
+<span class="kw">int</span> i = <span class="num">1</span>, n;
+<span class="kw">long</span> <span class="kw">long</span> t = <span class="num">1</span>;   <span class="cmt">// 累乘器</span>
+scanf(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">while</span> (i &lt;= n) {
+    t = t * i;
+    i++;
+}
+printf(<span class="str">"%lld\n"</span>, t);</pre>
+    <div class="box red"><span class="label">溢出</span><code class="inline">int</code> 只能装到 12!，求 13! 必须用 <code class="inline">long long</code>。</div>
+    <div class="box warn"><span class="label">初值不能错</span>累加器是置 <b>0</b>，累乘器是置 <b>1</b>。<b>套路一模一样，只换了初值和运算。</b></div>
+  </div>
+
+  <!-- ===== 12 算到足够精确（求 π） ===== -->
+  <div class="section" id="sec12">
+    <div class="section-title">次数不定（一）：算到足够精确为止</div>
+    <div class="box"><span class="label">问题</span>利用公式 π/4 = 1 - 1/3 + 1/5 - 1/7 + ... 求 π 的近似值，直到最后一项绝对值 &lt; 10<sup>-6</sup> 为止。</div>
+<pre class="code"><span class="kw">double</span> term = <span class="num">1.0</span>;       <span class="cmt">// 当前项</span>
+<span class="kw">double</span> pi = <span class="num">0</span>;
+<span class="kw">double</span> denominator = <span class="num">1.0</span>;<span class="cmt">// 分母</span>
+<span class="kw">int</span> sign = <span class="num">1</span>;             <span class="cmt">// 符号 (+1/-1)</span>
+
+<span class="kw">while</span> (fabs(term) &gt;= <span class="num">1e-6</span>) {
+    pi = pi + term;       <span class="cmt">// 累加</span>
+    denominator += <span class="num">2</span>;     <span class="cmt">// 分母+2</span>
+    sign = -sign;         <span class="cmt">// 变号</span>
+    term = sign / denominator; <span class="cmt">// 下一项</span>
+}
+pi = pi * <span class="num">4</span>;</pre>
+    <div class="box key">
+      <span class="label">遇到“次数不定”怎么思考？</span><br>
+      1️⃣ 找停止条件：题目中的“直到...为止”或要求的精度。<br>
+      2️⃣ 翻译成 while：把“直到...为止”翻译成 <code class="inline">while(继续做)</code>。<br>
+      3️⃣ 提前算出判断量：在循环体末尾，必须算出<b>下一轮</b>用来判断的变量。
+    </div>
+  </div>
+
+  <!-- ===== 13 输入控制与结束标志 ===== -->
+  <div class="section" id="sec13">
+    <div class="section-title">次数不定：不知道输入几个数据怎么办？</div>
+    <div class="section-sub">一、有特定结束标志（哨兵控制）</div>
+    <div class="box warn"><span class="label">题目规定</span>某个特殊值（如 -1）代表结束。</div>
+<pre class="code"><span class="kw">int</span> score, sum = <span class="num">0</span>, count = <span class="num">0</span>;
+scanf(<span class="str">"%d"</span>, &amp;score);     <span class="cmt">// 先读第一个</span>
+<span class="kw">while</span> (score != -<span class="num">1</span>) {    <span class="cmt">// -1 是结束标志</span>
+    sum += score;
+    count++;
+    scanf(<span class="str">"%d"</span>, &amp;score);  <span class="cmt">// 再读下一数</span>
+}</pre>
+    <div class="box tip"><span class="label">特点</span>逻辑简单，但必须规定该数值<strong>不能是合法的业务数据</strong>（如 0 是合法数，不能用 0 当结束符）。</div>
+
+    <div class="section-sub">二、无特定结束标志（EOF 控制）</div>
+    <div class="box"><span class="label">任何值都可能出现</span>只能靠“读不动”来停。</div>
+<pre class="code"><span class="kw">int</span> x, sum = <span class="num">0</span>, count = <span class="num">0</span>;
+<span class="kw">while</span> (scanf(<span class="str">"%d"</span>, &amp;x) == <span class="num">1</span>) {
+    sum += x;
+    count++;
+}</pre>
+    <div class="box warn"><span class="label">关键</span><code class="inline">scanf</code> 成功读入数据返回 1，遇到非法字符（如字母）或按 <code class="inline">Ctrl+Z</code> 则返回 0 或 EOF，循环自然结束。</div>
+  </div>
+
+  <!-- ===== 14 求最大值避坑 ===== -->
+  <div class="section" id="sec14">
+    <div class="section-title">进阶探讨：求最大值</div>
+    <div class="box warn"><span class="label">任务</span>输入任意个整数（遇到非数字时输入结束），求其中的最大值。</div>
+    <div class="card red">
+      <h4>❌ 写法 1：初值设 0</h4>
+<pre class="code"><span class="kw">int</span> x, max = <span class="num">0</span>;
+<span class="kw">while</span> (scanf(<span class="str">"%d"</span>, &amp;x) == <span class="num">1</span>) {
+    <span class="kw">if</span> (x &gt; max) 
+        max = x;
+}
+printf(<span class="str">"Max=%d\n"</span>, max);</pre>
+      <div class="box red" style="margin-top:12px;"><span class="label">缺陷</span>若输入全是负数（如 <code class="inline">-5 -10 -3</code>），程序会输出 <code class="inline">0</code>，因为 <b>0 > 任何负数</b>。</div>
+    </div>
+    <div class="card green">
+      <h4>✅ 写法 2：计数器记录首个元素</h4>
+<pre class="code"><span class="kw">int</span> x, max, count = <span class="num">0</span>;
+<span class="kw">while</span> (scanf(<span class="str">"%d"</span>, &amp;x) == <span class="num">1</span>) {
+    <span class="kw">if</span> (count == <span class="num">0</span>) max = x;
+    <span class="kw">else if</span> (x &gt; max) max = x;
+    count++;
+}
+<span class="kw">if</span> (count &gt; <span class="num">0</span>) 
+    printf(<span class="str">"Max=%d\n"</span>, max);</pre>
+      <div class="box tip" style="margin-top:12px;"><span class="label">巧妙</span>用 <code class="inline">count</code> 判断，把读到的第一个数直接定为 <code class="inline">max</code> 基准。</div>
+    </div>
+  </div>
+
+  <!-- ===== 15 while(1)+break 写法 ===== -->
+  <div class="section" id="sec15">
+    <div class="section-title">进阶写法： while(1) + break</div>
+    <div class="box key"><span class="label">思考</span>在不知道循环次数时，把读取条件和退出逻辑全塞进 <code class="inline">while()</code> 里，往往会让条件变得很长。有没有更符合人类思维“先做，不行再退”的写法？</div>
+<pre class="code"><span class="kw">int</span> x, max, count = <span class="num">0</span>;
+
+<span class="kw">while</span> (<span class="num">1</span>) { <span class="cmt">// 条件永远为真，先进入</span>
+    <span class="kw">if</span> (scanf(<span class="str">"%d"</span>, &amp;x) != <span class="num">1</span>) 
+        <span class="kw">break</span>; <span class="cmt">// 读不到数据，打破循环</span>
+        
+    <span class="kw">if</span> (count == <span class="num">0</span>) max = x;
+    <span class="kw">else if</span> (x &gt; max) max = x;
+    count++;
+}
+
+<span class="kw">if</span> (count &gt; <span class="num">0</span>) 
+    printf(<span class="str">"Max=%d\n"</span>, max);</pre>
+    <div class="box tip"><span class="label">优点</span>将“获取数据”和“判断是否结束”拆成了两步，逻辑极其清晰：<b>读不到？那就 break！</b></div>
+    <div class="box warn"><span class="label">更适用的场景</span>如果读取数据的逻辑很长，此时把所有条件塞进 <code class="inline">while()</code> 括号里会极其臃肿。这时用 <code class="inline">while(1)</code> 配合 <code class="inline">break</code> 是最佳实践。</div>
+    <div class="box orange"><span class="label">补充说明</span>下一章要学的 <code class="inline">do-while</code> 语句，本质上就是 <code class="inline">while(1) + break</code> 的标准语法糖。</div>
+  </div>
+
+  <!-- ===== 16 不知道读几个字符 ===== -->
+  <div class="section" id="sec16">
+    <div class="section-title">次数不定（三）：不知道要读几个字符</div>
+    <div class="section-sub">读到这一行结束</div>
+<pre class="code"><span class="kw">int</span> c;
+<span class="kw">while</span> ((c = getchar()) != <span class="str">'\n'</span>)
+    putchar(c);          <span class="cmt">// 原样输出</span></pre>
+    <div class="box tip"><span class="label">解释</span>先读一个字符存进 c，再拿它跟回车比；<b>不等于回车就执行循环体</b>。</div>
+    
+    <div class="section-sub">读到整个输入结束</div>
+<pre class="code"><span class="kw">int</span> c;
+<span class="kw">while</span> ((c = getchar()) != EOF)
+    putchar(c);          <span class="cmt">// 原样输出</span></pre>
+    <div class="box warn"><span class="label">怎么结束</span>Windows 按 <code class="inline">Ctrl + Z</code> 再回车；Linux / Mac 按 <code class="inline">Ctrl + D</code>。</div>
+
+    <div class="box red">
+      <span class="label">⚠️ 能把 getchar() 换成 scanf("%c", &c) 吗？</span><br>
+      不能简单替换。如果用 <code class="inline">while (scanf("%c", &c) != '\n')</code> 会直接陷入<b>死循环</b>。<br>
+      原因是：<code class="inline">scanf</code> 的返回值不是读到的字符，而是<b>成功读入的数据个数</b>。只要读到了字符（哪怕是回车），它就返回 <b>1</b>。判断条件变成了 <code class="inline">1 != '\n'</code>，永远成立。
+    </div>
+  </div>
+
+  <!-- ===== 17 凯撒密码加密 ===== -->
+  <div class="section" id="sec17">
+    <div class="section-title">多个字符处理：边读边改（加密）</div>
+    <div class="box warn"><span class="label">核心逻辑</span>读一个字符、偏移、输出，再读下一个。不需要把所有字符存进数组。</div>
+<pre class="code"><span class="kw">int</span> c;
+<span class="kw">while</span> ((c = getchar()) != <span class="str">'\n'</span>) {
+    <span class="kw">if</span> (c &gt;= <span class="str">'a'</span> &amp;&amp; c &lt;= <span class="str">'z'</span>)
+        c = (c - <span class="str">'a'</span> + <span class="num">3</span>) % <span class="num">26</span> + <span class="str">'a'</span>;
+    <span class="kw">else if</span> (c &gt;= <span class="str">'A'</span> &amp;&amp; c &lt;= <span class="str">'Z'</span>)
+        c = (c - <span class="str">'A'</span> + <span class="num">3</span>) % <span class="num">26</span> + <span class="str">'A'</span>;
+    putchar(c); <span class="cmt">// 边读、边改、边输出</span>
+}</pre>
+    <div class="box tip"><span class="label">原理</span>每个字母向后移 3 位（如 a→d, z→c），非字母不变。取模运算保证字母在 a~z 中循环。</div>
+  </div>
+
+  <!-- ===== 18 凯撒密码解密 ===== -->
+  <div class="section" id="sec18">
+    <div class="section-title">多个字符处理：凯撒密码的解密</div>
+    <div class="box warn"><span class="label">回顾</span>加密是把字母向后移 3 位，解密就是把它<b>向前移 3 位</b>。核心代码几乎一样。</div>
+<pre class="code"><span class="kw">int</span> c;
+<span class="kw">while</span> ((c = getchar()) != <span class="str">'\n'</span>) {
+    <span class="kw">if</span> (c &gt;= <span class="str">'a'</span> &amp;&amp; c &lt;= <span class="str">'z'</span>)
+        <span class="cmt">// 注意这里：-3 之后 +26</span>
+        c = (c - <span class="str">'a'</span> - <span class="num">3</span> + <span class="num">26</span>) % <span class="num">26</span> + <span class="str">'a'</span>;
+    <span class="kw">else if</span> (c &gt;= <span class="str">'A'</span> &amp;&amp; c &lt;= <span class="str">'Z'</span>)
+        c = (c - <span class="str">'A'</span> - <span class="num">3</span> + <span class="num">26</span>) % <span class="num">26</span> + <span class="str">'A'</span>;
+    putchar(c);
+}</pre>
+    <div class="box key"><span class="label">为什么要加 26？</span>在 C 语言中，<b>负数取模还是负数</b>。比如字母 <code class="inline">'a'</code>，偏移量是 0，<code class="inline">0 - 3 = -3</code>。<code class="inline">-3 % 26</code> 的结果仍是 <code class="inline">-3</code>，并没有循环到 <code class="inline">'x'</code>。在取模前先加上 26 就能补救。</div>
+    <div class="box tip"><span class="label">运行演示</span>密文: Khoor → 解密: Hello</div>
+  </div>
+
+  <!-- ===== 19 异或加密 ===== -->
+  <div class="section" id="sec19">
+    <div class="section-title">多个字符处理：边读边改（加密二）</div>
+    <div class="box warn"><span class="label">场景</span>按位异或（XOR）加密。这是一种更通用、更安全的单字符加密方式。将每个字符与一个密钥字符（如 'K'）进行异或。</div>
+<pre class="code"><span class="kw">int</span> c;
+<span class="kw">while</span> ((c = getchar()) != <span class="str">'\n'</span>) {
+    <span class="cmt">// 异或的特性：A ^ K = B, B ^ K = A</span>
+    c = c ^ <span class="str">'K'</span>; 
+    putchar(c); <span class="cmt">// 输出乱码即加密成功</span>
+}</pre>
+    <div class="box key"><span class="label">异或的妙用</span>加密和解密使用同一个密钥。你用 <code class="inline">'K'</code> 加密得到乱码，再用 <code class="inline">'K'</code> 异或，又能还原成明文。</div>
+    <div class="box tip"><span class="label">运行演示</span>输入: C Language → 输出: )#6HXJYJXH</div>
+  </div>
+
+  <!-- ===== 20 边读边改综合 ===== -->
+  <div class="section" id="sec20">
+    <div class="section-title">多个字符（三）：边读边改，边读边输出</div>
+    <div class="section-sub">例：去掉所有空格（压缩输出）</div>
+<pre class="code"><span class="kw">int</span> c;
+<span class="kw">while</span> ((c = getchar()) != <span class="str">'\n'</span>)
+    <span class="kw">if</span> (c != <span class="str">' '</span>)
+        putchar(c);</pre>
+    <div class="box tip"><span class="label">思路</span>读一个、判一个，不合意就不输出。</div>
+    
+    <div class="section-sub">例：小写转大写（改完再输出）</div>
+<pre class="code"><span class="kw">int</span> c;
+<span class="kw">while</span> ((c = getchar()) != <span class="str">'\n'</span>)
+    <span class="kw">if</span> (c &gt;= <span class="str">'a'</span> &amp;&amp; c &lt;= <span class="str">'z'</span>)
+        putchar(c - <span class="num">32</span>);   <span class="cmt">// 小写转大写</span>
+    <span class="kw">else</span>
+        putchar(c);</pre>
+    <div class="box key"><span class="label">32 是怎么来的</span><code class="inline">'a'</code> 是 97，<code class="inline">'A'</code> 是 65，正好差 32——小写减 32 就是大写。</div>
+  </div>
+
+  <!-- ===== 21 分号陷阱 ===== -->
+  <div class="section" id="sec21">
+    <div class="section-title">错误一：多写一个分号，循环体就没了</div>
+    <div class="box red"><span class="label">错误写法</span><code class="inline">while (i &lt;= 100);</code>　这个分号让循环体变成了一条<b>空语句</b></div>
+    <div class="card red">
+      <h4>❌ 错：分号结尾</h4>
+<pre class="code"><span class="kw">while</span> (i &lt;= <span class="num">100</span>);
+{
+    s = s + i;
+    i++;
+}</pre>
+      <div class="out">结果：卡死（i 永不变）</div>
+    </div>
+    <div class="card green">
+      <h4>✅ 对：不要分号</h4>
+<pre class="code"><span class="kw">while</span> (i &lt;= <span class="num">100</span>)
+{
+    s = s + i;
+    i++;
+}</pre>
+      <div class="out">结果：s = 5050</div>
+    </div>
+    <div class="box tip"><span class="label">怎么发现</span>程序<b>不输出、像卡住了</b>，第一反应就查 while 那行结尾有没有多余分号。</div>
+  </div>
+
+  <!-- ===== 22 忘记推进 ===== -->
+  <div class="section" id="sec22">
+    <div class="section-title">错误二：忘了让循环变量往前走</div>
+    <div class="card red">
+      <h4>❌ 错误写法</h4>
+<pre class="code"><span class="kw">int</span> i = <span class="num">1</span>, s = <span class="num">0</span>;
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    s = s + i;   <span class="cmt">// i 一直是 1</span>
+}                <span class="cmt">// 少了 i++</span></pre>
+      <p>循环体里只有累加，没有 <code class="inline">i++</code>。</p>
+    </div>
+    <div class="box key"><span class="label">自查口诀</span>沿循环体走一遍，确认循环变量<b>真的在变</b>。</div>
+    <div class="box warn"><span class="label">现象</span>屏幕上什么都没出来，程序却一直不结束——它正在<b>疯狂重复同一件事</b>。</div>
+    <div class="box tip"><span class="label">现场处理</span>控制台按 <code class="inline">Ctrl + C</code> 强行终止，别等着。</div>
+  </div>
+
+  <!-- ===== 23 累加器未清零 ===== -->
+  <div class="section" id="sec23">
+    <div class="section-title">错误三：累加器忘了清零</div>
+    <div class="card red">
+      <h4>✗ 错：不赋初值</h4>
+<pre class="code"><span class="kw">int</span> s;       <span class="cmt">// 里面是什么？</span>
+<span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    s = s + i;
+    i++;
+}</pre>
+    </div>
+    <div class="card green">
+      <h4>✓ 对：先给一个干净的 0</h4>
+<pre class="code"><span class="kw">int</span> s = <span class="num">0</span>;   <span class="cmt">// 明确从 0 开始</span>
+<span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    s = s + i;
+    i++;
+}</pre>
+    </div>
+    <div class="box warn"><span class="label">为什么每次不一样</span>局部变量不初始化，里面是<b>垃圾值</b>。</div>
+    <div class="box key"><span class="label">规矩</span>累加器写 0，累乘器写 1，计数器写 0。</div>
+  </div>
+
+  <!-- ===== 24 浮点比相等 ===== -->
+  <div class="section" id="sec24">
+    <div class="section-title">错误四：用浮点数判断"相等"</div>
+    <div class="box red"><span class="label">危险写法</span><code class="inline">while (f != 0.0)</code> —— f 可能永远也"不等于"0</div>
+    <div class="box"><span class="label">原因</span>0.1 在二进制里是<b>无限循环小数</b>，存进 double 就被截断了。</div>
+<pre class="code"><span class="cmt">// 危险：可能死循环</span>
+<span class="kw">while</span> (f != <span class="num">0.0</span>)
+    f = f - <span class="num">0.1</span>;
+<span class="cmt">// 安全：足够接近 0</span>
+<span class="kw">while</span> (fabs(f) &gt; <span class="num">1e-6</span>)
+    f = f - <span class="num">0.1</span>;</pre>
+    <div class="box key"><span class="label">规矩</span>浮点数<b>永远不要用 == 或 != 比</b>，要比就比 <code class="inline">fabs(a-b) &lt; 1e-6</code>。需要 <code class="inline">#include &lt;math.h&gt;</code>。</div>
+  </div>
+
+  <!-- ===== 25 随堂检测 ===== -->
+  <div class="section" id="sec25">
+    <div class="section-title">随堂检测：两道题，当堂推一遍</div>
+    <div class="card red">
+      <h4>Q1：执行几次？</h4>
+<pre class="code"><span class="kw">int</span> k = <span class="num">1</span>;
+<span class="kw">while</span> (k = <span class="num">1</span>) k--;</pre>
+      <p>A. 1 次　B. 0 次　C. 无数次　D. 语法错误</p>
+    </div>
+    <div class="card green">
+      <h4>Q2：i 最后是多少？</h4>
+<pre class="code"><span class="kw">int</span> i = <span class="num">0</span>;
+<span class="kw">while</span> (i &lt; <span class="num">5</span>) i++;</pre>
+      <p>A. 4　B. 5　C. 6　D. 不确定</p>
+    </div>
+    <div class="box warn"><span class="label">提示</span>Q1 看 <code class="inline">=</code> 与 <code class="inline">==</code>：赋值表达式的值是<b>赋进去的那个值</b>，恒为真。Q2 看<b>退出时循环变量已经变了</b>。</div>
+    <div class="box tip"><span class="label">答案</span>Q1 选 <b>C</b>（死循环）；Q2 选 <b>B</b>。</div>
+  </div>
+
+  <!-- ===== 26 本讲小结 ===== -->
+  <div class="section" id="sec26">
+    <div class="section-title">本讲小结：三类应用与五条要点</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead>
+          <tr><th>类型</th><th>循环前知道什么</th><th>本讲例子</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>次数确定</td><td>知道要做几遍</td><td>1 到 100、n!</td></tr>
+          <tr><td>次数不定</td><td>只知道停下来的条件</td><td>求 π、读到结束</td></tr>
+          <tr><td>多个字符</td><td>每次进来一个字符</td><td>分类统计、转换</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="feat">
+      <li><span class="k">① 循环与四要素</span><span class="v">起点、门槛、正事、推进，缺一个就错</span></li>
+      <li><span class="k">② while 怎么走</span><span class="v">先判断后执行，所以可能一次都不做</span></li>
+      <li><span class="k">③ 怎么验证</span><span class="v">列变量取值表，再看边界差没错</span></li>
+      <li><span class="k">④ 四个坑</span><span class="v">分号、不推进、未清零、浮点比相等</span></li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    C 程序设计基础 · 第 4 章（一）while 语句<br>
+    手机复习版 · 武汉理工大学 人工智能学院
+  </div>
+
+</div>
+
+<!-- ================= 回到顶部按钮 ================= -->
+<button class="backtop" id="backtop" title="回到顶部">↑</button>
+
+<script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
