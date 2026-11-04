@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C 程序设计基础 · 第 4 章（二）do-while 语句</title>
+<style>
+  :root{
+    --fs-title: 48px;
+    --fs-body:  32px;
+    --fs-other: 30px;
+    --fs-list:  30px;
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html,body{
+    height:100%;overflow:hidden;background:var(--blue-900);
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  #stage{
+    position:fixed;left:50%;top:50%;
+    width:1600px;height:900px;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    transform-origin:center center;
+    background:#fff;overflow:hidden;
+    transition:opacity .22s ease;
+  }
+  body.blackout #stage{opacity:0;}
+
+  .slide{
+    position:absolute;inset:0;
+    display:none;flex-direction:column;
+    padding:30px 64px 60px;
+    background:linear-gradient(180deg,#ffffff 0%,#f4faff 100%);
+  }
+  .slide.active{display:flex;animation:fadeUp .26s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  @keyframes itemIn{
+    from{opacity:0;transform:translateY(18px);}
+    to{opacity:1;transform:none;}
+  }
+  .slide.active .s-title{animation:itemIn .42s ease both;}
+  .slide.active .s-body > *{animation:itemIn .42s ease both;}
+  .slide.active .s-body > *:nth-child(1){animation-delay:.08s;}
+  .slide.active .s-body > *:nth-child(2){animation-delay:.16s;}
+  .slide.active .s-body > *:nth-child(3){animation-delay:.24s;}
+  .slide.active .s-body > *:nth-child(4){animation-delay:.32s;}
+  .slide.active .s-body > *:nth-child(5){animation-delay:.40s;}
+  .slide.active .s-body > *:nth-child(6){animation-delay:.48s;}
+
+  .slide.cover.active .s-title,
+  .slide.cover.active .s-body > *,
+  .slide.end.active .s-title,
+  .slide.end.active .s-body > *{animation:none;}
+
+  .slide::after{
+    content:"";position:absolute;right:-90px;bottom:-90px;
+    width:300px;height:300px;border-radius:50%;
+    background:radial-gradient(circle,rgba(26,111,181,.10) 0%,rgba(26,111,181,0) 70%);
+    pointer-events:none;
+  }
+
+  .s-title{
+    flex:0 0 auto;align-self:flex-start;
+    background:linear-gradient(135deg,#1a6fb5 0%,#124f83 100%);
+    color:#fff;font-size:48px;font-weight:700;
+    letter-spacing:1.5px;line-height:1.15;
+    padding:14px 30px 14px 24px;
+    border-left:10px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    margin-bottom:18px;
+    box-shadow:0 6px 16px rgba(18,79,131,.18);
+  }
+  .s-sub{
+    font-size:var(--fs-body);font-weight:700;color:var(--blue-700);
+    border-left:7px solid var(--orange);
+    padding:2px 0 2px 14px;margin:14px 0 10px;
+  }
+  .s-sub:first-child{margin-top:0;}
+  .s-sub.blue{border-left-color:var(--blue-600);}
+
+  .s-body{
+    flex:1 1 auto;min-height:0;overflow:hidden;
+    font-size:32px;line-height:1.5;color:var(--ink);
+  }
+  .s-body p{margin:8px 0;}
+  .s-body p:first-child{margin-top:0;}
+  .s-body ul,.s-body ol{padding-left:1.5em;margin:8px 0;}
+  .s-body li{margin:4px 0;}
+  .s-body ul>li::marker{color:var(--blue-600);}
+  .s-body ol>li::marker{color:var(--orange);font-weight:800;}
+  b,strong{color:var(--blue-700);}
+
+  table.tb{
+    width:100%;border-collapse:separate;border-spacing:0;
+    font-size:var(--fs-other);line-height:1.45;margin:6px 0;
+    border-radius:12px;overflow:hidden;
+    box-shadow:0 4px 14px rgba(18,79,131,.08);
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;font-size:var(--fs-other);
+    padding:12px 18px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:11px 18px;background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:nth-child(even) td{background:#f7fafd;}
+  .c-red{color:var(--red);font-weight:600;}
+  .c-green{color:var(--green);font-weight:700;}
+  .c-blue{color:var(--blue-600);font-weight:700;}
+
+  .box{
+    border-left:7px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:16px 28px;margin:10px 0;
+    font-size:30px;line-height:1.7;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:10px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:6px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    padding:14px 22px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:30px;line-height:1.55;
+    white-space:pre;overflow:hidden;
+    box-shadow:0 8px 22px rgba(13,43,69,.22);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:2px 8px;font-size:30px;border-radius:5px;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:6px solid var(--blue-400);
+    border-radius:0 12px 12px 0;
+    padding:12px 22px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:30px;line-height:1.5;white-space:pre;
+  }
+
+  .steps{display:flex;gap:10px;align-items:stretch;}
+  .step{
+    flex:1;background:#fff;border:1px solid var(--line);
+    border-top:7px solid var(--blue-600);
+    border-radius:0 0 14px 14px;
+    padding:14px 12px;text-align:center;
+    box-shadow:0 6px 16px rgba(18,79,131,.08);
+  }
+  .step.orange{border-top-color:var(--orange);}
+  .step.green{border-top-color:var(--green);}
+  .step.purple{border-top-color:var(--purple);}
+  .step .n{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,var(--orange),#c55807);
+    color:#fff;font-size:30px;font-weight:700;margin-bottom:8px;
+  }
+  .step .t{font-size:30px;font-weight:700;color:var(--blue-700);line-height:1.2;}
+  .step .d{font-size:30px;color:var(--muted);margin-top:6px;line-height:1.4;}
+  
+  /* 纵向三步布局 */
+  .steps-vertical{
+    display:flex;flex-direction:column;align-items:stretch;gap:0;
+  }
+  .steps-vertical .step{
+    flex:0 0 auto;padding:18px 24px;text-align:left;
+    border-radius:0 14px 14px 0;border-top:none;
+    border-left:7px solid var(--blue-600);
+  }
+  .steps-vertical .step.orange{border-left-color:var(--orange);border-top:none;}
+  .steps-vertical .step.green{border-left-color:var(--green);border-top:none;}
+  .steps-vertical .step-head{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+  .steps-vertical .step .n{margin-bottom:0;flex:0 0 auto;}
+  .steps-vertical .step .t{font-size:30px;font-weight:700;color:var(--blue-700);line-height:1.2;text-align:left;}
+  .steps-vertical .step.orange .t{color:#b95a05;}
+  .steps-vertical .step.green .t{color:var(--green);}
+  .steps-vertical .step .d{font-size:30px;color:var(--muted);line-height:1.4;text-align:left;margin-top:0;}
+  .arrow-down{display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:700;color:var(--orange);line-height:1;padding:6px 0;}
+
+  .grid{display:grid;gap:14px;}
+  .grid.c2{grid-template-columns:1fr 1fr;}
+  .grid.c3{grid-template-columns:repeat(3,1fr);}
+  .grid{ gap:26px 14px; }
+  .card{
+    background:#fff;border:1px solid var(--line);
+    border-top:7px solid var(--blue-600);
+    border-radius:0 0 16px 16px;
+    padding:22px 28px;
+    box-shadow:0 6px 16px rgba(18,79,131,.08);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:30px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:10px;
+    line-height:1.2;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:30px;color:var(--muted);line-height:1.7;margin:0;}
+  .card .ico{font-size:30px;line-height:1;}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+  .two.wide{grid-template-columns:1.15fr 1fr;}
+
+  .feat{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
+  .feat li{
+    display:flex;align-items:center;gap:22px;
+    background:#fff;border:1px solid var(--line);
+    border-left:7px solid var(--blue-600);
+    border-radius:0 12px 12px 0;
+    padding:12px 24px;
+    box-shadow:0 4px 10px rgba(18,79,131,.06);
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;width:270px;
+    font-size:30px;font-weight:700;color:var(--blue-700);
+    line-height:1.25;
+  }
+  .feat .v{
+    font-size:30px;color:var(--muted);line-height:1.5;
+  }
+
+  .slide.cover{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    padding:0 110px 60px;justify-content:center;
+  }
+  .slide.cover::before{
+    content:"";position:absolute;right:-100px;top:-100px;
+    width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.18) 0%,rgba(232,114,12,0) 70%);
+  }
+  .slide.cover::after{
+    content:"";position:absolute;left:-100px;bottom:-120px;
+    width:440px;height:440px;border-radius:50%;
+    background:radial-gradient(circle,rgba(74,151,212,.18) 0%,rgba(74,151,212,0) 70%);
+  }
+  .cover-inner{position:relative;z-index:2;}
+  .cover-kicker{
+    display:inline-block;font-size:var(--fs-other);letter-spacing:3px;
+    color:#ffd9b3;border:1px solid rgba(255,217,179,.55);
+    padding:8px 24px;margin-bottom:28px;border-radius:999px;
+  }
+  .cover h1{
+    font-size:82px;font-weight:800;color:#fff;
+    letter-spacing:5px;line-height:1.15;margin-bottom:16px;
+  }
+  .cover-bar{width:650px;height:8px;border-radius:4px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:22px;}
+  .cover-sub{font-size:40px;color:#a9d8f5;letter-spacing:3px;margin-bottom:36px;}
+  .cover-meta{font-size:var(--fs-other);color:#7fb2dd;letter-spacing:2px;}
+
+  .slide.end{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    padding:0 110px 60px;justify-content:center;
+  }
+  .slide.end::before{
+    content:"";position:absolute;right:-100px;bottom:-120px;
+    width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.16) 0%,rgba(232,114,12,0) 70%);
+  }
+  .end-inner{position:relative;z-index:2;}
+  .end h2{font-size:82px;font-weight:800;color:#fff;letter-spacing:10px;margin-bottom:22px;}
+  .end p{font-size:var(--fs-body);color:#a9d8f5;letter-spacing:2px;}
+
+  .pageinfo{
+    position:absolute;right:40px;top:22px;z-index:20;
+    font-size:var(--fs-other);color:var(--blue-600);letter-spacing:1px;
+    background:rgba(255,255,255,.95);
+    border:1px solid var(--line);border-radius:999px;
+    padding:5px 20px;
+    box-shadow:0 4px 10px rgba(18,79,131,.08);
+  }
+  .pageinfo b{font-size:var(--fs-other);color:var(--orange);}
+
+  .nav{
+    position:absolute;right:36px;bottom:14px;z-index:20;
+    display:flex;align-items:center;gap:10px;
+  }
+  .nav button{
+    height:50px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-size:var(--fs-other);line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .18s;font-family:inherit;
+    border-radius:12px;width:50px;
+    box-shadow:0 5px 12px rgba(18,79,131,.28);
+  }
+  .nav button:hover{background:linear-gradient(135deg,#e8720c,#c55807);transform:translateY(-2px);}
+  .nav button:disabled{background:#b9cfe4;cursor:not-allowed;box-shadow:none;transform:none;}
+  .nav .tocbtn{width:auto;padding:0 22px;font-weight:700;letter-spacing:1px;}
+
+  .progress{
+    position:absolute;left:0;bottom:0;height:6px;width:0;z-index:20;
+    background:linear-gradient(90deg,#1a6fb5,#e8720c);
+    transition:width .3s ease;
+  }
+
+  .keyhint{
+    position:absolute;left:36px;bottom:18px;transform:none;
+    z-index:20;font-size:30px;color:#7fa8c4;letter-spacing:1px;
+    background:rgba(255,255,255,.85);border:1px solid var(--line);
+    border-radius:999px;padding:4px 16px;
+    transition:opacity .6s ease;white-space:nowrap;
+  }
+  .keyhint.hide{opacity:0;}
+
+  .toc{
+    position:absolute;inset:0;z-index:40;
+    background:rgba(10,61,99,.96);
+    display:none;padding:44px 60px 60px;overflow:hidden;
+  }
+  .toc.show{display:block;}
+  .toc h3{font-size:40px;color:#fff;letter-spacing:4px;margin-bottom:6px;}
+  .toc .toc-bar{width:110px;height:6px;border-radius:3px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:20px;}
+  .toc-list{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;align-items:start;
+  }
+  .toc-group{
+    background:rgba(255,255,255,.05);
+    border-radius:14px;
+    padding:14px 14px 16px;
+    border-top:5px solid var(--blue-400);
+  }
+  .toc-group:nth-child(2){border-top-color:var(--orange);}
+  .toc-group:nth-child(3){border-top-color:var(--green);}
+  .toc-group:nth-child(4){border-top-color:var(--purple);}
+  .toc-group-title{
+    font-size:30px;color:#ffc17a;font-weight:800;
+    letter-spacing:1px;margin-bottom:10px;
+    padding-bottom:8px;
+    border-bottom:1px dashed rgba(255,255,255,.18);
+    line-height:1.25;
+  }
+  .toc-group a{
+    display:block;color:#cfe6f7;font-size:30px;
+    padding:8px 12px;border-radius:8px;
+    cursor:pointer;margin-bottom:4px;
+    text-decoration:none;line-height:1.35;
+    transition:all .16s;
+  }
+  .toc-group a:hover{background:linear-gradient(90deg,#e8720c,#c55807);color:#fff;}
+  .toc-close{
+    position:absolute;right:40px;top:22px;
+    background:none;border:1px solid #7fb2dd;color:#cfe6f7;
+    font-size:var(--fs-other);padding:7px 22px;cursor:pointer;font-family:inherit;
+    border-radius:12px;
+  }
+  .toc-close:hover{background:#e8720c;border-color:#e8720c;color:#fff;}
+
+  /* 字号统一 */
+  pre.code{font-size:30px;line-height:1.48;}
+  code.inline{font-size:30px;padding:1px 7px;}
+  .out{font-size:30px;line-height:1.5;}
+  .box{font-size:32px;line-height:1.65;padding:16px 26px;}
+  .box .label{margin-right:8px;}
+  .card h4{font-size:32px;}
+  .card p{font-size:30px;line-height:1.6;}
+  .feat .k{font-size:32px;width:300px;}
+  .feat .v{font-size:30px;line-height:1.45;}
+  .step .n{width:46px;height:46px;font-size:30px;}
+  .step .t{font-size:30px;}
+  .step .d{font-size:30px;line-height:1.35;}
+  table.tb{font-size:30px;}
+  table.tb thead th,table.tb td,table.tb tbody th{font-size:30px;}
+  .arrow-down{font-size:32px;padding:2px 0;}
+  .s-body{font-size:32px;}
+  .two.narrow{grid-template-columns:0.82fr 1.18fr;}
+  .two.narrow2{grid-template-columns:0.78fr 1.22fr;}
+
+  /* 选择增强 */
+  ::selection{background:#ffb74d;color:#0d2b45;}
+  pre.code::selection, pre.code *::selection{background:#ffcc80;color:#0d2b45;}
+  .out::selection, .out *::selection{background:#ffb74d;color:#0d2b45;}
+  .nav,.pageinfo,.keyhint,.progress,.toc,.copy-toast{
+    -webkit-user-select:none;-moz-user-select:none;user-select:none;}
+  #stage .slide{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
+  .copy-toast{
+    position:absolute;left:50%;bottom:78px;z-index:60;
+    transform:translateX(-50%) translateY(12px);
+    background:rgba(13,43,69,.95);color:#fff;
+    font-size:30px;letter-spacing:1px;line-height:1.35;
+    padding:12px 30px;border-radius:999px;white-space:nowrap;
+    box-shadow:0 10px 26px rgba(13,43,69,.32);
+    opacity:0;pointer-events:none;
+    transition:opacity .22s ease,transform .22s ease;}
+  .copy-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  /* ==== 流程图图元：复用资料库《流程图元件库》的 .fc-* 规范 ==== */
+  .flow{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;width:100%;gap:6px;}
+  .flow svg{display:block;height:auto;}
+  .flow svg text{font-family:"Microsoft YaHei","PingFang SC",sans-serif;}
+  .fc-ns{fill:#fff;stroke:var(--blue-600);stroke-width:2.5;}
+  .fc-ns-line{stroke:var(--blue-600);stroke-width:2.5;}
+  .fc-ns-cond{fill:var(--blue-100);stroke:var(--blue-600);stroke-width:2.5;}
+  .fc-ns-t{fill:var(--ink);}
+
+  /* ==== 演示动画：按钮逐步推进（与 4_1 凯撒页同一套交互） ==== */
+  .demo{
+    background:#fff;border:1px solid var(--line);border-top:7px solid var(--purple);
+    border-radius:0 0 16px 16px;padding:18px 24px;
+    box-shadow:0 6px 16px rgba(18,79,131,.08);
+    display:flex;flex-direction:column;justify-content:space-between;gap:2px;
+  }
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .demo-title{font-size:32px;font-weight:700;color:var(--purple);}
+  .demo-btn{
+    font-family:inherit;font-size:30px;line-height:1;padding:12px 22px;
+    border:none;border-radius:10px;background:var(--purple);color:#fff;cursor:pointer;
+    box-shadow:0 4px 12px rgba(142,68,173,.30);transition:background .16s;
+  }
+  .demo-btn:hover{background:#7a3a96;}
+  .chips{display:flex;gap:12px;justify-content:center;margin:2px 0 14px;}
+  .chip{
+    width:64px;height:64px;border-radius:12px;background:var(--blue-100);
+    border:2px solid var(--blue-400);color:var(--blue-700);
+    font-size:38px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    transition:all .22s ease;
+  }
+  .chip.hot{background:var(--orange);border-color:var(--orange);color:#fff;transform:translateY(-8px);
+            box-shadow:0 8px 16px rgba(232,114,12,.35);}
+  .chip.off{opacity:.30;background:#eef3f8;border-color:var(--line);color:#8fa6b8;
+            transform:none;box-shadow:none;text-decoration:line-through;}
+  .demo-vals{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:10px;}
+  .dv{background:#f6fafd;border:1px solid var(--line);border-radius:10px;padding:6px 8px;text-align:center;}
+  .dv .k{display:block;font-size:30px;color:var(--muted);line-height:1.25;}
+  .dv b{display:block;font-size:36px;color:var(--blue-700);line-height:1.25;}
+  .dv b.q-true{color:var(--green);}
+  .dv b.q-false{color:var(--red);}
+  .demo-note{margin-top:12px;font-size:30px;color:var(--muted);line-height:1.45;min-height:58px;}
+
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- 1 封面 -->
+  <section class="slide cover active">
+    <div class="cover-inner">
+      <div class="cover-kicker">武汉理工大学 人工智能学院</div>
+      <h1>do-while 语句</h1>
+      <div class="cover-bar"></div>
+      <div class="cover-sub">第 4 章（二）循环结构 · 直到型循环</div>
+      <div class="cover-meta">主讲：李　民</div>
+    </div>
+  </section>
+
+  <!-- 2 本讲内容 -->
+  <section class="slide">
+    <div class="s-title">本讲内容</div>
+    <div class="s-body">
+      <div class="grid c2">
+        <div class="card"><h4><span class="ico">🔂</span>为什么还要一种循环</h4><p>有些事必须先做一次</p></div>
+        <div class="card orange"><h4><span class="ico">⚙️</span>语法与执行流程</h4><p>先执行、后判断</p></div>
+        <div class="card green"><h4><span class="ico">🧪</span>一次反例</h4><p>初值 101：while 得 0，它得 101</p></div>
+        <div class="card purple"><h4><span class="ico">🧮</span>四个落地场景</h4><p>输入校验、菜单、位数、公约数</p></div>
+        <div class="card red"><h4><span class="ico">⚠️</span>两个专属陷阱</h4><p>结尾分号、条件取反</p></div>
+        <div class="card"><h4><span class="ico">🎯</span>选型与检测</h4><p>三种循环各在什么场合上场</p></div>
+      </div>
+      <div class="box key" style="margin-top:18px;">
+        <span class="label">一条主线</span>
+        全篇只回答一个问题：<b>判断放在门口，还是放在出口？</b>位置一挪，行为就全变了。
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 本讲学习目标 -->
+  <section class="slide">
+    <div class="s-title">本讲学习目标</div>
+    <div class="s-body">
+      <ul class="feat">
+        <li><span class="k">① 会写</span><span class="v">四要素，写完别忘结尾分号</span></li>
+        <li><span class="k">② 会读</span><span class="v">说清"先执行、后判断"的先后</span></li>
+        <li><span class="k">③ 会辨</span><span class="v">初值取 101 时，能算出两种结果并解释</span></li>
+        <li><span class="k">④ 会用</span><span class="v">输入校验、菜单、位数统计能独立写出</span></li>
+        <li><span class="k">⑤ 会选</span><span class="v">判断该用 while 还是 do-while</span></li>
+      </ul>
+      <div class="box tip" style="margin-top:18px;">
+        <span class="label">怎么算学会了</span>
+        给一段 do-while，能<b>手推出每一轮的变量值</b>，还能说清"它为什么比 while 多执行一次"。
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 案例引入：猜数字 -->
+  <section class="slide">
+    <div class="s-title">案例引入：猜数字</div>
+    <div class="s-body" style="display:flex; flex-direction:column; gap:14px;">
+      <div class="two" style="margin-top:0;">
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">int</span> n = <span class="num">37</span>, g;
+printf(<span class="str">"猜 1~100："</span>);
+scanf(<span class="str">"%d"</span>, &amp;g);
+<span class="kw">while</span> (g != n) {
+    printf(g &lt; n ? <span class="str">"小了："</span>
+                  : <span class="str">"大了："</span>);
+    scanf(<span class="str">"%d"</span>, &amp;g);
+}
+printf(<span class="str">"猜对了！\n"</span>);</pre>
+        </div>
+        <div>
+          <table class="tb" style="margin-top:0;">
+            <thead><tr><th style="width:14%;">轮</th><th style="width:20%;">输入 g</th><th style="width:24%;">g != 37</th><th>屏幕上</th></tr></thead>
+            <tbody>
+              <tr><th>1</th><td>50</td><td>真</td><td>大了：</td></tr>
+              <tr><th>2</th><td>25</td><td>真</td><td>小了：</td></tr>
+              <tr><th>3</th><td>37</td><td class="c-red">假</td><td>猜对了！</td></tr>
+            </tbody>
+          </table>
+          <div class="box warn" style="margin-top:12px;">
+            <span class="label">有点啰嗦</span>
+            <b>scanf 写了两遍</b>：循环前一次、循环里一次——同一句话说了两遍。
+          </div>
+          <div class="box tip" style="margin-top:10px;">
+            <span class="label">前提</span>
+            总得让人<b>先猜一次</b>。
+          </div>
+        </div>
+      </div>
+      <div class="box key" style="margin:0;">
+        <span class="label">想一想</span>
+        n 若由随机数生成，要猜几次<b>事先算不出来</b>，循环次数不确定。
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 同样的功能，do-while 少写一遍 -->
+  <section class="slide">
+    <div class="s-title">同样的功能，do-while 少写一遍</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:6px;">
+        <div>
+          <div class="box" style="margin-top:0;"><span class="label">while 版</span>输入写两遍</div>
+          <pre class="code" style="margin-top:12px;">scanf(<span class="str">"%d"</span>, &amp;n);        <span class="cmt">// 第一遍</span>
+<span class="kw">while</span> (n &lt; <span class="num">1</span> || n &gt; <span class="num">100</span>) {
+    printf(<span class="str">"重输："</span>);
+    scanf(<span class="str">"%d"</span>, &amp;n);    <span class="cmt">// 第二遍</span>
+}</pre>
+        </div>
+        <div>
+          <div class="box green" style="margin-top:0;"><span class="label">do-while 版</span>只写一遍</div>
+          <pre class="code" style="margin-top:12px;"><span class="kw">do</span> {
+    printf(<span class="str">"输入 1~100："</span>);
+    scanf(<span class="str">"%d"</span>, &amp;n);
+} <span class="kw">while</span> (n &lt; <span class="num">1</span> || n &gt; <span class="num">100</span>);</pre>
+        </div>
+      </div>
+      <div class="box key" style="margin-top:16px;">
+        <span class="label">一句话</span>
+        <b>它把"先做一次"和"不够再来一次"写成了同一份代码</b>——这就是它存在的全部理由。
+      </div>
+      <div class="box warn" style="margin-top:12px;">
+        <span class="label">代价</span>
+        它替你省掉一遍输入，也顺手把"至少做一次"写死了——<b>不需要先做一次时，别用它</b>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 语法与执行流程：先斩后奏 -->
+  <section class="slide">
+    <div class="s-title">语法与执行流程：先斩后奏</div>
+    <div class="s-body" style="display:flex; flex-direction:column; gap:16px;">
+      <div class="two" style="gap:30px; margin-top:0; align-items:start;">
+        <div>
+          <div class="s-sub blue" style="margin:0 0 6px;">格式</div>
+          <pre class="code" style="margin-top:0;"><span class="kw">do</span> {
+    语句;                <span class="cmt">/* 先执行 */</span>
+} <span class="kw">while</span> (条件表达式);    <span class="cmt">/* 后判断 */</span></pre>
+          <div class="s-sub blue" style="margin:16px 0 6px;">示例：统计位数</div>
+          <pre class="code" style="margin-top:0;"><span class="kw">int</span> n = <span class="num">2026</span>, c = <span class="num">0</span>;
+<span class="kw">do</span> {
+    c++;              <span class="cmt">// 先记一位</span>
+    n /= <span class="num">10</span>;           <span class="cmt">// 再砍一位</span>
+} <span class="kw">while</span> (n &gt; <span class="num">0</span>);      <span class="cmt">// 后判断</span></pre>
+        </div>
+        <div style="text-align:center;">
+          <div class="flow" style="margin-top:0;">
+            <svg viewBox="0 0 192 195" style="width:330px">
+              <rect class="fc-ns" x="6" y="13" width="180" height="168" rx="8"/>
+              <path class="fc-ns-cond" d="M14,13 h42 v127 h130 v33 a8,8 0 0 1 -8,8 h-164 a8,8 0 0 1 -8,-8 v-152 a8,8 0 0 1 8,-8 z"/>
+              <text class="fc-ns-t" x="121" y="58" font-size="18" text-anchor="middle">c++</text>
+              <line class="fc-ns-line" x1="56" y1="90" x2="186" y2="90"/>
+              <text class="fc-ns-t" x="121" y="120" font-size="18" text-anchor="middle">n /= 10</text>
+              <text class="fc-ns-t" x="96" y="168" font-size="18" font-weight="700" text-anchor="middle">n &gt; 0 ？</text>
+            </svg>
+          </div>
+          <div class="box tip" style="text-align:left; margin-top:12px;">
+            <span class="label">读图 · 后测试</span>
+            循环体在上、循环条件在下：<b>先走一趟，再问"还来吗"</b>。
+          </div>
+        </div>
+      </div>
+      <div class="box" style="margin:0; padding:10px 24px; display:flex; align-items:center; justify-content:center; gap:16px;">
+        <span><b>① 先执行一遍</b>　不看条件</span>
+        <span style="color:var(--orange);font-size:32px;font-weight:800;">→</span>
+        <span><b>② 再算条件</b>　做完才问</span>
+        <span style="color:var(--orange);font-size:32px;font-weight:800;">→</span>
+        <span><b>③ 真则回头，假则退出</b></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 四要素没多没少，只搬了一个家 -->
+  <section class="slide">
+    <div class="s-title">四要素没多没少，只搬了一个家</div>
+    <div class="s-body">
+      <table class="tb" style="margin-top:4px;">
+        <thead><tr><th style="width:22%;">要素</th><th style="width:34%;">while 里</th><th>do-while 里</th></tr></thead>
+        <tbody>
+          <tr><th>初值</th><td>循环之前</td><td>循环之前（<span class="c-blue">不变</span>）</td></tr>
+          <tr><th>判断条件</th><td>循环入口</td><td><span class="c-red">循环出口</span></td></tr>
+          <tr><th>循环体</th><td><code class="inline">{ }</code> 内</td><td><code class="inline">do</code> 与 <code class="inline">while</code> 之间</td></tr>
+          <tr><th>推进</th><td>循环体里</td><td>循环体里（<span class="c-blue">不变</span>）</td></tr>
+        </tbody>
+      </table>
+      <div class="two" style="margin-top:16px;">
+        <div class="box warn" style="margin-top:0;">
+          <span class="label">注意</span>
+          初值和推进还在老地方，<b>只搬了"判断"</b>。
+        </div>
+        <div class="box tip" style="margin-top:0;">
+          <span class="label">记住</span>
+          判断在出口，意味着它<b>至少被执行过一次</b>。
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+  <!-- 8 一次反例：初值取 101，两者就分家了 -->
+  <section class="slide">
+    <div class="s-title">一次反例：初值取 101，两者的不同</div>
+    <div class="s-body">
+      <div class="box" style="margin-top:0;">
+        <span class="label">问题</span>
+        求 1 到 100 之和，代码几乎一字不差，<b>只把初值改成 101。</b>
+      </div>
+      <div class="two" style="margin-top:14px;">
+        <div>
+          <div class="box" style="margin-top:0;"><span class="label">while</span>先判断</div>
+          <pre class="code" style="margin-top:12px;"><span class="kw">int</span> i = <span class="num">101</span>, s = <span class="num">0</span>;
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    s += i;
+    i++;
+}</pre>
+          <div class="out" style="margin-top:10px;">s = 0　一次没进</div>
+        </div>
+        <div>
+          <div class="box orange" style="margin-top:0;"><span class="label">do-while</span>后判断</div>
+          <pre class="code" style="margin-top:12px;"><span class="kw">int</span> i = <span class="num">101</span>, s = <span class="num">0</span>;
+<span class="kw">do</span> {
+    s += i;
+    i++;
+} <span class="kw">while</span> (i &lt;= <span class="num">100</span>);</pre>
+          <div class="out" style="margin-top:10px;">s = 101　硬做一次</div>
+        </div>
+      </div>
+      <div class="box key" style="margin-top:14px;">
+        <span class="label">为什么</span>
+        判断在门口，条件不成立<b>一次都不进</b>；判断在出口，人<b>已经进去了</b>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 手工跟踪：i 从 5 开始，每轮减 2 -->
+  <section class="slide">
+    <div class="s-title">手工跟踪：i 从 5 开始，每轮减 2</div>
+    <div class="s-body">
+      <div class="two narrow" style="margin-top:6px;">
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">int</span> i = <span class="num">5</span>;
+<span class="kw">do</span> {
+    i -= <span class="num">2</span>;
+    printf(<span class="str">"%d "</span>, i);
+} <span class="kw">while</span> (i &gt; <span class="num">0</span>);</pre>
+          <div class="out" style="margin-top:12px;">输出结果： 3 1 -1</div>
+        </div>
+        <div>
+          <table class="tb" style="margin-top:0;">
+            <thead><tr><th>轮</th><th>进入 i 值</th><th>减 2 后 i 值</th><th>i &gt; 0</th></tr></thead>
+            <tbody>
+              <tr><th>1</th><td>5</td><td>3</td><td class="c-green">真</td></tr>
+              <tr><th>2</th><td>3</td><td>1</td><td class="c-green">真</td></tr>
+              <tr><th>3</th><td>1</td><td>−1</td><td class="c-red">假</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="box warn" style="margin-top:14px;">
+        <span class="label">易错</span>
+        循环体执行了 <b>3 次</b>。很多人答"2 次"，因为漏掉最后那轮——<b>做完了才发现该停</b>。
+      </div>
+      <div class="box" style="margin-top:12px;">
+        <span class="label">若i的初值是0 </span>
+        这一问题用<code class="inline">while</code>与<code class="inline">do-while</code>循环输出结果相同，因为 <code class="inline">5 &gt; 0</code> 一开始就成立。<br>
+        <b>而当 i = 0</b>：<code class="inline">while</code> 一次不做、什么都不输出；<code class="inline">do-while</code> 仍做一轮，输出 <code class="inline">-2</code>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 当型与直到型：一张表看清 -->
+  <section class="slide">
+    <div class="s-title">当型与直到型：一张表看清</div>
+    <div class="s-body">
+      <table class="tb" style="margin-top:4px;">
+        <thead><tr><th style="width:26%;">比较项</th><th style="width:34%;">while（当型）</th><th>do-while（直到型）</th></tr></thead>
+        <tbody>
+          <tr><th>判断位置</th><td>循环入口</td><td>循环出口</td></tr>
+          <tr><th>最少执行</th><td><span class="c-red">0 次</span></td><td><span class="c-green">1 次</span></td></tr>
+          <tr><th>条件一开始为假</th><td>直接跳过</td><td>做完一遍才退出</td></tr>
+          <tr><th>适合场景</th><td>可能一次都不做</td><td>至少要做一次</td></tr>
+          <tr><th>最常见的错</th><td>忘记推进</td><td>丢了结尾分号</td></tr>
+        </tbody>
+      </table>
+      <div class="box key" style="margin-top:16px;">
+        <span class="label">一句话</span>
+        <b>while 可以是 0 次，do-while 至少 1 次。</b>这句话不是用来背的，上面那个 101 的反例才是证据。
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 陷阱一：结尾那个分号，丢不得 -->
+  <section class="slide">
+    <div class="s-title">陷阱一：结尾那个分号，丢不得</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:6px;">
+        <div>
+          <div class="box tip" style="margin-top:0;"><span class="label">✓ 正确</span>括号后跟分号</div>
+          <pre class="code" style="margin-top:12px;"><span class="kw">do</span> {
+    s += i;
+    i++;
+} <span class="kw">while</span> (i &lt;= <span class="num">100</span>);  <span class="cmt">// 有分号</span></pre>
+        </div>
+        <div>
+          <div class="box red" style="margin-top:0;"><span class="label">✗ 错误</span>少了分号</div>
+          <pre class="code" style="margin-top:12px;"><span class="kw">do</span> {
+    s += i;
+    i++;
+} <span class="kw">while</span> (i &lt;= <span class="num">100</span>)   <span class="cmt">// 没有</span></pre>
+          <div class="out" style="margin-top:10px;">编译错误： expected ';' before '}'</div>
+        </div>
+      </div>
+      <div class="box warn" style="margin-top:16px;">
+        <span class="label">为什么</span>
+        整个 <code class="inline">do … while(…);</code> 是<b>一条完整语句</b>，语句就得用分号收尾。这是它独有的要求。
+      </div>
+      <div class="box tip" style="margin-top:12px;">
+        <span class="label">看报错的技巧</span>
+        编译器常把错误指在<b>下一行</b>。别急着改下一行，先回头看上一行结尾。
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 陷阱二：括号里要写"继续"，不是"停止" -->
+  <section class="slide">
+    <div class="s-title">陷阱二：括号里要写"继续"，不是"停止"</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:6px;">
+        <div>
+          <div class="box" style="margin-top:0;">
+            <span class="label">人的想法</span>
+            "一直问，<b>直到</b>输入合法为止。"
+          </div>
+          <div class="box red" style="margin-top:12px;">
+            <span class="label">✗ 直译</span>
+            <code class="inline">while (n &gt;= 1 &amp;&amp; n &lt;= 100);</code><br>
+            合法就继续，反了。
+          </div>
+        </div>
+        <div>
+          <div class="box tip" style="margin-top:0;">
+            <span class="label">✓ 正确</span>
+            <code class="inline">while (n &lt; 1 || n &gt; 100);</code><br>
+            不合法就再来一轮。
+          </div>
+          <div class="box key" style="margin-top:12px;">
+            <span class="label">要点</span>
+            <b>条件为真时继续循环</b>。
+          </div>
+        </div>
+      </div>
+      <div class="box warn" style="margin-top:16px;">
+        <span class="label">换个问法</span>
+        先想"什么情况下还要再来一次"，再落笔写条件——比背语法管用。
+      </div>
+      <table class="tb" style="margin-top:14px;">
+        <thead><tr><th style="width:46%;">你想说的那句话</th><th>do-while 括号里表达式</th></tr></thead>
+        <tbody>
+          <tr><th>直到输入落在 1~100</th><td><code class="inline">n &lt; 1 || n &gt; 100</code></td></tr>
+          <tr><th>直到猜中</th><td><code class="inline">g != n</code></td></tr>
+          <tr><th>直到除尽（余数为 0）</th><td><code class="inline">r != 0</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 13 场景一：输入不合法，就一直问下去 -->
+  <section class="slide">
+    <div class="s-title">场景一：输入不合法，就一直问下去</div>
+    <div class="s-body">
+      <div class="two narrow2" style="margin-top:6px;">
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">int</span> n;
+<span class="kw">do</span> {
+  printf(<span class="str">"输入 1~100："</span>);
+  <span class="kw">if</span> (scanf(<span class="str">"%d"</span>, &amp;n) != <span class="num">1</span>) {
+    <span class="kw">while</span> (getchar() != <span class="str">'\n'</span>) ;
+    n = <span class="num">0</span>;
+  }
+} <span class="kw">while</span> (n &lt; <span class="num">1</span> || n &gt; <span class="num">100</span>);
+printf(<span class="str">"%d\n"</span>, n);</pre>
+        </div>
+        <div>
+          <div class="box tip" style="margin-top:0;">
+            <span class="label">要点</span>
+            <code class="inline">scanf</code> 返回<b>成功读入的项数</b>。敲了字母它返回 0，n 还是旧值。
+          </div>
+          <div class="box warn" style="margin-top:12px;">
+            <span class="label">别漏</span>
+            不清缓冲区，那个坏字符还在，<b>下一秒又读到它</b>——死循环。
+          </div>
+          <div class="box" style="margin-top:12px;">
+            <span class="label">为什么必须 do-while</span>
+            不问一次，拿什么判断合不合法？
+          </div>
+        </div>
+      </div>
+      <div class="box" style="margin-top:12px;">
+        <span class="label">三种坏输入</span>
+        字母（返回 0）清缓冲区重来；999（返回 1 但越界）交给条件送回；<code class="inline">50abc</code> 只读走 50，<b>'abc' 留在缓冲区坑下一次</b>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 场景二、三：菜单与密码，都是"先给一次机会" -->
+  <section class="slide">
+    <div class="s-title">场景二、三：菜单与密码，都是"先给一次机会"</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:6px;">
+        <div>
+          <div class="box green" style="margin-top:0;"><span class="label">菜单</span>至少显示一次</div>
+          <pre class="code" style="margin-top:12px;"><span class="kw">int</span> op;
+<span class="kw">do</span> {
+  printf(<span class="str">"1.录入 2.查询 0.退出\n"</span>);
+  scanf(<span class="str">"%d"</span>, &amp;op);
+  <span class="cmt">/* 按 op 处理 */</span>
+} <span class="kw">while</span> (op != <span class="num">0</span>);</pre>
+        </div>
+        <div>
+          <div class="box purple" style="margin-top:0;"><span class="label">密码</span>至少试一次</div>
+          <pre class="code" style="margin-top:12px;"><span class="kw">int</span> pw, cnt = <span class="num">0</span>;
+<span class="kw">do</span> {
+  printf(<span class="str">"密码："</span>);
+  scanf(<span class="str">"%d"</span>, &amp;pw);
+  cnt++;
+} <span class="kw">while</span> (pw != <span class="num">123456</span> &amp;&amp; cnt &lt; <span class="num">3</span>);</pre>
+        </div>
+      </div>
+      <div class="box key" style="margin-top:16px;">
+        <span class="label">规律</span>
+        菜单、密码、猜数字、游戏"再来一局"——凡是<b>先给对方一次机会</b>的交互，都是 do-while 的地盘。
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 经典题：统计一个整数有几位 -->
+  <section class="slide">
+    <div class="s-title">经典题：统计一个整数有几位</div>
+    <div class="s-body" style="display:flex; flex-direction:column; gap:14px;">
+      <div class="box" style="margin:0; padding:10px 26px;">
+        <span class="label">题目</span>
+        输入一个非负整数，输出位数。<b>0 也是一位数。</b>
+      </div>
+      <div class="two" style="gap:26px; margin-top:0; align-items:stretch;">
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">int</span> n, c = <span class="num">0</span>;
+scanf(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">do</span> {
+    c++;          <span class="cmt">// 记一位</span>
+    n /= <span class="num">10</span>;       <span class="cmt">// 砍一位</span>
+} <span class="kw">while</span> (n &gt; <span class="num">0</span>);
+printf(<span class="str">"%d\n"</span>, c);</pre>
+          <div class="out" style="margin-top:12px;">输入 2026 → 输出 4</div>
+        </div>
+        <div>
+          <div class="demo">
+            <div class="demo-head">
+              <span class="demo-title">跟着走一遍</span>
+              <button class="demo-btn" id="demo-btn">▶ 下一步</button>
+            </div>
+            <div class="chips" id="demo-chips">
+              <div class="chip">2</div><div class="chip">0</div><div class="chip">2</div><div class="chip">6</div>
+            </div>
+            <div class="demo-vals">
+              <div class="dv"><span class="k">n</span><b id="dv-n">2026</b></div>
+              <div class="dv"><span class="k">c</span><b id="dv-c">0</b></div>
+              <div class="dv"><span class="k">n &gt; 0</span><b id="dv-q">—</b></div>
+            </div>
+            <div class="demo-note" id="demo-note">准备：c = 0，n = 2026，先无条件进循环体做一遍。</div>
+          </div>
+        </div>
+      </div>
+      <div class="box key" style="margin:0; padding:10px 26px;">
+        <span class="label">换成while行不行？</span>
+        <b>不行！0 也是一位数。</b>写 <code class="inline">while (n &gt; 0)</code>，n = 0 就输出 0 位——错。
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 经典题：把数字倒着打印 -->
+  <section class="slide">
+    <div class="s-title">经典题：把数字倒着打印</div>
+    <div class="s-body">
+      <div class="two narrow" style="margin-top:6px;">
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">int</span> n;
+scanf(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">do</span> {
+    printf(<span class="str">"%d"</span>, n%<span class="num">10</span>); <span class="cmt">// 末位</span>
+    n /= <span class="num">10</span>;           <span class="cmt">// 砍掉</span>
+} <span class="kw">while</span> (n &gt; <span class="num">0</span>);</pre>
+          <div class="out" style="margin-top:12px;">输入 1230 → 0321</div>
+        </div>
+        <div>
+          <div class="box tip" style="margin-top:0;">
+            <span class="label">顺序不能反</span>
+            一定<b>先输出末位、后砍末位</b>。反了第一次就把个位砍掉，少打一位。
+          </div>
+          <div class="box warn" style="margin-top:12px;">
+            <span class="label">若末位有0</span>
+            输入 1230 会输出 <code class="inline">0321</code>，末尾的 0 也打出来了。<br>
+            若要"倒序后的数值"，得先累加再输出。
+          </div>
+        </div>
+      </div>
+      <table class="tb" style="margin-top:14px;">
+        <thead><tr><th style="width:12%;">轮</th><th style="width:16%;">n</th><th style="width:20%;">n % 10</th><th style="width:22%;">已输出</th><th>n /= 10 后</th></tr></thead>
+        <tbody>
+          <tr><th>1</th><td>123</td><td>3</td><td>3</td><td>12</td></tr>
+          <tr><th>2</th><td>12</td><td>2</td><td>32</td><td>1</td></tr>
+          <tr><th>3</th><td>1</td><td>1</td><td>321</td><td class="c-red">0 → 停</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 17 经典题：辗转相除法求最大公约数 -->
+  <section class="slide">
+    <div class="s-title">经典题：辗转相除法求最大公约数</div>
+    <div class="s-body">
+      <div class="two narrow" style="margin-top:6px;">
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">int</span> a, b, r;
+scanf(<span class="str">"%d%d"</span>, &amp;a, &amp;b);
+<span class="kw">do</span> {
+    r = a % b;   <span class="cmt">// 求余数</span>
+    a = b;       <span class="cmt">// 除数上移</span>
+    b = r;       <span class="cmt">// 余数变除数</span>
+} <span class="kw">while</span> (r != <span class="num">0</span>);
+printf(<span class="str">"gcd=%d\n"</span>, a);</pre>
+        </div>
+        <div>
+          <div class="box tip" style="margin-top:0;">
+            <span class="label">适合用do-while</span>
+            不先做一次除法，<b>根本不知道余数是不是 0</b>。
+          </div>
+          <div class="box" style="margin-top:12px;">
+            <span class="label">验一遍</span>
+            a=12, b=8
+             → r=4, a=8, b=4<br>
+             → r=0, a=4 → 退出，gcd = 4 ✓
+          </div>
+        </div>
+      </div>
+      <table class="tb" style="margin-top:14px;">
+        <thead><tr><th style="width:14%;">轮</th><th style="width:16%;">a</th><th style="width:16%;">b</th><th style="width:24%;">r = a % b</th><th>下一轮的 a、b</th></tr></thead>
+        <tbody>
+          <tr><th>1</th><td>12</td><td>8</td><td>4</td><td>a = 8，b = 4</td></tr>
+          <tr><th>2</th><td>8</td><td>4</td><td class="c-green">0</td><td>退出，gcd = a = 4</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 18 写循环前，先问自己五个问题 -->
+  <section class="slide">
+    <div class="s-title">写循环前，先问自己五个问题</div>
+    <div class="s-body">
+      <ul class="feat">
+        <li><span class="k">① 重复做什么</span><span class="v">放进 <code class="inline">do { }</code> 里的循环体</span></li>
+        <li><span class="k">② 靠什么控制</span><span class="v">每轮都在变的那个量</span></li>
+        <li><span class="k">③ 初值多少</span><span class="v">写在 do 之前，和 while 一样</span></li>
+        <li><span class="k">④ 每轮怎么变</span><span class="v">推进写在循环体里，漏了就死循环</span></li>
+        <li><span class="k">⑤ 什么情况停</span><span class="v">把它<b>反过来</b>写进 while( )</span></li>
+      </ul>
+      <div class="box key" style="margin-top:16px;">
+        <span class="label">前四问不变</span>
+        第五问才是分水岭：<b>你写的不是"什么时候停"，而是"什么时候继续"。</b>
+      </div>
+      <div class="box tip" style="margin-top:14px;">
+        <span class="label">套到成绩统计上</span>
+        ① 重复读成绩并累加　② 靠成绩本身控制　③ 无初值可给　④ 每轮再读一个　⑤ 停：读到 -1 → 写 <code class="inline">while (score != -1)</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 while、do-while、for，到底用哪个 -->
+  <section class="slide">
+    <div class="s-title">while、do-while、for，到底用哪个</div>
+    <div class="s-body">
+      <table class="tb" style="margin-top:4px;">
+        <thead><tr><th style="width:36%;">情形</th><th style="width:20%;">选它</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><th>次数已知（1 到 100）</th><td class="c-blue">for</td><td>三要素写在一行</td></tr>
+          <tr><th>次数未知，可能不做</th><td class="c-blue">while</td><td>先判断，不成立就跳过</td></tr>
+          <tr><th>次数未知，至少做一次</th><td class="c-green">do-while</td><td>先执行，贴合"先试一次"</td></tr>
+          <tr><th>中途要跳出</th><td class="c-red">break</td><td>三者通用</td></tr>
+        </tbody>
+      </table>
+      <div class="box key" style="margin-top:16px;">
+        <span class="label">拿不准就问一句</span>
+        <b>"第一轮是不是无论如何都要做？"</b>　是 → do-while；否 → while。
+      </div>
+      <div class="box warn" style="margin-top:12px;">
+        <span class="label">别硬凑</span>
+        该用 while 的地方硬套 do-while，就会多执行一次——那是 bug，不是风格。
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 随堂检测：两题，动笔推一遍 -->
+  <section class="slide">
+    <div class="s-title">随堂检测：两题，动笔推一遍</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:6px;">
+        <div class="card orange" style="margin-top:0;">
+          <h4><span class="ico">第 1 题</span>s 等于多少？</h4>
+          <pre class="code" style="margin:12px 0;"><span class="kw">int</span> i = <span class="num">1</span>, s = <span class="num">0</span>;
+<span class="kw">do</span> {
+    s += i;
+    i += <span class="num">2</span>;
+} <span class="kw">while</span> (i &lt; <span class="num">10</span>);</pre>
+          <p>答案：s = 25</p>
+        </div>
+        <div class="card purple" style="margin-top:0;">
+          <h4><span class="ico">第 2 题</span>输出什么？</h4>
+          <pre class="code" style="margin:12px 0;"><span class="kw">int</span> n = <span class="num">5</span>;
+<span class="kw">do</span> {
+    printf(<span class="str">"%d"</span>, n--);
+} <span class="kw">while</span> (n);</pre>
+          <p>答案：54321</p>
+        </div>
+      </div>
+      <div class="box warn" style="margin-top:16px;">
+        <span class="label">考点</span>
+        第 1 题考"<b>先加后判</b>"；第 2 题里 <code class="inline">while(n)</code> 等价于 <code class="inline">while(n != 0)</code>，<b>非 0 即真</b>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 21 本讲小结 -->
+  <section class="slide">
+    <div class="s-title">本讲小结</div>
+    <div class="s-body" style="display:flex; flex-direction:column; gap:14px;">
+      <div class="two" style="margin-top:0;">
+        <div class="box key" style="margin:0;">
+          <span class="label">一句话</span>
+          <b>while 可以是 0 次，do-while 至少 1 次。</b>
+        </div>
+        <div class="box warn" style="margin:0;">
+          <span class="label">两个陷阱</span>
+          结尾<b>分号</b>；条件为真"继续"，不是"停止"。
+        </div>
+      </div>
+      <table class="tb" style="margin:0;">
+        <thead><tr><th style="width:24%;">三个场景</th><th style="width:40%;">do-while</th><th> while</th></tr></thead>
+        <tbody>
+          <tr><th>输入校验</th><td>不问一次，拿什么判断合不合法</td><td>循环前得先读一遍</td></tr>
+          <tr><th>菜单交互</th><td>菜单至少要露一次面</td><td>得在循环前再打印一遍</td></tr>
+          <tr><th>位数统计</th><td>0 也是一位数</td><td>n = 0 输出 0 位，错</td></tr>
+        </tbody>
+      </table>
+      <div class="box" style="margin:0;">
+        <span class="label">下一讲</span>
+        <b>for 语句</b>——把初值、条件、推进三要素收进一行。
+      </div>
+    </div>
+  </section>
+
+  <!-- 22 结束页 -->
+  <section class="slide end">
+    <div class="end-inner">
+      <h2>谢　谢</h2>
+      <p>下一讲：for 语句 · 把三要素收进一行</p>
+    </div>
+  </section>
+
+  <!-- 导航 UI -->
+  <div class="pageinfo"><b id="cur">1</b> / <span id="total">23</span></div>
+
+  <div class="nav">
+    <button class="tocbtn" id="btnCopy" title="复制本页全部代码（按 C 键）">复制代码</button>
+    <button class="tocbtn" id="btnToc" title="目录（按 O 键）">目录</button>
+    <button id="btnPrev" title="上一页（←）">‹</button>
+    <button id="btnNext" title="下一页（→ / 空格）">›</button>
+  </div>
+
+  <div class="keyhint" id="keyhint">← → 翻页　·　空格下一页　·　C 复制代码　·　B 黑屏　·　O 目录　·　Esc 关闭</div>
+  <div class="progress" id="progress"></div>
+
+  <div class="toc" id="toc">
+    <button class="toc-close" id="btnTocClose">关闭 ✕</button>
+    <h3>目录</h3>
+    <div class="toc-bar"></div>
+    <div class="toc-list" id="tocList"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var stage   = document.getElementById('stage');
+  var slides  = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total   = slides.length;
+  var cur     = 0;
+  var curEl   = document.getElementById('cur');
+  var bar     = document.getElementById('progress');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+  var toc     = document.getElementById('toc');
+  var tocList = document.getElementById('tocList');
+  var keyhint = document.getElementById('keyhint');
+
+  document.getElementById('total').textContent = total;
+
+  // 修复了页码匹配的侧边栏目录
+  var tocGroups = [
+    {
+      title: "开场",
+      items: [
+        { i: 0, t: "封面" },
+        { i: 1, t: "本讲内容" },
+        { i: 2, t: "学习目标" },
+        { i: 3, t: "案例：猜数字" }
+      ]
+    },
+    {
+      title: "一、为什么需要它",
+      items: [
+        { i: 4, t: "while 写两遍的尴尬" },
+        { i: 5, t: "语法与执行流程" },
+        { i: 6, t: "四要素搬了哪个家" }
+      ]
+    },
+    {
+      title: "二、0 次还是 1 次",
+      items: [
+        { i: 7, t: "反例：初值 101" },
+        { i: 8, t: "手工跟踪" },
+        { i: 9, t: "当型与直到型对照" }
+      ]
+    },
+    {
+      title: "三、两个专属陷阱",
+      items: [
+        { i: 10, t: "结尾的分号" },
+        { i: 11, t: "条件要取反" }
+      ]
+    },
+    {
+      title: "四、四个落地场景",
+      items: [
+        { i: 12, t: "输入校验" },
+        { i: 13, t: "菜单与密码" },
+        { i: 14, t: "位数统计" },
+        { i: 15, t: "逆序输出" },
+        { i: 16, t: "最大公约数" }
+      ]
+    },
+    {
+      title: "五、方法论",
+      items: [
+        { i: 17, t: "循环五问" },
+        { i: 18, t: "三种循环选型" }
+      ]
+    },
+    {
+      title: "六、检测与小结",
+      items: [
+        { i: 19, t: "随堂检测" },
+        { i: 20, t: "本讲小结" },
+        { i: 21, t: "结束页" }
+      ]
+    }
+  ];
+
+  tocGroups.forEach(function(group){
+    var g = document.createElement('div');
+    g.className = 'toc-group';
+    var h = document.createElement('div');
+    h.className = 'toc-group-title';
+    h.textContent = group.title;
+    g.appendChild(h);
+    group.items.forEach(function(item){
+      var a = document.createElement('a');
+      a.textContent = item.t;
+      a.onclick = function(){ go(item.i); closeToc(); };
+      g.appendChild(a);
+    });
+    tocList.appendChild(g);
+  });
+
+  function resize(){
+    var s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+    stage.style.setProperty('--s', s);
+  }
+  window.addEventListener('resize', resize);
+
+  function go(i){
+    cur = Math.max(0, Math.min(total - 1, i));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === cur); });
+    curEl.textContent = cur + 1;
+    bar.style.width = ((cur + 1) / total * 100) + '%';
+    btnPrev.disabled = (cur === 0);
+    btnNext.disabled = (cur === total - 1);
+    if (typeof window.__demoReset === 'function') window.__demoReset();
+  }
+
+  btnPrev.onclick = function(){ go(cur - 1); this.blur(); hideHint(); };
+  btnNext.onclick = function(){ go(cur + 1); this.blur(); hideHint(); };
+
+  // ===== 复制本页代码 =====
+  var copyToast = document.createElement('div');
+  copyToast.className = 'copy-toast';
+  stage.appendChild(copyToast);
+  var toastTimer = null;
+  function toast(msg){
+    copyToast.textContent = msg;
+    copyToast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ copyToast.classList.remove('show'); }, 2000);
+  }
+
+  function pageCodeText(){
+    var pres = slides[cur].querySelectorAll('pre');
+    var blocks = [];
+    for (var i = 0; i < pres.length; i++) {
+      var t = pres[i].innerText.replace(/\u00a0/g, ' ').replace(/\s+$/, '');
+      if (t.replace(/\s/g, '').length > 0) blocks.push(t);
+    }
+    if (blocks.length === 0) return '';
+    if (blocks.length === 1) return blocks[0];
+    var out = [];
+    for (var j = 0; j < blocks.length; j++) {
+      out.push('/* ---- 本页第 ' + (j + 1) + ' 段代码 ---- */');
+      out.push(blocks[j]);
+    }
+    return out.join('\n\n');
+  }
+
+  function writeClipboard(txt, done){
+    var ok = false;
+    var ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    if (ok) { done(true); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function(){ done(true); },
+                                             function(){ done(false); });
+    } else { done(false); }
+  }
+
+  function copyPageCode(){
+    var txt = pageCodeText();
+    if (!txt) { toast('本页没有可复制的代码'); return; }
+    var lines = txt.split('\n').length;
+    var segs = slides[cur].querySelectorAll('pre').length;
+    writeClipboard(txt, function(ok){
+      if (ok) {
+        toast('已复制 ' + lines + ' 行代码' + (segs > 1 ? '（本页共 ' + segs + ' 段，已用注释分隔）' : ''));
+      } else {
+        toast('复制失败，请直接拖选后按 Ctrl+C');
+      }
+    });
+  }
+  document.getElementById('btnCopy').onclick = function(){ copyPageCode(); this.blur(); };
+
+  function openToc(){ toc.classList.add('show'); }
+  function closeToc(){ toc.classList.remove('show'); }
+  document.getElementById('btnToc').onclick = function(){
+    toc.classList.contains('show') ? closeToc() : openToc();
+    this.blur();
+  };
+  document.getElementById('btnTocClose').onclick = function(){
+    closeToc(); this.blur();
+  };
+
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+
+    if (toc.classList.contains('show')) {
+      if (k === 'Escape' || k === 'o' || k === 'O') { e.preventDefault(); closeToc(); }
+      return;
+    }
+
+    if ((k === ' ' || k === 'Enter') &&
+        String(window.getSelection()).replace(/\s/g, '').length > 0) {
+      return;  // 正在选择文字，空格不翻页
+    }
+
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' ||
+        k === ' ' || k === 'Enter') {
+      e.preventDefault(); go(cur + 1); hideHint();
+    } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' ||
+               k === 'Backspace') {
+      e.preventDefault(); go(cur - 1); hideHint();
+    } else if (k === 'Home') {
+      e.preventDefault(); go(0); hideHint();
+    } else if (k === 'End') {
+      e.preventDefault(); go(total - 1); hideHint();
+    } else if (k === 'o' || k === 'O') {
+      e.preventDefault(); openToc();
+    } else if (k === 'b' || k === 'B' || k === '.') {
+      e.preventDefault();
+      document.body.classList.toggle('blackout');
+    } else if ((k === 'c' || k === 'C') && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault(); copyPageCode();
+    } else if (k >= '1' && k <= '4') {
+      var map = { '1': 5, '2': 7, '3': 10 };
+      e.preventDefault(); go(map[k]); hideHint();
+    }
+  });
+
+  var wheelLock = false;
+  document.addEventListener('wheel', function(e){
+    if (toc.classList.contains('show')) return;
+    if (wheelLock) return;
+    wheelLock = true;
+    setTimeout(function(){ wheelLock = false; }, 420);
+    if (e.deltaY > 0) go(cur + 1); else go(cur - 1);
+    hideHint();
+  }, { passive: true });
+
+  // 记录按下与松开的位置：拖动选择文字时不翻页
+  var downX = 0, downY = 0, dragged = false;
+  document.addEventListener('mousedown', function(e){
+    downX = e.clientX; downY = e.clientY; dragged = false;
+  });
+  document.addEventListener('mouseup', function(e){
+    if (Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6) dragged = true;
+  });
+
+  document.addEventListener('click', function(e){
+    if (toc.classList.contains('show')) return;
+    if (e.target.closest('.nav')) return;
+    if (e.target.closest('.toc')) return;
+    if (e.target.closest('a')) return;
+    if (e.target.closest('.demo')) return;
+    if (dragged) { dragged = false; return; }
+    var sel = window.getSelection();
+    if (sel && String(sel).replace(/\s/g, '').length > 0) return;
+    if (e.clientX > window.innerWidth / 2) go(cur + 1);
+    else go(cur - 1);
+    hideHint();
+  });
+
+  var tx = 0, ty = 0;
+  document.addEventListener('touchstart', function(e){
+    tx = e.changedTouches[0].clientX;
+    ty = e.changedTouches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - tx;
+    var dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+      go(dx < 0 ? cur + 1 : cur - 1);
+      hideHint();
+    }
+  }, { passive: true });
+
+  var hintTimer = null;
+  function hideHint(){
+    if (keyhint.classList.contains('hide')) return;
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 500);
+  }
+  hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 6000);
+
+  resize();
+  go(0);
+})();
+</script>
+
+<script>
+(function(){
+  var btn = document.getElementById('demo-btn');
+  if (!btn) return;
+  var chips = document.getElementById('demo-chips').children;
+  var dvN = document.getElementById('dv-n');
+  var dvC = document.getElementById('dv-c');
+  var dvQ = document.getElementById('dv-q');
+  var note = document.getElementById('demo-note');
+
+  var steps = [
+    { n:'2026', c:'0', q:'\u2014', hot:-1,
+      text:'\u51c6\u5907\uff1ac = 0\uff0cn = 2026\uff0c\u5148\u65e0\u6761\u4ef6\u8fdb\u5faa\u73af\u4f53\u505a\u4e00\u904d\u3002' },
+    { n:'202',  c:'1', q:'\u771f', hot:3,
+      text:'\u7b2c 1 \u8f6e\uff1ac \u53d8 1\u3001n \u53d8 202\uff1b\u7b97 n > 0 \u4e3a\u771f\uff0c\u56de\u5934\u518d\u505a\u3002' },
+    { n:'20',   c:'2', q:'\u771f', hot:2,
+      text:'\u7b2c 2 \u8f6e\uff1ac \u53d8 2\u3001n \u53d8 20\uff1b\u4ecd\u4e3a\u771f\uff0c\u7ee7\u7eed\u3002' },
+    { n:'2',    c:'3', q:'\u771f', hot:1,
+      text:'\u7b2c 3 \u8f6e\uff1ac \u53d8 3\u3001n \u53d8 2\uff1b\u4ecd\u4e3a\u771f\uff0c\u518d\u6765\u4e00\u6b21\u3002' },
+    { n:'0',    c:'4', q:'\u5047', hot:0,
+      text:'\u7b2c 4 \u8f6e\uff1ac \u53d8 4\u3001n \u53d8 0\uff1b\u6761\u4ef6\u4e3a\u5047\uff0c\u9000\u51fa\u5faa\u73af\uff0c\u8f93\u51fa c = 4\u3002' }
+  ];
+  var i = 0;
+
+  function paint(){
+    var st = steps[i];
+    for (var k = 0; k < chips.length; k++){
+      var cls = 'chip';
+      if (st.hot >= 0){
+        if (k === st.hot) cls = 'chip hot';
+        else if (k > st.hot) cls = 'chip off';
+      }
+      chips[k].className = cls;
+    }
+    dvN.textContent = st.n;
+    dvC.textContent = st.c;
+    dvQ.textContent = st.q;
+    dvQ.className = (st.q === '\u771f') ? 'q-true' : (st.q === '\u5047' ? 'q-false' : '');
+    note.textContent = st.text;
+    btn.textContent = (i === steps.length - 1) ? '\u21bb \u91cd\u6765' : '\u25b6 \u4e0b\u4e00\u6b65';
+  }
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    i = (i >= steps.length - 1) ? 0 : i + 1;
+    paint();
+    this.blur();
+  });
+
+  window.__demoReset = function(){ i = 0; paint(); };
+  paint();
+})();
+</script>
+</body>
+</html>
