@@ -649,7 +649,7 @@ printf(<span class="str">"%lld\n"</span>, t);</pre>
     sign = -sign;         <span class="cmt">// 变号</span>
     term = sign / denominator; <span class="cmt">// 下一项</span>
 }
-pi = pi * <span class="num">4</span>;</pre>
+pi = (pi + term) * <span class="num">4</span>;</pre>
     <div class="box key">
       <span class="label">遇到“次数不定”怎么思考？</span><br>
       1️⃣ 找停止条件：题目中的“直到...为止”或要求的精度。<br>
