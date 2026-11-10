@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 4 章（五）循环的嵌套 · 手机版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Source Han Sans SC",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.55;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 页脚 ================= */
+  .footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:24px 16px 40px;
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 移动端布局微调 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部固定栏 ================= -->
+<div class="topbar">
+  <h1>第 4 章（五）循环的嵌套</h1>
+  <button class="btn-toc" id="btnToc">
+    目录 <span class="arrow">▼</span>
+  </button>
+</div>
+
+<!-- ================= 目录浮层 ================= -->
+<div class="toc-panel" id="tocPanel">
+  <div class="toc-group open">
+    <div class="toc-group-title">开场 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec1">本讲内容</a>
+      <a href="#sec2">学习目标</a>
+      <a href="#sec3">案例：什么时候需要两层</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">一、嵌套是怎么转的 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec4">外层走一步，内层走一圈</a>
+      <a href="#sec5">写嵌套的三条规矩</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">二、图形与表格 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec6">图形一：直角三角形</a>
+      <a href="#sec7">图形二：金字塔</a>
+      <a href="#sec8">图形三：九九乘法表</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">三、嵌套 + 前面学的 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec9">素数表：break 在内层</a>
+      <a href="#sec10">三层嵌套：三位数不重复</a>
+      <a href="#sec11">内层上界写 i 还是写 n</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">四、能不能少一层 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec12">阶乘和：复用中间量</a>
+      <a href="#sec13">前缀和：p 自己往前滚</a>
+      <a href="#sec14">百钱百鸡（一）：列方程</a>
+      <a href="#sec15">百钱百鸡（二）：三层压到一层</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">五、三个坑与效率 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec16">陷阱一：内外层同名</a>
+      <a href="#sec17">陷阱二：忘了复位</a>
+      <a href="#sec18">陷阱三：break 只跳一层</a>
+      <a href="#sec19">三层为什么一下就慢了</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">六、完整例子与检测 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec20">水仙花（一）：从一个到全部</a>
+      <a href="#sec21">水仙花（二）：两种枚举</a>
+      <a href="#sec22">课后挑战</a>
+      <a href="#sec23">五步读一段嵌套</a>
+      <a href="#sec24">随堂检测</a>
+      <a href="#sec25">本讲小结</a>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 内容区 ================= -->
+<div class="content">
+
+  <!-- ===== 1 本讲内容 ===== -->
+  <div class="section" id="sec1">
+    <div class="section-title">本讲内容</div>
+    <div class="card"><h4>🪆 嵌套是怎么回事</h4><p>外层跑一圈，内层跑一整圈</p></div>
+    <div class="card orange"><h4>🧭 执行轨迹</h4><p>把 i 和 j 的每一轮取值摊开看</p></div>
+    <div class="card green"><h4>📐 图形与表格</h4><p>三角形、金字塔、乘法表</p></div>
+    <div class="card purple"><h4>🔍 嵌套 + 前面学的</h4><p>素数表、三层枚举、水仙花</p></div>
+    <div class="card red"><h4>⚠️ 三个坑</h4><p>同名变量、忘了重置、只跳一层</p></div>
+    <div class="card"><h4>⏱️ 效率意识</h4><p>三层为什么慢，怎么压成两层</p></div>
+    <div class="box key"><span class="label">本讲主线</span>一句话打底：<b>外层走一步，内层走一整圈。</b><br>先把 i、j 的取值摊开看 → 三个图形练手感 → 再和 break、枚举合起来用 → 最后学怎么把层数压下去。</div>
+  </div>
+
+  <!-- ===== 2 学习目标 ===== -->
+  <div class="section" id="sec2">
+    <div class="section-title">本讲学习目标</div>
+    <ul class="feat">
+      <li><span class="k">① 会读</span><span class="v">说清内层跑了多少圈、总共执行多少次</span></li>
+      <li><span class="k">② 会画</span><span class="v">行、列、空格三种循环各管什么，能对上号</span></li>
+      <li><span class="k">③ 会写</span><span class="v">三角形、乘法表能独立默写出来</span></li>
+      <li><span class="k">④ 会算</span><span class="v">总次数 = 各层次数相乘，能估出量级</span></li>
+      <li><span class="k">⑤ 会避</span><span class="v">内外层同名、内层变量没重置，这两坑不踩</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== 3 案例引入 ===== -->
+  <div class="section" id="sec3">
+    <div class="section-title">案例引入：打印 5 行 5 列的星号</div>
+    <div class="section-sub">一层就够：每行都长一样</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++)
+    printf(<span class="str">"*****\n"</span>);</pre>
+    <div class="out">*****
+*****
+*****
+*****
+*****</div>
+    <div class="section-sub">一层不够：每行的 * 个数不一样</div>
+    <div class="out">*
+**
+***
+****
+*****</div>
+    <div class="box warn"><span class="label">为什么不够</span>printf 里那个字符串是<b>写死的</b>——第 i 行要打 i 个 *，只有一层循环写不出来。</div>
+    <div class="box key"><span class="label">分界</span>分行不是难点。真正的分界是：<b>一行的内容要不要跟着行号变</b>——要变，就得用两层。</div>
+  </div>
+
+  <!-- ===== 4 嵌套怎么转 ===== -->
+  <div class="section" id="sec4">
+    <div class="section-title">嵌套：外层走一步，内层走一整圈</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {   <span class="cmt">// 外层</span>
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">2</span>; j++) { <span class="cmt">// 内层</span>
+        printf(<span class="str">"(%d,%d)"</span>, i, j);
+    }
+    printf(<span class="str">"\n"</span>);
+}</pre>
+    <div class="out">(1,1)(1,2)
+(2,1)(2,2)
+(3,1)(3,2)</div>
+    <div class="section-sub">跟着走一遍</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>第几次</th><th>i</th><th>j</th><th>输出</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>1</td><td>1</td><td>(1,1)</td></tr>
+          <tr><td>2</td><td>1</td><td>2</td><td>(1,2)</td></tr>
+          <tr><td>3</td><td>2</td><td>1</td><td>(2,1)</td></tr>
+          <tr><td>4</td><td>2</td><td>2</td><td>(2,2)</td></tr>
+          <tr><td>5</td><td>3</td><td>1</td><td>(3,1)</td></tr>
+          <tr><td>6</td><td>3</td><td>2</td><td>(3,2)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box key"><span class="label">时针与分针</span>外层走一格，内层转一整圈；内层<b>每轮都从初值重新开始</b>，不是接着上一轮往下跑。总共 3 × 2 = <b>6</b> 次，不是 3 + 2。</div>
+  </div>
+
+  <!-- ===== 5 三条规矩 ===== -->
+  <div class="section" id="sec5">
+    <div class="section-title">写嵌套的三条规矩</div>
+    <ul class="feat">
+      <li><span class="k">① 变量别重名</span><span class="v">外层用 <code class="inline">i</code>，内层用 <code class="inline">j</code>，再深用 <code class="inline">k</code></span></li>
+      <li><span class="k">② 逐层缩进</span><span class="v">内层比外层多缩一级，嵌套关系一眼看得出</span></li>
+      <li><span class="k">③ 内层变量要复位</span><span class="v">for 自动做；while 得自己写 <code class="inline">j = 1;</code></span></li>
+    </ul>
+    <div class="box key"><span class="label">为什么必须分开</span>内外层共用一个变量，内层会把外层<b>正在使用的值</b>冲掉——外层就乱了套。本讲第五节有实例。</div>
+    <div class="box tip"><span class="label">缩进的用处</span>排版不是好看而已：<b>看缩进就知道谁包着谁</b>，出问题时能立刻定位是哪一层的错。</div>
+  </div>
+
+  <!-- ===== 6 直角三角形 ===== -->
+  <div class="section" id="sec6">
+    <div class="section-title">图形一：直角三角形，上界跟着外层</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= i; j++)
+        printf(<span class="str">"*"</span>);
+    printf(<span class="str">"\n"</span>);
+}</pre>
+    <div class="out">*
+**
+***
+****
+*****</div>
+    <div class="box key"><span class="label">唯一的变化</span>内层的上界从固定的 <code class="inline">5</code> 换成了 <code class="inline">i</code>——<b>第几行就打几个</b>。</div>
+    <div class="box tip"><span class="label">输出格式</span>星号之间没有空格，<b>行末也没有</b>。每行就是 i 个 <code class="inline">*</code>，紧接着一个换行符。</div>
+  </div>
+
+  <!-- ===== 7 金字塔 ===== -->
+  <div class="section" id="sec7">
+    <div class="section-title">图形二：金字塔，一行两个内层循环</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">5</span>-i; j++)
+        printf(<span class="str">" "</span>);   <span class="cmt">// 空格</span>
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">2</span>*i-<span class="num">1</span>; j++)
+        printf(<span class="str">"*"</span>);   <span class="cmt">// 星号</span>
+    printf(<span class="str">"\n"</span>);
+}</pre>
+    <div class="out">    *
+   ***
+  *****
+ *******
+*********</div>
+    <div class="box tip"><span class="label">只有行首有空格</span>i = 1 时，* 前有 4 个空格；星号之间、行末都没有。</div>
+    <div class="box key"><span class="label">两个内层的分工</span>前一个循环输出<b>前导空格</b>（5−i 个），后一个循环输出<b>星号</b>（2i−1 个）；它们是<b>并列关系，不是嵌套</b>，两个循环变量可以重名，都是 j。</div>
+  </div>
+
+  <!-- ===== 8 九九乘法表 ===== -->
+  <div class="section" id="sec8">
+    <div class="section-title">图形三：九九乘法表</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">9</span>; i++) {
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= i; j++)
+        printf(<span class="str">"%d*%d=%d "</span>, i, j, i*j);
+    printf(<span class="str">"\n"</span>);
+}</pre>
+    <div class="out">1*1=1
+1*2=2 2*2=4
+1*3=3 2*3=6 3*3=9 …</div>
+    <div class="box tip"><span class="label">和上一页一个套路</span>内层上界还是 <code class="inline">i</code>，只是把星号换成了算式——<b>图形题的骨架都一样</b>。</div>
+    <div class="box warn"><span class="label">输出格式</span>每个算式后面都跟一个空格，<b>行末那个也算</b>——格式串里带了空格，打完才换行。</div>
+    <div class="box tip"><span class="label">对齐小技巧</span>想让各列整齐，用 <code class="inline">%-3d</code> 这类<b>定宽格式</b>，别靠手打空格。</div>
+  </div>
+
+  <!-- ===== 9 素数表 ===== -->
+  <div class="section" id="sec9">
+    <div class="section-title">嵌套 + break：2~100 的素数</div>
+<pre class="code"><span class="kw">int</span> m, i;            <span class="cmt">// 声明在循环外</span>
+<span class="kw">for</span> (m = <span class="num">2</span>; m &lt;= <span class="num">100</span>; m++) {
+    <span class="kw">for</span> (i = <span class="num">2</span>; i * i &lt;= m; i++)
+        <span class="kw">if</span> (m % i == <span class="num">0</span>) <span class="kw">break</span>;
+    <span class="kw">if</span> (i * i &gt; m) printf(<span class="str">"%d "</span>, m);
+}</pre>
+    <div class="out">2 3 5 7 11 13 17 … 97</div>
+    <div class="box tip"><span class="label">两层各干什么</span>外层<b>挨个拿数</b>，内层<b>判断这个数是不是素数</b>。找到了就 break，换下一个数再试。</div>
+    <div class="box warn"><span class="label">break 的位置</span>它只跳出<b>内层</b>，跳完接着走 <code class="inline">if (i*i &gt; m)</code>——正好用内层留下的 i 判断结果。</div>
+    <div class="box red"><span class="label">别在内层 for 里定义 i</span>写成 <code class="inline">for (int i = 2; ...)</code>，i 出了这个 for 就不能用了，下面那句 <code class="inline">if (i*i &gt; m)</code> 直接编译报错。<b>如果跳出之后还要用的变量，必须在循环前面定义。</b></div>
+  </div>
+
+  <!-- ===== 10 三层嵌套 ===== -->
+  <div class="section" id="sec10">
+    <div class="section-title">三层嵌套：1、2、3 组三位数</div>
+<pre class="code"><span class="kw">for</span> (a = <span class="num">1</span>; a &lt;= <span class="num">3</span>; a++)
+  <span class="kw">for</span> (b = <span class="num">1</span>; b &lt;= <span class="num">3</span>; b++)
+    <span class="kw">for</span> (c = <span class="num">1</span>; c &lt;= <span class="num">3</span>; c++)
+      <span class="kw">if</span> (a != b &amp;&amp; b != c &amp;&amp; a != c)
+        printf(<span class="str">"%d%d%d "</span>, a, b, c);</pre>
+    <div class="out">123 132 213 231 312 321</div>
+    <div class="box tip"><span class="label">三层怎么读</span>百位 a 固定一个，十位 b 转一圈，个位 c 再转一圈——<b>像三个套在一起的转盘</b>。</div>
+    <div class="box warn"><span class="label">试了多少次</span>3×3×3 = <b>27</b> 次，其中只有 <b>6</b> 个合格——枚举就是先全试一遍，再筛。</div>
+    <div class="box key"><span class="label">层数一多就不一样了</span>三层 3³ = 27 次还轻松，五层就是 243 次、八层 6561 次——暴力枚举的天花板就是这么来的。能剪的枝要在<b>浅层</b>剪掉。</div>
+  </div>
+
+  <!-- ===== 11 内层上界 ===== -->
+  <div class="section" id="sec11">
+    <div class="section-title">内层上界写 i 还是写 n</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>写法（n = 5）</th><th>每行打几个 *</th><th>总次数</th></tr></thead>
+        <tbody>
+          <tr><th><code class="inline">j = 1; j &lt;= n</code></th><td>5 5 5 5 5</td><td>25</td></tr>
+          <tr><th><code class="inline">j = 1; j &lt;= i</code></th><td>1 2 3 4 5</td><td><b>15</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box tip"><span class="label">公式</span>前者 <b>n²</b>，后者 <b>n(n+1)/2</b>。n 越大差得越多：n = 100 时是 10000 对 5050。</div>
+    <div class="box warn"><span class="label">别忘了</span>内层少转一圈，<b>外层照旧</b>——省的是内层，不是行数。</div>
+    <div class="box key"><span class="label">顺带一提</span>图形题里写 <code class="inline">j &lt;= i</code> 不只是为了图形对，<b>也顺手省掉一半空转</b>。</div>
+  </div>
+
+  <!-- ===== 12 阶乘和 ===== -->
+  <div class="section" id="sec12">
+    <div class="section-title">能不能少一层：阶乘和</div>
+    <div class="section-sub">双层：每轮从头算 k!</div>
+<pre class="code">s = <span class="num">0</span>;
+<span class="kw">for</span> (k = <span class="num">1</span>; k &lt;= n; k++) {
+    t = <span class="num">1</span>;                 <span class="cmt">/* 每轮重来 */</span>
+    <span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= k; i++)
+        t = t * i;
+    s = s + t;
+}</pre>
+    <div class="section-sub">单层：接着上一轮往下乘</div>
+<pre class="code">s = <span class="num">0</span>; t = <span class="num">1</span>;      <span class="cmt">/* 只初始化一次 */</span>
+<span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= n; i++) {
+    t = t * i;     <span class="cmt">/* 用的是 (i-1)! */</span>
+    s = s + t;
+}</pre>
+    <div class="box key"><span class="label">单层为什么能省</span><b>k! = (k−1)! × k</b>：双层写法里，上一轮刚算出来，下一轮又重头算。<b>内层要算的，外层手里本来就有</b>。n = 5 时两边都 153，乘法 <b>15 次 → 5 次</b>。</div>
+  </div>
+
+  <!-- ===== 13 前缀和 ===== -->
+  <div class="section" id="sec13">
+    <div class="section-title">再试一题：前缀和</div>
+    <div class="section-sub">双层：每轮重算前缀和</div>
+<pre class="code">s = <span class="num">0</span>;
+<span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= n; i++) {
+    p = <span class="num">0</span>;                 <span class="cmt">/* 每轮重来 */</span>
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= i; j++)
+        p += j;
+    s += p;
+}</pre>
+    <div class="section-sub">单层：p 自己会往前滚</div>
+<pre class="code">p = <span class="num">0</span>; s = <span class="num">0</span>;
+<span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= n; i++) {
+    p = p + i;    <span class="cmt">/* 接着上一轮的 p */</span>
+    s = s + p;
+}</pre>
+    <div class="box key"><span class="label">认准这个 p</span>p 是<b>到第 i 项为止的前缀和</b>：<code class="inline">p_i = p_(i−1) + i</code>。n = 7 时 s = <b>84</b>，加法 <b>35 次 → 14 次</b>（双层 28+7，单层 7+7）。</div>
+  </div>
+
+  <!-- ===== 14 百钱百鸡一 ===== -->
+  <div class="section" id="sec14">
+    <div class="section-title">百钱百鸡（一）：理解题意列方程</div>
+    <div class="box"><span class="label">题目</span>鸡翁一，钱值五；鸡母一，钱值三；鸡雏三，钱值一。问何以百钱买百鸡？</div>
+    <div class="box tip"><span class="label">条件与上界</span>设 x 只公鸡、y 只母鸡、z 只小鸡。两个条件：只数 x + y + z = 100，钱数 5x + 3y + z/3 = 100。<br>由此定上界：x ≤ 100÷5 = <b>20</b>，y ≤ 100÷3 = <b>33</b>，z ≤ <b>100</b>——不是随便写的。</div>
+<pre class="code"><span class="kw">for</span> (x = <span class="num">0</span>; x &lt;= <span class="num">20</span>; x++)
+  <span class="kw">for</span> (y = <span class="num">0</span>; y &lt;= <span class="num">33</span>; y++)
+    <span class="kw">for</span> (z = <span class="num">0</span>; z &lt;= <span class="num">100</span>; z += <span class="num">3</span>)
+      <span class="kw">if</span> (x + y + z == <span class="num">100</span>
+          &amp;&amp; <span class="num">15</span>*x + <span class="num">9</span>*y + z == <span class="num">300</span>)
+        printf(<span class="str">"%d %d %d\n"</span>, x, y, z);</pre>
+    <div class="out">0 25 75
+4 18 78
+8 11 81
+12 4 84</div>
+    <div class="box key"><span class="label">乘 3 的两个好处</span>① 同乘 3，z/3 的截断没了；② 移项后 z = 300 − 15x − 9y，它只能是 3 的倍数——让 z 每次加 3 就够，最内层 101 次压到 34 次，全式 21×34×34 = <b>24 276</b> 次。</div>
+  </div>
+
+  <!-- ===== 15 百钱百鸡二 ===== -->
+  <div class="section" id="sec15">
+    <div class="section-title">百钱百鸡（二）：从三层压到一层</div>
+    <div class="section-sub">两层：z 由只数算出</div>
+    <div class="box red"><span class="label">先消 z</span><code class="inline">z = 100 - x - y</code>：只数一满，z 就定了，不用再试一轮。</div>
+<pre class="code"><span class="kw">for</span> (x = <span class="num">0</span>; x &lt;= <span class="num">20</span>; x++)
+  <span class="kw">for</span> (y = <span class="num">0</span>; y &lt;= <span class="num">33</span>; y++) {
+    z = <span class="num">100</span> - x - y;
+    <span class="kw">if</span> (<span class="num">15</span>*x + <span class="num">9</span>*y + z == <span class="num">300</span>)
+      printf(<span class="str">"%d %d %d\n"</span>, x, y, z);
+  }</pre>
+    <div class="section-sub">一层：再消掉 y</div>
+    <div class="box tip"><span class="label">两式相减</span>消掉 z 得 14x + 8y = 200，约成 7x + 4y = 100，固定 x 就解出 y。</div>
+<pre class="code"><span class="kw">for</span> (x = <span class="num">0</span>; <span class="num">7</span>*x &lt;= <span class="num">100</span>; x++)
+  <span class="kw">if</span> ((<span class="num">100</span> - <span class="num">7</span>*x) % <span class="num">4</span> == <span class="num">0</span>) {
+    y = (<span class="num">100</span> - <span class="num">7</span>*x) / <span class="num">4</span>;
+    z = <span class="num">100</span> - x - y;
+    printf(<span class="str">"%d %d %d\n"</span>, x, y, z);
+  }</pre>
+    <div class="box key"><span class="label">三次对比</span>三层（z 每次加 3）<b>24 276</b> 次 → 两层 <b>714</b> 次 → 一层 <b>15</b> 次，不加步长则是 72 114 次。</div>
+    <div class="box warn"><span class="label">规律</span>z 由只数条件算出、y 由钱数条件解出，每消掉一个未知量就少一层枚举；一层版先判 <code class="inline">% 4 == 0</code> 再除，与上一页乘 3 是同一招。</div>
+  </div>
+
+  <!-- ===== 16 陷阱一 ===== -->
+  <div class="section" id="sec16">
+    <div class="section-title">陷阱一：内外层用了同一个变量</div>
+    <div class="section-sub">✗ 两层都用 i：只出一行</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {
+    <span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++)
+        printf(<span class="str">"(%d)"</span>, i);
+    printf(<span class="str">"|\n"</span>);
+}</pre>
+    <div class="out">(1)(2)(3)|</div>
+    <div class="section-sub">✓ 外层 i、内层 j：三行</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">3</span>; j++)
+        printf(<span class="str">"(%d,%d)"</span>, i, j);
+    printf(<span class="str">"|\n"</span>);
+}</pre>
+    <div class="out">(1,1)(1,2)(1,3)|
+(2,1)(2,2)(2,3)|
+(3,1)(3,2)(3,3)|</div>
+    <div class="box warn"><span class="label">为什么只出一行</span>内层把 i 推到 <b>4</b>，回外层再 <code class="inline">i++</code> 变 <b>5</b>，条件立刻为假——外层只跑了一轮。</div>
+  </div>
+
+  <!-- ===== 17 陷阱二 ===== -->
+  <div class="section" id="sec17">
+    <div class="section-title">陷阱二：内层变量忘了复位</div>
+    <div class="section-sub">✗ 少了 j = 1：只打第一行</div>
+<pre class="code"><span class="kw">int</span> i = <span class="num">1</span>, j = <span class="num">1</span>;
+<span class="kw">while</span> (i &lt;= <span class="num">3</span>) {
+    <span class="kw">while</span> (j &lt;= <span class="num">3</span>) { printf(<span class="str">"*"</span>); j++; }
+    printf(<span class="str">"\n"</span>); i++;
+}</pre>
+    <div class="out">***
+（下接两行空行）</div>
+    <div class="section-sub">✓ 每轮开头复位：三行</div>
+<pre class="code"><span class="kw">int</span> i = <span class="num">1</span>, j;
+<span class="kw">while</span> (i &lt;= <span class="num">3</span>) {
+    j = <span class="num">1</span>;        <span class="cmt">// 一定要复位</span>
+    <span class="kw">while</span> (j &lt;= <span class="num">3</span>) { printf(<span class="str">"*"</span>); j++; }
+    printf(<span class="str">"\n"</span>); i++;
+}</pre>
+    <div class="out">***
+***
+***</div>
+    <div class="box key"><span class="label">for 为什么不会忘</span>内层 for 每轮重进都重跑<b>表达式1</b>；while 得自己补初值。</div>
+  </div>
+
+  <!-- ===== 18 陷阱三 ===== -->
+  <div class="section" id="sec18">
+    <div class="section-title">陷阱三：break 只跳一层</div>
+    <div class="section-sub">✗ 只有 break：找到还在继续找</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++)
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">3</span>; j++)
+        <span class="kw">if</span> (i * j == <span class="num">6</span>) {
+            printf(<span class="str">"(%d,%d) "</span>, i, j);
+            <span class="kw">break</span>;        <span class="cmt">/* 只跳内层 */</span>
+        }</pre>
+    <div class="out">(2,3) (3,2) </div>
+    <div class="section-sub">✓ break + 标志变量：只报第一个</div>
+<pre class="code">found = <span class="num">0</span>;
+<span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">3</span> &amp;&amp; !found; i++)
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">3</span>; j++)
+        <span class="kw">if</span> (i * j == <span class="num">6</span>) {
+            printf(<span class="str">"(%d,%d) "</span>, i, j);
+            found = <span class="num">1</span>; <span class="kw">break</span>;
+        }</pre>
+    <div class="out">(2,3) </div>
+    <div class="box key"><span class="label">两条出口</span>左边跳出内层，外层照转，3×2 又找到一次；右边用 <code class="inline">found</code> 让外层条件变假。</div>
+  </div>
+
+  <!-- ===== 19 三层为什么慢 ===== -->
+  <div class="section" id="sec19">
+    <div class="section-title">为什么三层嵌套一下就慢了</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>嵌套层数</th><th>n = 100 时次数</th><th>本机耗时</th></tr></thead>
+        <tbody>
+          <tr><th>一层</th><td>100</td><td>不到 1 微秒</td></tr>
+          <tr><th>两层</th><td>10 000</td><td>约 0.03 毫秒</td></tr>
+          <tr><th>三层</th><td><b>1 000 000</b></td><td><b>3~4 毫秒</b></td></tr>
+          <tr><th>四层</th><td><b>100 000 000</b></td><td><b>0.34 秒</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box key"><span class="label">数哪一句</span>数<b>最内层那条语句</b>跑了几次，不是数代码行数。<b>行数不随规模变，次数才变</b>。</div>
+    <div class="box warn"><span class="label">怎么比快慢</span>n 从 100 加到 200：一层 2 倍、两层 4 倍、三层 8 倍。三层实测 3 毫秒 → 30 毫秒。次数翻几倍，时间就翻几倍。</div>
+    <div class="box tip"><span class="label">一个参照</span>每多套一层，次数就乘一个 n。空循环体本机实测：1 亿次 0.34 秒，折算一次 3.4 纳秒。所以能算掉一层就算掉。</div>
+  </div>
+
+  <!-- ===== 20 水仙花一 ===== -->
+  <div class="section" id="sec20">
+    <div class="section-title">水仙花数（一）：从一个到全部</div>
+    <div class="section-sub">第一步：判断一个三位数</div>
+<pre class="code">scanf(<span class="str">"%d"</span>, &amp;m);
+x = m % <span class="num">10</span>;            <span class="cmt">/* 个位 */</span>
+y = m / <span class="num">10</span> % <span class="num">10</span>;       <span class="cmt">/* 十位 */</span>
+z = m / <span class="num">100</span>;            <span class="cmt">/* 百位 */</span>
+<span class="kw">if</span> (x*x*x + y*y*y + z*z*z == m)
+    printf(<span class="str">"%d\n"</span>, m);</pre>
+    <div class="section-sub">第二步：外面套一层枚举</div>
+<pre class="code"><span class="kw">for</span> (m = <span class="num">100</span>; m &lt; <span class="num">1000</span>; m++) {
+    x = m % <span class="num">10</span>;
+    y = m / <span class="num">10</span> % <span class="num">10</span>;
+    z = m / <span class="num">100</span>;
+    <span class="kw">if</span> (x*x*x + y*y*y + z*z*z == m)
+        printf(<span class="str">"%d\n"</span>, m);
+}</pre>
+    <div class="out">153 370 371 407</div>
+    <div class="box key"><span class="label">这一步是通用套路</span>求"所有成立的数"：把判断<b>原样搬进循环体</b>，外面套一层枚举。</div>
+  </div>
+
+  <!-- ===== 21 水仙花二 ===== -->
+  <div class="section" id="sec21">
+    <div class="section-title">同一道水仙花，两种枚举法</div>
+    <div class="section-sub">写法一：枚举数，再拆位</div>
+<pre class="code"><span class="kw">for</span> (m = <span class="num">100</span>; m &lt; <span class="num">1000</span>; m++) {
+    x = m % <span class="num">10</span>;
+    y = m / <span class="num">10</span> % <span class="num">10</span>;
+    z = m / <span class="num">100</span>;
+    <span class="kw">if</span> (x*x*x + y*y*y + z*z*z == m)
+        printf(<span class="str">"%d\n"</span>, m);
+}</pre>
+    <div class="section-sub">写法二：直接枚举三位</div>
+<pre class="code"><span class="kw">for</span> (a = <span class="num">1</span>; a &lt;= <span class="num">9</span>; a++)
+  <span class="kw">for</span> (b = <span class="num">0</span>; b &lt;= <span class="num">9</span>; b++)
+    <span class="kw">for</span> (c = <span class="num">0</span>; c &lt;= <span class="num">9</span>; c++) {
+      m = a*<span class="num">100</span> + b*<span class="num">10</span> + c;
+      <span class="kw">if</span> (a*a*a + b*b*b + c*c*c == m)
+        printf(<span class="str">"%d\n"</span>, m);
+    }</pre>
+    <div class="out">两种写法都输出　153 370 371 407</div>
+    <div class="box key"><span class="label">都是 900 次</span>三层那版<b>天生就有 a、b、c</b>，不用拆位；代价是位数一变，层数就得跟着变。</div>
+  </div>
+
+  <!-- ===== 22 课后挑战 ===== -->
+  <div class="section" id="sec22">
+    <div class="section-title">课后挑战：这两题不给代码</div>
+    <div class="card">
+      <h4>① 不变初心数</h4>
+      <p>一个数乘 2、3、…、9，各乘积的<b>各位数字之和</b>都相等，这个和就叫它的"初心"。给定一批数，判断有没有不变的初心，有则输出初心，否则输出 NO。</p>
+      <p style="margin-top:8px;">例：18 → 36 和 9、54 和 9、…、162 和 9，初心是 <b>9</b>。</p>
+    </div>
+    <div class="box tip"><span class="label">提示</span>外层枚举乘数 2~9，内层 <code class="inline">while</code> 求各位和；一旦不等就置标志、break。</div>
+    <div class="card purple">
+      <h4>② 连续因子</h4>
+      <p>求 N 的<b>最长连续因子序列</b>：几个连续整数（≥2）相乘能整除 N。输出最长长度，以及起始最小的那组。</p>
+      <p style="margin-top:8px;">例：630 → 5×6×7 = 210 能整除 630，长度 <b>3</b>。</p>
+    </div>
+    <div class="box tip"><span class="label">提示</span>外层枚举起点 <code class="inline">i</code> 到 √N，内层连续乘；用 <code class="inline">maxLen</code>、<code class="inline">start</code> 两个变量记住最优解。</div>
+    <div class="box key"><span class="label">它们考什么</span>不是语法，是<b>能不能自己把嵌套拆对</b>：哪一层枚举、哪一层累加、什么时候该提前退出。</div>
+  </div>
+
+  <!-- ===== 23 五步读嵌套 ===== -->
+  <div class="section" id="sec23">
+    <div class="section-title">拿到一段嵌套，按这五步读</div>
+    <ul class="feat">
+      <li><span class="k">① 外层跑几次</span><span class="v">看它的初值、上界、步长</span></li>
+      <li><span class="k">② 内层每轮几圈</span><span class="v">上界是不是引用了外层变量</span></li>
+      <li><span class="k">③ 总次数</span><span class="v">各层次数<b>相乘</b>，不是相加</span></li>
+      <li><span class="k">④ 内层从几开始</span><span class="v">每进一次内层，就按初值重新开始，不接着上一轮的末值</span></li>
+      <li><span class="k">⑤ break 在哪一层</span><span class="v">它只管自己那一层</span></li>
+    </ul>
+    <div class="box key"><span class="label">最省事的办法</span>拿张纸，<b>把外层每一轮的 i 写成一行，右边标出内层跑了几次</b>——画两三轮，规律自己就出来了。</div>
+  </div>
+
+  <!-- ===== 24 随堂检测 ===== -->
+  <div class="section" id="sec24">
+    <div class="section-title">随堂检测：两题，动笔推一遍</div>
+    <div class="card orange">
+      <h4>第 1 题　s 等于多少？</h4>
+<pre class="code"><span class="kw">int</span> s = <span class="num">0</span>;
+<span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++)
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= i; j++)
+        s += j;</pre>
+      <div class="box tip"><span class="label">答案</span>s = <b>10</b>。逐轮算：<b>1 + (1+2) + (1+2+3) = 10</b>。</div>
+    </div>
+    <div class="card purple">
+      <h4>第 2 题　打印几行几个 *？</h4>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {
+    <span class="kw">for</span> (j = i; j &lt;= <span class="num">3</span>; j++)
+        printf(<span class="str">"*"</span>);
+    printf(<span class="str">"\n"</span>);
+}</pre>
+      <div class="box tip"><span class="label">答案</span>3 行，每行分别是 <b>3 个、2 个、1 个</b>。内层起点跟着 i 走，得到倒三角。</div>
+    </div>
+    <div class="box warn"><span class="label">怎么算过关</span>拿纸画表：外层每一行的 i 写一列，右边写内层跑了几次、s 加到了多少。第 1 题三行就推完。</div>
+  </div>
+
+  <!-- ===== 25 小结 ===== -->
+  <div class="section" id="sec25">
+    <div class="section-title">本讲小结：五条铁律</div>
+    <ul class="feat">
+      <li><span class="k">① 一句话</span><span class="v"><b>外层走一步，内层走一整圈</b>——内层是外层循环体的一部分，不是并列关系。</span></li>
+      <li><span class="k">② 次数相乘</span><span class="v">总次数是 <b>m × n</b>，不是 m + n。三层就再乘一层。</span></li>
+      <li><span class="k">③ 上界跟着外层</span><span class="v">内层上界写成 <code class="inline">i</code>，三角形、九九表一次就通；写死 <code class="inline">n</code> 就是满屏方块。</span></li>
+      <li><span class="k">④ 别同名、要复位</span><span class="v">内外层用 <code class="inline">i</code>/<code class="inline">j</code>/<code class="inline">k</code> 分开；while 实现时内层变量每轮开头<b>必须重新赋值</b>。</span></li>
+      <li><span class="k">⑤ 能少一层就少一层</span><span class="v">阶乘和、前缀和靠<b>复用中间量</b>，百钱百鸡靠<b>方程消元</b>：能算出来的变量，不必再枚举。</span></li>
+    </ul>
+    <div class="box tip"><span class="label">下一讲</span>循环中的输入问题——缓冲区、EOF，以及为什么第二次 scanf 会被跳过。</div>
+  </div>
+
+  <div class="footer">
+    C 程序设计基础 · 第 4 章（五）循环的嵌套<br>
+    手机复习版 · 武汉理工大学 人工智能学院
+  </div>
+
+</div>
+
+<!-- ================= 回到顶部按钮 ================= -->
+<button class="backtop" id="backtop" title="回到顶部">↑</button>
+
+<script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>

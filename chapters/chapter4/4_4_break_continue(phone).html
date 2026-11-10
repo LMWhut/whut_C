@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 4 章（四）break 与 continue · 手机版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Source Han Sans SC",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.55;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 页脚 ================= */
+  .footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:24px 16px 40px;
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 移动端布局微调 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部固定栏 ================= -->
+<div class="topbar">
+  <h1>第 4 章（四）break 与 continue</h1>
+  <button class="btn-toc" id="btnToc">
+    目录 <span class="arrow">▼</span>
+  </button>
+</div>
+
+<!-- ================= 目录浮层 ================= -->
+<div class="toc-panel" id="tocPanel">
+  <div class="toc-group open">
+    <div class="toc-group-title">开场 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec1">本讲内容</a>
+      <a href="#sec2">学习目标</a>
+      <a href="#sec3">案例：素数白跑 83 轮</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">一、break：整件事不做了 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec4">立刻结束整个循环</a>
+      <a href="#sec5">例一：加到和超过 1000</a>
+      <a href="#sec6">例二：遇到负数就停</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">二、continue：只跳过这一轮 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec7">这一轮到此为止</a>
+      <a href="#sec8">最大的坑：while 里的 continue</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">三、该用哪一个 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec9">三个判据</a>
+      <a href="#sec10">同一段循环，换一个词</a>
+      <a href="#sec11">switch 里的 break 只跳 switch</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">四、跳出之后 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec12">循环结束后 i 是几</a>
+      <a href="#sec13">判断素数：试到几就够</a>
+      <a href="#sec14">判断素数的完整程序</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">五、检测与小结 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec15">随堂检测</a>
+      <a href="#sec16">本讲小结</a>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 内容区 ================= -->
+<div class="content">
+
+  <!-- ===== 1 本讲内容 ===== -->
+  <div class="section" id="sec1">
+    <div class="section-title">本讲内容</div>
+    <div class="card red"><h4>⏹️ break：结束整个循环</h4><p>后面的轮次全部不做了</p></div>
+    <div class="card green"><h4>⏭️ continue：跳过这一轮</h4><p>本轮剩下的语句不做了，下一轮照常</p></div>
+    <div class="card orange"><h4>⚖️ 两者的区别</h4><p>列成一张表，逐条对照</p></div>
+    <div class="card purple"><h4>🕳️ 最大的坑</h4><p>while 里的 continue 会死循环</p></div>
+    <div class="card"><h4>🔢 跳出后 i 是几</h4><p>三种结束方式，答案不一样</p></div>
+    <div class="card"><h4>🎯 例题：判断素数</h4><p>试到 √m 就够，跳出后看 i 停在哪儿</p></div>
+    <div class="box key"><span class="label">本讲主线</span>一句话打底：<b>break 是"整件事不做了"，continue 是"这一条不要了"</b>。<br>先看素数那道题白跑 83 轮 → 认两个词的出口位置 → 用三个判据选 → 最后看跳出后 i 停在哪儿。</div>
+  </div>
+
+  <!-- ===== 2 学习目标 ===== -->
+  <div class="section" id="sec2">
+    <div class="section-title">本讲学习目标</div>
+    <ul class="feat">
+      <li><span class="k">① 会辨</span><span class="v">给一段代码，说清它执行几次、输出什么</span></li>
+      <li><span class="k">② 会用</span><span class="v">"找到就停"用 break，"不合格就跳过"用 continue</span></li>
+      <li><span class="k">③ 会防</span><span class="v">知道 while 里用 continue 为什么会卡死</span></li>
+      <li><span class="k">④ 会算</span><span class="v">循环结束后 i 是几，分三种结束方式各答一遍</span></li>
+      <li><span class="k">⑤ 会读</span><span class="v">跳出之后，从 i 的值看出是"找到"还是"试完"</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== 3 案例引入 ===== -->
+  <div class="section" id="sec3">
+    <div class="section-title">案例引入：判断 m 是不是素数</div>
+    <div class="section-sub">没有 break：试到 90 才停</div>
+<pre class="code"><span class="kw">int</span> m = <span class="num">91</span>, i, flag = <span class="num">1</span>;
+<span class="kw">for</span> (i = <span class="num">2</span>; i &lt; m; i++)
+    <span class="kw">if</span> (m % i == <span class="num">0</span>)
+        flag = <span class="num">0</span>;
+printf(<span class="str">"%d"</span>, flag);   <span class="cmt">// 0：不是素数</span></pre>
+    <div class="box red"><span class="label">白跑了</span>m 的值为 91，从 2 试到 90。i = 7 时已经除得尽，剩下 <b>83 轮照样跑</b>，每一轮都在重复同一个已知的结论。</div>
+    <div class="section-sub">加了 break：除得尽就跳出</div>
+<pre class="code"><span class="kw">int</span> m = <span class="num">91</span>, i, flag = <span class="num">1</span>;
+<span class="kw">for</span> (i = <span class="num">2</span>; i &lt; m; i++)
+    <span class="kw">if</span> (m % i == <span class="num">0</span>) { flag = <span class="num">0</span>; <span class="kw">break</span>; }
+printf(<span class="str">"%d"</span>, flag);   <span class="cmt">// 0：不是素数</span></pre>
+    <div class="box key"><span class="label">区别</span>除了 break 这一个词，两段代码完全一样。除得尽的那一刻结论已经定了，后面的循环只是在重复同一件事。</div>
+  </div>
+
+  <!-- ===== 4 break ===== -->
+  <div class="section" id="sec4">
+    <div class="section-title">break：立刻结束整个循环</div>
+<pre class="code"><span class="kw">while</span> (条件) {
+    语句1;
+    <span class="kw">if</span> (出口条件)
+        <span class="kw">break</span>;   <span class="cmt">// 立即跳出</span>
+    语句2;      <span class="cmt">// 本轮不再执行</span>
+}
+语句3;          <span class="cmt">// 从这里接着走</span></pre>
+    <div class="box tip"><span class="label">作用</span>放弃<b>剩下的所有轮次</b>，直接跳到循环后面那条语句——语句3。</div>
+    <div class="box warn"><span class="label">注意</span><b>语句2 也不会执行</b>——不只是退出循环，本轮剩余部分也一并跳过。</div>
+    <div class="box key"><span class="label">两种结束方式</span>条件为假是<b>正常出口</b>，break 是<b>提前出口</b>。两者都让循环结束，但停的位置不同。</div>
+  </div>
+
+  <!-- ===== 5 例一 ===== -->
+  <div class="section" id="sec5">
+    <div class="section-title">例一：加到和超过 1000</div>
+<pre class="code"><span class="kw">int</span> i = <span class="num">1</span>, s = <span class="num">0</span>;
+<span class="kw">while</span> (<span class="num">1</span>) {
+    s += i;
+    <span class="kw">if</span> (s &gt; <span class="num">1000</span>) <span class="kw">break</span>;
+    i++;
+}
+printf(<span class="str">"%d %d"</span>, i, s);</pre>
+    <div class="out">45 1035</div>
+    <div class="box tip"><span class="label">为什么用 while (1)</span>说不清要转几圈，只知道转到超过 1000 为止。次数不定就用 while，出口写在循环体里。</div>
+    <div class="box warn"><span class="label">算一遍</span>1+2+…+44 = 990，再加 45 得 <b>1035</b>，超过才停。所以 i = 45。</div>
+    <div class="box key"><span class="label">i++ 为什么放在最后</span>跳出时 i 不再加 1，输出 45；要是挪到 if 语句前面，同样的和对应的就是 i = 46。</div>
+  </div>
+
+  <!-- ===== 6 例二 ===== -->
+  <div class="section" id="sec6">
+    <div class="section-title">例二：读一批成绩，遇到负数就停</div>
+<pre class="code"><span class="kw">int</span> x, s = <span class="num">0</span>, n = <span class="num">0</span>;
+<span class="kw">while</span> (<span class="num">1</span>) {
+    scanf(<span class="str">"%d"</span>, &amp;x);
+    <span class="kw">if</span> (x &lt; <span class="num">0</span>) <span class="kw">break</span>;
+    s += x;
+    n++;
+}
+printf(<span class="str">"%.2f"</span>, (<span class="kw">double</span>)s / n);</pre>
+    <div class="out">输入　90 85 78 -1
+输出　84.33</div>
+    <div class="box tip"><span class="label">哨兵值</span>用一个正常数据里不会出现的值（这里负数）当"到此为止"的信号，这个值叫哨兵。</div>
+    <div class="box warn"><span class="label">这题只能用 break</span>读到哨兵之前，不知道要读几个数，条件写不进括号里。</div>
+    <div class="box"><span class="label">同类场景</span>读到文件末尾、读到 0 结束。</div>
+  </div>
+
+  <!-- ===== 7 continue ===== -->
+  <div class="section" id="sec7">
+    <div class="section-title">continue：这一轮到此为止</div>
+<pre class="code"><span class="kw">int</span> s = <span class="num">0</span>, n = <span class="num">0</span>, x;
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">10</span>; i++) {
+    scanf(<span class="str">"%d"</span>, &amp;x);
+    <span class="kw">if</span> (x &lt; <span class="num">60</span>) <span class="kw">continue</span>;   <span class="cmt">// 不及格</span>
+    s += x;
+    n++;
+}
+printf(<span class="str">"%d %.1f"</span>, n, (<span class="kw">double</span>)s / n);</pre>
+    <div class="box tip"><span class="label">作用</span>跳过循环体的剩余部分，本轮结束，直接进入下一轮。</div>
+    <div class="box warn"><span class="label">和 break 比</span>break 结束整个循环，continue 只结束这一轮。<b>循环次数一点没变</b>，只是有几轮少做了事。</div>
+    <div class="box"><span class="label">不用它也行</span>反过来把条件包成 <code class="inline">x &gt;= 60</code>，两句缩进写在 if 里，结果一样。但后面要处理的语句一多，这层缩进就碍事了。</div>
+  </div>
+
+  <!-- ===== 8 while 里的 continue ===== -->
+  <div class="section" id="sec8">
+    <div class="section-title">最大的坑：while 里的 continue</div>
+<pre class="code"><span class="kw">int</span> i = <span class="num">1</span>, s = <span class="num">0</span>;
+<span class="kw">while</span> (i &lt;= <span class="num">10</span>) {
+    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>)
+        <span class="kw">continue</span>;   <span class="cmt">// 回到条件判断</span>
+    s += i;
+    i++;            <span class="cmt">// 永远轮不到</span>
+}</pre>
+    <div class="out">i 停在 2，条件永远成立
+屏幕上一个字符也不输出</div>
+    <div class="box red"><span class="label">走一遍</span>i = 1：i%2 得 1，<code class="inline">i%2==0</code> 不成立，不跳；s += 1，i 变 2。<br>i = 2：i%2 得 0，<code class="inline">i%2==0</code> 成立，continue 一执行就<b>直接回到 while 判断</b>。<br>i 还是 2，于是又判到 0、又跳一次……<b>永远出不去</b>。</div>
+    <div class="box warn"><span class="label">for 里为什么不会</span>continue 在 for 里跳到表达式3（i++），在 while 里跳到条件判断。差的就是 i++ 这一步。</div>
+    <div class="box tip"><span class="label">怎么改</span>把 i++ 挪到 continue 前面，或者改用 for。判断"要不要跳过"之前，先保证推进语句一定会被执行。</div>
+  </div>
+
+  <!-- ===== 9 三个判据 ===== -->
+  <div class="section" id="sec9">
+    <div class="section-title">break 还是 continue：三个判据</div>
+    <ul class="feat">
+      <li><span class="k">① 整件事都不做了吗</span><span class="v">是 → <b>break</b>。哨兵出现、找到即停、文件读完，都是这一种</span></li>
+      <li><span class="k">② 只是这条数据不要吗</span><span class="v">是 → 再看第 3 条；不是 → 两个都不用，循环照常走</span></li>
+      <li><span class="k">③ 跳过后还剩多少活</span><span class="v">只剩一两句 → 用 <code class="inline">if</code> 反向包住；剩一长串 → 用 <b>continue</b></span></li>
+    </ul>
+    <div class="box tip"><span class="label">活少</span>反过来判 <code class="inline">x &gt;= 0</code>，用 if 把两句包起来，一个 if 就够，别绕。</div>
+    <div class="box key"><span class="label">活多</span>后面还有一长串，continue 省掉一层缩进。</div>
+<pre class="code"><span class="kw">if</span> (x &lt; <span class="num">0</span>) <span class="kw">continue</span>;
+s += x;
+n++;
+<span class="cmt">/* 后面还有一串 */</span></pre>
+    <div class="box warn"><span class="label">用不上就别用</span>本来一个 if 就写清的事，拆成 continue 再往回绕，只是给读的人多加一层。</div>
+  </div>
+
+  <!-- ===== 10 换一个词 ===== -->
+  <div class="section" id="sec10">
+    <div class="section-title">同一段循环，换一个词</div>
+    <div class="section-sub">用 break：输出 12</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+    <span class="kw">if</span> (i == <span class="num">3</span>) <span class="kw">break</span>;
+    printf(<span class="str">"%d"</span>, i);
+}</pre>
+    <div class="out">12</div>
+    <div class="section-sub">用 continue：输出 1245</div>
+<pre class="code"><span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+    <span class="kw">if</span> (i == <span class="num">3</span>) <span class="kw">continue</span>;
+    printf(<span class="str">"%d"</span>, i);
+}</pre>
+    <div class="out">1245</div>
+    <div class="box warn"><span class="label">差别在哪</span>break 让 i = 3 之后的轮次全部消失；continue 只让 i = 3 这一轮消失。</div>
+  </div>
+
+  <!-- ===== 11 switch 里的 break ===== -->
+  <div class="section" id="sec11">
+    <div class="section-title">switch 里的 break 只跳 switch</div>
+<pre class="code"><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {
+    <span class="kw">switch</span> (i) {
+    <span class="kw">case</span> <span class="num">1</span>: <span class="kw">break</span>;      <span class="cmt">// 只跳 switch</span>
+    <span class="kw">case</span> <span class="num">2</span>: printf(<span class="str">"*"</span>);
+    }
+    printf(<span class="str">"%d"</span>, i);
+}</pre>
+    <div class="out">01*2</div>
+    <div class="box warn"><span class="label">容易错的地方</span>很多人以为这个 break 能跳出循环，其实它只跳出了 switch。</div>
+    <div class="box"><span class="label">逐个看</span>i=0：没有匹配的 case，输出 0<br>i=1：break 跳 switch，接着输出 1<br>i=2：case 2 打一个 *，再输出 2</div>
+    <div class="box key"><span class="label">跳出范围</span>break 只跳出包着它的那对 <code class="inline">{}</code>：在 switch 里跳 switch，在循环里跳循环。</div>
+  </div>
+
+  <!-- ===== 12 循环结束后 i 是几 ===== -->
+  <div class="section" id="sec12">
+    <div class="section-title">循环结束后，i 是几</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>结束方式</th><th>i 的值</th><th>为什么</th></tr></thead>
+        <tbody>
+          <tr><th>条件为假（正常）</th><td><b>6</b></td><td>最后那轮 i++ 照样做了</td></tr>
+          <tr><th>break（i==3 时）</th><td><b>3</b></td><td>跳出时不执行 i++</td></tr>
+          <tr><th>continue</th><td><b>6</b></td><td>不影响终值，只是少做事</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box tip"><span class="label">为什么</span>break 是当场跳出，表达式3 还没轮到；正常结束是判断没过才走，表达式3 已经做完了。</div>
+    <div class="box warn"><span class="label">推一遍</span><code class="inline">for (i = 1; i &lt;= 5; i++) if (i == 3) break;</code>　结束后 i 是 <b>3</b>，不是 6。</div>
+  </div>
+
+  <!-- ===== 13 素数：试到几就够 ===== -->
+  <div class="section" id="sec13">
+    <div class="section-title">例题：判断素数，试到几就够</div>
+    <div class="box key"><span class="label">什么叫素数</span>大于 1，且<b>只能被 1 和它自己</b>整除的整数。1 不算素数，2 是最小的那个。</div>
+    <div class="box tip"><span class="label">怎么判</span>拿 2、3、4……挨个去除。<b>有一个除得尽，它就不是素数</b>；全都除不尽，才是。</div>
+<pre class="code"><span class="cmt">// m = 97 时，最老实的办法</span>
+97 % 2  &rarr; 1
+97 % 3  &rarr; 1
+    &hellip;
+97 % 96 &rarr; 1    <span class="cmt">// 试完 95 次才敢下结论</span></pre>
+    <div class="box warn"><span class="label">为什么试到 √m 就够</span>m 若能写成 a × b（a ≤ b），则 a ≤ √m。大于 √m 的因子，一定有个小于 √m 的跟它配对，试了也没有新结果。</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>m</th><th>试到 m-1</th><th>试到 √m</th><th>省了</th></tr></thead>
+        <tbody>
+          <tr><th>97</th><td>95 次</td><td><b>8 次</b></td><td>约 12 倍</td></tr>
+          <tr><th>1000</th><td>998 次</td><td><b>30 次</b></td><td>约 33 倍</td></tr>
+          <tr><th>10007</th><td>10005 次</td><td><b>99 次</b></td><td>约 101 倍</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box key"><span class="label">还能再省一步</span>除得尽就不用往下试了。用 break，后面的轮次一个都不执行。</div>
+  </div>
+
+  <!-- ===== 14 素数的完整程序 ===== -->
+  <div class="section" id="sec14">
+    <div class="section-title">例题：判断素数的完整程序</div>
+<pre class="code"><span class="kw">int</span> m = <span class="num">91</span>, i;
+<span class="kw">for</span> (i = <span class="num">2</span>; i * i &lt;= m; i++)
+    <span class="kw">if</span> (m % i == <span class="num">0</span>) <span class="kw">break</span>;   <span class="cmt">// 找到因子，停</span>
+<span class="kw">if</span> (i * i &gt; m) puts(<span class="str">"是素数"</span>);
+<span class="kw">else</span> printf(<span class="str">"不是素数"</span>);</pre>
+    <div class="out">91 = 7 * 13 → 不是素数</div>
+    <div class="box tip"><span class="label">走一遍 m = 91</span>i=2：2·2=4 ≤ 91，91%2=1，继续<br>i=3：91%3=1，继续<br>…<br>i=7：91%7=0，<b>break 跳出，i 停在 7</b><br>出来后判 i·i = 49 ≤ 91 → 不是素数</div>
+    <div class="box key"><span class="label">走完却没被 break</span>说明 i·i 越过了 m——<b>那才是素数</b>。</div>
+    <div class="section-sub">跳出之后，三条路</div>
+    <ul class="feat">
+      <li><span class="k">① 靠 i 的位置</span><span class="v">break 出来的 i·i ≤ m，走完的 i·i &gt; m</span></li>
+      <li><span class="k">② 靠标志变量</span><span class="v">跳出后还要用 i 的原值，就靠它</span></li>
+      <li><span class="k">③ 抽成函数</span><span class="v">return 0/1；要整个程序一起停，用 <code class="inline">exit(0)</code></span></li>
+    </ul>
+  </div>
+
+  <!-- ===== 15 随堂检测 ===== -->
+  <div class="section" id="sec15">
+    <div class="section-title">随堂检测：两题，动笔推一遍</div>
+    <div class="card orange">
+      <h4>第 1 题　s 等于多少？</h4>
+<pre class="code"><span class="kw">int</span> s = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">10</span>; i++) {
+    <span class="kw">if</span> (i % <span class="num">2</span>) <span class="kw">continue</span>;
+    s += i;
+}</pre>
+      <div class="box tip"><span class="label">答案</span>s = <b>30</b>。<code class="inline">i % 2</code> 为真表示奇数，<b>奇数被跳过</b>，累加的是偶数 2+4+6+8+10。</div>
+    </div>
+    <div class="card purple">
+      <h4>第 2 题　i 最后是几？</h4>
+<pre class="code"><span class="kw">int</span> i;
+<span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= <span class="num">10</span>; i++)
+    <span class="kw">if</span> (i * i &gt; <span class="num">50</span>) <span class="kw">break</span>;</pre>
+      <div class="box tip"><span class="label">答案</span>i = <b>8</b>。8² = 64 才超过 50，7² = 49 还没超。</div>
+    </div>
+    <div class="box warn"><span class="label">怎么算过关</span>两题都<b>不许心算</b>：拿纸画一张跟踪表（轮次 ｜ i ｜ 条件 ｜ s），一行一行填。填完答案自己就出来了。</div>
+  </div>
+
+  <!-- ===== 16 本讲小结 ===== -->
+  <div class="section" id="sec16">
+    <div class="section-title">本讲小结</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>遇到的情形</th><th>写法</th><th>为什么</th></tr></thead>
+        <tbody>
+          <tr><th>次数已知，中途可能提前结束</th><td><b>for + break</b></td><td>先给上限，命中就跳出</td></tr>
+          <tr><th>一批数据里找第一个</th><td><b>找到就 break</b></td><td>循环后靠 i 判断找没找到</td></tr>
+          <tr><th>某几项不参与计算</th><td><b>continue</b></td><td>本轮跳过，剩下的照做</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="feat">
+      <li><span class="k">① 一句话</span><span class="v"><b>break 结束整个循环，continue 只结束这一轮。</b></span></li>
+      <li><span class="k">② 跳出后马上用 i</span><span class="v">是命中处还是越界值，差一。</span></li>
+      <li><span class="k">③ 在 while 里用 continue</span><span class="v">先看 i++ 有没有被跳过，漏掉就是死循环。</span></li>
+      <li><span class="k">④ 在循环里套 switch</span><span class="v">break 只跳 switch，循环照转。</span></li>
+    </ul>
+    <div class="box tip"><span class="label">下一讲</span>循环的嵌套。break 只跳一层，到时候细讲。</div>
+  </div>
+
+  <div class="footer">
+    C 程序设计基础 · 第 4 章（四）break 与 continue<br>
+    手机复习版 · 武汉理工大学 人工智能学院
+  </div>
+
+</div>
+
+<!-- ================= 回到顶部按钮 ================= -->
+<button class="backtop" id="backtop" title="回到顶部">↑</button>
+
+<script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>

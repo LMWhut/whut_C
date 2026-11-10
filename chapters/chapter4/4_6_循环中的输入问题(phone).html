@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 4 章（六）循环中的输入问题 · 手机版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Source Han Sans SC",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.55;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 页脚 ================= */
+  .footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:24px 16px 40px;
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 移动端布局微调 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部固定栏 ================= -->
+<div class="topbar">
+  <h1>第 4 章（六）循环中的输入问题</h1>
+  <button class="btn-toc" id="btnToc">
+    目录 <span class="arrow">▼</span>
+  </button>
+</div>
+
+<!-- ================= 目录浮层 ================= -->
+<div class="toc-panel" id="tocPanel">
+  <div class="toc-group open">
+    <div class="toc-group-title">开场 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec1">本讲内容</a>
+      <a href="#sec2">学习目标</a>
+      <a href="#sec3">案例：第二次输入被跳过</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">一、程序到底在读什么 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec4">输入流与缓冲区</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">二、让循环停下的四种写法 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec5">例 4-14：计数器控制</a>
+      <a href="#sec6">例 4-15：用一个结束标志</a>
+      <a href="#sec7">写短：读写合一</a>
+      <a href="#sec8">结束标志 EOF</a>
+      <a href="#sec9">EOF 的标准写法与 char 的坑</a>
+      <a href="#sec10">scanf 的返回值</a>
+      <a href="#sec11">用返回值控制循环</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">三、格式串的规矩 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec12">格式串是模板</a>
+      <a href="#sec13">读实数：%lf 与假成功</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">四、缓冲区里的残渣 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec14">那个没被读走的回车</a>
+      <a href="#sec15">清缓冲区：两种写法</a>
+      <a href="#sec16">两个更隐蔽的坑</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">五、完整例子：小计算器 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec17">例 4-18：要求与骨架</a>
+      <a href="#sec18">代码（上）：循环与容错</a>
+      <a href="#sec19">代码（下）：分派与输出</a>
+      <a href="#sec20">六组数据测一测</a>
+      <a href="#sec21">三处最容易写坏的地方</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">六、作业题与检测 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec22">PTA 7-8：最佳情侣身高差</a>
+      <a href="#sec23">作业题：错在哪、怎么写</a>
+      <a href="#sec24">随堂检测</a>
+      <a href="#sec25">本讲小结</a>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 内容区 ================= -->
+<div class="content">
+
+  <!-- ===== 1 本讲内容 ===== -->
+  <div class="section" id="sec1">
+    <div class="section-title">本讲内容</div>
+    <div class="card"><h4>🔍 一个怪现象</h4><p>第二次输入凭空消失了</p></div>
+    <div class="card orange"><h4>📥 输入流与缓冲区</h4><p>键盘敲的东西先攒在哪儿</p></div>
+    <div class="card green"><h4>🧮 三个原例</h4><p>4-14、4-15、4-18 逐个走一遍</p></div>
+    <div class="card purple"><h4>🚩 结束标志</h4><p>回车是一个，EOF 是另一个</p></div>
+    <div class="card red"><h4>🧹 清缓冲区</h4><p>混用 scanf 与 getchar 的代价</p></div>
+    <div class="card"><h4>🎯 随堂检测</h4><p>四道题，当堂判断</p></div>
+    <div class="box key"><span class="label">本讲主线</span>前五讲教你怎么<b>控制循环</b>，这一讲解决"<b>数据从哪儿来、什么时候算完</b>"。</div>
+  </div>
+
+  <!-- ===== 2 学习目标 ===== -->
+  <div class="section" id="sec2">
+    <div class="section-title">本讲学习目标</div>
+    <ul class="feat">
+      <li><span class="k">① 说得清</span><span class="v">键盘输入为什么不是"敲一个、程序拿一个"</span></li>
+      <li><span class="k">② 会写</span><span class="v">计数器、'\n'、EOF、返回值，四种让循环停下的写法</span></li>
+      <li><span class="k">③ 会躲</span><span class="v">缓冲区残留引起的"输入被跳过"与"死循环"</span></li>
+      <li><span class="k">④ 分得清</span><span class="v">格式串里的空白与字面字符，%d、%lf 各配什么类型</span></li>
+      <li><span class="k">⑤ 会写</span><span class="v">一个能反复计算的交互式程序</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== 3 案例引入 ===== -->
+  <div class="section" id="sec3">
+    <div class="section-title">案例引入：第二次输入被跳过</div>
+    <div class="section-sub">写法一：读不到字符</div>
+<pre class="code"><span class="kw">int</span> n;  <span class="kw">char</span> ch;
+scanf(<span class="str">"%d"</span>, &amp;n);
+ch = getchar();
+printf(<span class="str">"[%c]"</span>, ch);</pre>
+    <div class="out">输入：42 回车
+输出：[</div>
+    <div class="box warn"><span class="label">方括号里不是空的</span>ch 拿到的就是那个回车 <code class="inline">'\n'</code>，printf 原样打了出来，右括号才掉到下一行。</div>
+    <div class="section-sub">写法二：先清干净</div>
+<pre class="code"><span class="kw">int</span> n;  <span class="kw">char</span> ch;
+scanf(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">while</span> (getchar() != <span class="str">'\n'</span>) ;
+ch = getchar();
+printf(<span class="str">"[%c]"</span>, ch);</pre>
+    <div class="out">输入：42 回车、再敲 A 回车
+输出：[A]</div>
+    <div class="box tip"><span class="label">多这一行</span>才轮到用户真正敲的那个字符。</div>
+  </div>
+
+  <!-- ===== 4 输入流与缓冲区 ===== -->
+  <div class="section" id="sec4">
+    <div class="section-title">输入流与缓冲区：程序在读什么</div>
+    <ul class="feat">
+      <li><span class="k">① 敲键盘</span><span class="v">字符先存进系统的<b>行缓冲区</b>，程序还看不到</span></li>
+      <li><span class="k">② 按回车</span><span class="v">整行才交给程序，<b>末尾多一个 '\n'</b></span></li>
+      <li><span class="k">③ 程序取用</span><span class="v">scanf 与 getchar 按各自规则取，谁也不多拿</span></li>
+      <li><span class="k">④ 剩下留着</span><span class="v">没取走的字符<b>还在缓冲区里</b>，等下一次</span></li>
+    </ul>
+    <div class="box key"><span class="label">关键</span><b>缓冲区是程序与键盘之间的一段内存。</b>程序不是"敲一个拿一个"，而是从这段内存里按需取；取不完，就留在那儿给下一次。</div>
+    <div class="box warn"><span class="label">于是</span>"输入被跳过"不是键盘坏了，是<b>上一轮留下的回车被当成了这一次的输入</b>。</div>
+  </div>
+
+  <!-- ===== 5 例 4-14 ===== -->
+  <div class="section" id="sec5">
+    <div class="section-title">例 4-14：计数器控制</div>
+<pre class="code"><span class="cmt">/* 读 10 个字符，输出 ASCII 码 */</span>
+<span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main()
+{
+    <span class="kw">int</span> c, n;
+    <span class="kw">for</span> (n = <span class="num">0</span>; n &lt; <span class="num">10</span>; ++n) {
+        c = getchar();   <span class="cmt">// 读 1 个字符</span>
+        printf(<span class="str">"%d "</span>, c);  <span class="cmt">// 输出编码</span>
+    }
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">输入：Hi 3.14
+　　　ab
+输出：72 105 32 51 46 49 52 10 97 98 </div>
+    <div class="box key"><span class="label">数一数这 10 个名额</span>分两行输入，每行末尾都有一个回车。H=72、i=105、<b>空格=32</b>、3=51、.=46、1=49、4=52、<b>回车=10</b>、a=97、b=98。</div>
+    <div class="box tip"><span class="label">特点</span>循环次数<b>由程序说了算</b>，跟用户输什么无关——这就是"计数器控制"。<b>连回车都算一个字符</b>，所以名额里常常混着 10。</div>
+  </div>
+
+  <!-- ===== 6 例 4-15 ===== -->
+  <div class="section" id="sec6">
+    <div class="section-title">例 4-15：用一个结束标志收工</div>
+<pre class="code"><span class="cmt">/* 输入一行字符，输出字符个数 */</span>
+<span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main()
+{
+    <span class="kw">int</span> c, n = <span class="num">0</span>;
+    c = getchar();        <span class="cmt">// 先读第一个</span>
+    <span class="kw">while</span> (c != <span class="str">'\n'</span>) {     <span class="cmt">// 回车就停</span>
+        ++n;
+        c = getchar();    <span class="cmt">// 再读下一个</span>
+    }
+    printf(<span class="str">"%d characters!\n"</span>, n);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">输入：Hello world 回车
+输出：11 characters!</div>
+    <div class="box key"><span class="label">思路</span><b>循环次数事先不知道</b>，于是约定一个"停"的暗号：读到 '\n' 就认为这一行结束了。</div>
+    <div class="box warn"><span class="label">两个 getchar 不能少</span>进循环前必须先读一次，否则变量 c 里是随机值，循环条件<b>一上来就是碰运气</b>。</div>
+  </div>
+
+  <!-- ===== 7 读写合一 ===== -->
+  <div class="section" id="sec7">
+    <div class="section-title">把它写短：读写合一的写法</div>
+    <div class="section-sub">原来：读一次，判一次</div>
+<pre class="code"><span class="kw">int</span> c, n = <span class="num">0</span>;
+c = getchar();
+<span class="kw">while</span> (c != <span class="str">'\n'</span>) {
+    ++n;
+    c = getchar();
+}</pre>
+    <div class="section-sub">改写：读和判断合成一句</div>
+<pre class="code"><span class="kw">int</span> c, n = <span class="num">0</span>;
+<span class="kw">while</span> ((c = getchar()) != <span class="str">'\n'</span>)
+    ++n;</pre>
+    <div class="box key"><span class="label">为什么能这么写</span>赋值本身也是一个表达式，<b>它的值就是刚赋进去的那个字符</b>。所以 <code class="inline">(c = getchar())</code> 同时干了两件事：读一个字符，再拿它跟 '\n' 比。</div>
+    <div class="box warn"><span class="label">括号不能丢</span>写成 <code class="inline">while (c = getchar() != '\n')</code>，是把比较结果赋给 c，意思全变了。</div>
+    <div class="box tip"><span class="label">好处</span>少写一次"再读一次"，就少一处"忘了写"的机会。</div>
+  </div>
+
+  <!-- ===== 8 EOF ===== -->
+  <div class="section" id="sec8">
+    <div class="section-title">结束标志不止一个：EOF</div>
+    <ul class="feat">
+      <li><span class="k">是什么</span><span class="v">stdio.h 里定义的宏，值是 −1，含义是"没有更多输入了"</span></li>
+      <li><span class="k">键盘怎么给</span><span class="v">Windows 按 Ctrl+Z 再回车；Linux / macOS 按 Ctrl+D</span></li>
+      <li><span class="k">与 '\n' 的分工</span><span class="v">'\n' 说"这一行完了"，EOF 说"输入到此为止"</span></li>
+      <li><span class="k">为什么需要</span><span class="v">用户要输几行，程序事先不知道，只能等一个"彻底没有"的信号</span></li>
+    </ul>
+    <div class="box key"><span class="label">适用场合</span>处理一行用 '\n'；处理<b>一直到输入结束</b>的全部内容（多行、重定向的文件），用 EOF。</div>
+    <div class="box warn"><span class="label">易错</span>终端里直接运行程序时，<b>不按 Ctrl+Z / Ctrl+D 就永远等不到 EOF</b>，这也是很多人以为"程序卡住了"的原因。</div>
+  </div>
+
+  <!-- ===== 9 EOF 与 char ===== -->
+  <div class="section" id="sec9">
+    <div class="section-title">EOF 的标准写法，以及 char 的坑</div>
+    <div class="section-sub">✓ 用 int 接返回值</div>
+<pre class="code"><span class="kw">int</span> c;              <span class="cmt">/* 必须是 int */</span>
+<span class="kw">while</span> ((c = getchar()) != EOF)
+    putchar(c);</pre>
+    <div class="box tip"><span class="label">为什么用 int</span>getchar 返回的是 <b>int</b>：正常字符是 0～255，特殊值 EOF 是 −1，用一个 int 就能区分开。</div>
+    <div class="section-sub">✗ 用 char 接</div>
+<pre class="code"><span class="kw">char</span> c;
+<span class="kw">while</span> ((c = getchar()) != EOF)
+    putchar(c);</pre>
+    <div class="box warn"><span class="label">char 只有 8 位且带符号</span>读到字节 <b>0xFF</b> 时，塞进 char 是 −1，提升成 int 也是 −1，<b>与 EOF 撞车</b>，循环提前结束、后面的内容被吞掉。</div>
+    <div class="box red"><span class="label">换成 unsigned char 更糟</span>它永远不等于 −1，循环<b>停不下来</b>。</div>
+  </div>
+
+  <!-- ===== 10 scanf 返回值 ===== -->
+  <div class="section" id="sec10">
+    <div class="section-title">scanf 的返回值：它其实会回答你</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>返回值</th><th>含义</th><th>举例</th></tr></thead>
+        <tbody>
+          <tr><th>1</th><td>成功读入并赋值的<b>项数</b></td><td>输入 42 读 %d → 返回 1</td></tr>
+          <tr><th>0</th><td>第一项就格式对不上，<b>什么都没读到</b></td><td>输入 abc 读 %d → 返回 0</td></tr>
+          <tr><th>EOF</th><td>还没读到数据，输入就结束了</td><td>直接 Ctrl+Z 回车 → 返回 EOF</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box key"><span class="label">要点</span>返回值不是"成功与否"这种二值答案，而是<b>读到了几项</b>。<code class="inline">scanf("%d%d", &amp;a, &amp;b)</code> 成功两数返回 2，只读到第一个返回 1。</div>
+    <div class="box tip"><span class="label">对照</span>printf 返回的是<b>输出了多少个字符</b>，scanf 返回的是<b>读到了多少项</b>。一个是出，一个是进。</div>
+  </div>
+
+  <!-- ===== 11 用返回值控制循环 ===== -->
+  <div class="section" id="sec11">
+    <div class="section-title">用返回值控制循环：读不动就停</div>
+<pre class="code"><span class="cmt">/* 读一批整数，求和与个数 */</span>
+<span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main()
+{
+    <span class="kw">int</span> x, sum = <span class="num">0</span>, n = <span class="num">0</span>;
+    <span class="kw">while</span> (scanf(<span class="str">"%d"</span>, &amp;x) == <span class="num">1</span>) {
+        sum += x;
+        ++n;
+    }
+    printf(<span class="str">"n=%d sum=%d\n"</span>, n, sum);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">输入：3 7 12 回车，再按 Ctrl+Z 回车
+输出：n=3 sum=22</div>
+    <div class="box key"><span class="label">循环条件在问什么</span>"<b>刚才那一次读成功了吗？</b>"成功就继续读，读不动就收工。</div>
+    <div class="box tip"><span class="label">scanf 自带跳过</span>%d 会自己跳过空格、制表符、回车，所以数字可以<b>分几行输</b>，也可以一行输几个。这一点 getchar 做不到——它一个字符都不跳。</div>
+  </div>
+
+  <!-- ===== 12 格式串是模板 ===== -->
+  <div class="section" id="sec12">
+    <div class="section-title">格式串是模板，空格不是分隔符</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>格式串</th><th>输入</th><th>结果（只改格式串，其余不动）</th></tr></thead>
+        <tbody>
+          <tr><th>"%d%d"</th><td>12 34 回车</td><td>a=12 b=34，返回 <b>2</b></td></tr>
+          <tr><th>"%d %d"</th><td>12 34 回车</td><td>一模一样，返回 <b>2</b>——那个空格是白写的</td></tr>
+          <tr><th>"%d,%d"</th><td>12 34 回车</td><td>a=12，<b>b 没读到</b>，返回 1</td></tr>
+          <tr><th>"%d,%d"</th><td>12,34 回车</td><td>a=12 b=34，返回 2——逗号必须在输入里真的出现</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box key"><span class="label">空白：跳过任意空白</span>空格、<code class="inline">\n</code>、<code class="inline">\t</code> 都只有一个意思——<b>跳过零个或多个空白</b>。%d 自己就会跳，两个 %d 之间的空格写不写都一样。</div>
+    <div class="box warn"><span class="label">其他字符：必须真的出现</span>逗号、冒号、字母都是<b>字面匹配</b>：输入里没有，这一项就读不到，后面的跟着崩。题面说"用空格隔开"，就不该写逗号。</div>
+    <div class="box tip"><span class="label">别把两件事混了</span>"空格是分隔符"说的是<b>输入流</b>；格式串只认三类东西——% 占位符、空白、字面字符。前两类跳过，后一类必须对上。</div>
+  </div>
+
+  <!-- ===== 13 读实数 ===== -->
+  <div class="section" id="sec13">
+    <div class="section-title">读实数：%lf，以及那个假成功</div>
+<pre class="code"><span class="kw">int</span>    n;  scanf(<span class="str">"%d"</span>,  &amp;n);
+<span class="kw">float</span>  f;  scanf(<span class="str">"%f"</span>,  &amp;f);
+<span class="kw">double</span> x;  scanf(<span class="str">"%lf"</span>, &amp;x);  <span class="cmt">/* 要 l */</span></pre>
+    <div class="box key"><span class="label">printf 不挑，scanf 挑</span>输出 double 用 %f 或 %lf 都行；<b>读</b> double 必须 %lf。格式串得告诉 scanf 往那个地址里写几个字节。</div>
+<pre class="code"><span class="kw">double</span> x = <span class="num">0</span>;
+scanf(<span class="str">"%lf"</span>, &amp;x);   <span class="cmt">/* 输入 12,34 */</span></pre>
+    <div class="out">scanf() 返回 1
+x = 12
+缓冲区还剩 ",34"</div>
+    <div class="box warn"><span class="label">返回 1 只说"我读到一项"</span>逗号既不是数字也不是小数点，%lf 读到它就停下，把 12 交给 x。<b>它没说"这一行读干净了"</b>。</div>
+    <div class="box tip"><span class="label">下一轮</span>循环里接着读，还是从那个逗号开始，一样读不到。中文输入法打出的「12，34」，那个全角逗号卡在这儿的情况更常见。</div>
+  </div>
+
+  <!-- ===== 14 那个没被读走的回车 ===== -->
+  <div class="section" id="sec14">
+    <div class="section-title">混着用就出事：没被读走的回车</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>写法</th><th>输入</th><th>实际结果</th></tr></thead>
+        <tbody>
+          <tr><th>scanf("%d", &amp;n);<br>c = getchar();</th><td>42 回车</td><td>c 得到 '\n'，不是你以为的那个字符</td></tr>
+          <tr><th>scanf("%d", &amp;n);<br>scanf("%c", &amp;ch);</th><td>42 回车</td><td>ch 得到 '\n'，'%c' 不跳空白</td></tr>
+          <tr><th>scanf("%d", &amp;n);<br>while (getchar() != '\n') ;</th><td>42 回车</td><td>循环立刻结束（本来就是回车），清了个空</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box key"><span class="label">根子</span>%d 读到<b>第一个不属于数字的字符</b>就停下，那个字符<b>不取走</b>，原样留在缓冲区。于是下一条读字符的语句，读到的就是它。</div>
+    <div class="box warn"><span class="label">常见问题</span>实验课上"我明明输入了字符，程序却直接跳过去了"，十有八九就是这个回车。</div>
+  </div>
+
+  <!-- ===== 15 清缓冲区 ===== -->
+  <div class="section" id="sec15">
+    <div class="section-title">清缓冲区：两种写法，一句别用</div>
+<pre class="code"><span class="cmt">/* ① 读到回车为止 */</span>
+<span class="kw">while</span> (getchar() != <span class="str">'\n'</span>) ;
+
+<span class="cmt">/* ② 让 scanf 自己跳空白 */</span>
+scanf(<span class="str">" %c"</span>, &amp;ch);
+
+<span class="cmt">/* 别用：网上到处都是 */</span>
+fflush(stdin);</pre>
+    <div class="box tip"><span class="label">① 最常用</span>读走直到回车为止的所有字符，回车也一并吃掉。</div>
+    <div class="box key"><span class="label">② 治本</span>格式串<b>开头加一个空格</b>，意思是"先跳过任意空白"。%c 是唯一要手动加的。</div>
+    <div class="box warn"><span class="label">fflush 不是标准写法</span>C 标准只说它管<b>输出流</b>，对输入流用是<b>未定义行为</b>——微软在 MSVC 里实现成"清空缓冲区"，所以机房里能跑，换 gcc 不一定有用。</div>
+    <div class="box"><span class="label">判断标准</span>换一个编译器还对，才是语言给你的；不对，只是某个编译器给的。</div>
+  </div>
+
+  <!-- ===== 16 两个更隐蔽的坑 ===== -->
+  <div class="section" id="sec16">
+    <div class="section-title">两个更隐蔽的坑</div>
+    <div class="section-sub">坑一：%c 连回车都吃</div>
+<pre class="code">scanf(<span class="str">"%c"</span>, &amp;ch);   <span class="cmt">// 读到 '\n'</span>
+scanf(<span class="str">" %c"</span>, &amp;ch);  <span class="cmt">// 读到真字符</span></pre>
+    <div class="box tip"><span class="label">规范写法是第二行</span>要读下一个<b>可见字符</b>，一律写 <code class="inline">" %c"</code>；确实想读空格本身，才写 <code class="inline">"%c"</code>。</div>
+    <div class="section-sub">坑二：清缓冲区清成了死循环</div>
+<pre class="code"><span class="kw">while</span> (getchar() != <span class="str">'\n'</span>) ;
+<span class="cmt">/* 输入已结束 → 等不到 '\n'，卡死 */</span></pre>
+    <div class="box tip"><span class="label">规范写法是下面这段</span>c 用 <b>int</b>，两个条件都判：读到回车停，读到 EOF 也停。</div>
+<pre class="code"><span class="kw">int</span> c;
+<span class="kw">while</span> ((c = getchar()) != <span class="str">'\n'</span>
+       &amp;&amp; c != EOF) ;</pre>
+    <div class="box key"><span class="label">经验</span>凡是"一直读到某个字符为止"的循环，<b>都要顺手防一下 EOF</b>。</div>
+  </div>
+
+  <!-- ===== 17 例 4-18 要求 ===== -->
+  <div class="section" id="sec17">
+    <div class="section-title">例 4-18：能反复算的小计算器</div>
+    <div class="box"><span class="label">要求</span>每读入一个格式正确的表达式，就输出结果；<b>输一个非数字字符就退出</b>。</div>
+    <div class="out">Small Calculator
+Enter any no-digit character to stop.
+12.8*36.5
+12.80*36.50=467.20
+254+143.8
+254.00+143.80=397.80
+a
+/* 退出 */</div>
+    <div class="box key"><span class="label">怎么知道该停了</span>靠 scanf 的返回值：<code class="inline">== 1</code> 才进去。用户输的是字母，<b>第一个数就读不到</b>，返回值不是 1，整个 while 收工。</div>
+    <div class="box warn"><span class="label">三种意外</span>① 运算符不是 + − * /　② 第二个数不是数字　③ 除数为 0</div>
+    <div class="box tip"><span class="label">骨架</span><code class="inline">while (读得动) { 处理; 出错就清缓冲区再 continue; }</code></div>
+  </div>
+
+  <!-- ===== 18 代码上 ===== -->
+  <div class="section" id="sec18">
+    <div class="section-title">例 4-18（上）：循环与容错</div>
+<pre class="code"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main(<span class="kw">void</span>) {
+  <span class="kw">float</span> left, right, r;  <span class="kw">char</span> op;
+  printf(<span class="str">"Small Calculator\n"</span>);
+  printf(<span class="str">"Enter any no-digit char to stop.\n"</span>);
+  <span class="kw">while</span> (scanf(<span class="str">"%f"</span>, &amp;left) == <span class="num">1</span>) {   <span class="cmt">// 第一个数是数字才进来</span>
+    op = getchar();                       <span class="cmt">// 紧跟的运算符</span>
+    <span class="kw">if</span> ((op != <span class="str">'+'</span> &amp;&amp; op != <span class="str">'-'</span> &amp;&amp; op != <span class="str">'*'</span> &amp;&amp; op != <span class="str">'/'</span>)
+        || scanf(<span class="str">"%f"</span>, &amp;right) != <span class="num">1</span>) {      <span class="cmt">// 运算符错或第二数错</span>
+      printf(<span class="str">"Format incorrect.\n"</span>);
+      <span class="kw">while</span> (getchar() != <span class="str">'\n'</span>) ;         <span class="cmt">// 清掉本行残留</span></pre>
+    <div class="box tip"><span class="label">三处要点</span><code class="inline">op = getchar()</code> 取的是 %f 停下来的那个字符，就是运算符；<b>|| 有短路</b>：op 不合法时右边的 scanf 不执行，right 压根没被赋值；出错后清缓冲区再 continue。</div>
+  </div>
+
+  <!-- ===== 19 代码下 ===== -->
+  <div class="section" id="sec19">
+    <div class="section-title">例 4-18 代码（下）：分派与输出</div>
+<pre class="code">      <span class="kw">continue</span>;                          <span class="cmt">// 重新输入下一个式子</span>
+    }
+    <span class="kw">switch</span> (op) {
+    <span class="kw">case</span> <span class="str">'+'</span>: r = left + right; <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'-'</span>: r = left - right; <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'*'</span>: r = left * right; <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'/'</span>:
+      <span class="kw">if</span> (right != <span class="num">0</span>) r = left / right;
+      <span class="kw">else</span> { printf(<span class="str">"Error! divider is 0\n"</span>); <span class="kw">continue</span>; }
+    }
+    printf(<span class="str">"%.2f%c%.2f=%.2f\n"</span>, left, op, right, r);
+  }
+  <span class="kw">return</span> <span class="num">0</span>;                    <span class="cmt">// 在循环外，整个程序只返回一次</span>
+}</pre>
+    <div class="box key"><span class="label">两处 continue 分工不同</span>第一处（容错）是"这一行读坏了，重来"；第二处（除数为 0）是"这题算不了，跳过打结果"。两者都不退出程序。</div>
+  </div>
+
+  <!-- ===== 20 六组数据 ===== -->
+  <div class="section" id="sec20">
+    <div class="section-title">拿六组数据测一测</div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>你输入</th><th>屏幕上出现</th><th>程序走了哪条路</th></tr></thead>
+        <tbody>
+          <tr><th><code class="inline">12.8*36.5</code></th><td>12.80*36.50=467.20</td><td>格式对，正常算</td></tr>
+          <tr><th><code class="inline">10/0</code></th><td>Error! divider is 0</td><td>除数为 0，不打结果</td></tr>
+          <tr><th><code class="inline">5%3</code></th><td>Format incorrect.</td><td>% 不是运算符，短路</td></tr>
+          <tr><th><code class="inline">3+abc</code></th><td>Format incorrect.</td><td>运算符对，第二数读不到</td></tr>
+          <tr><th><code class="inline">10 + 3</code></th><td>Format incorrect.</td><td>多一个空格，op 是 ' '</td></tr>
+          <tr><th><code class="inline">a</code></th><td>（程序结束）</td><td>第一个数读不到，退出</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box warn"><span class="label">把清缓冲那句删掉会怎样</span>输 <code class="inline">5%3</code> 会刷出<b>两条</b> Format incorrect.——残留的 3 又被当成下一轮的开头。可紧接着输 <code class="inline">7+2</code> 照样算对，<b>错得断断续续，最难查</b>。</div>
+  </div>
+
+  <!-- ===== 21 三处最容易写坏 ===== -->
+  <div class="section" id="sec21">
+    <div class="section-title">例 4-18 里三处最容易写坏的地方</div>
+    <div class="box red"><span class="label">① return 0 的位置</span>写进了 <code class="inline">while</code> 循环体里，算完第一个式子就返回。要放在循环之后，整个程序只返回一次。</div>
+    <div class="box red"><span class="label">② case '/' 的 break</span>少了 <code class="inline">break</code>，现在它恰好是最后一个分支才侥幸没出错；以后再加一个 case，就会<b>静默地往下跑</b>。每个 case 都要有出口。</div>
+    <div class="box red"><span class="label">③ 出错后没清掉这一行</span>错误字符留在缓冲区，同一条报错会连着刷两遍（上一节实测）。要清到回车为止再 continue，顺手判一下 EOF。</div>
+    <div class="box tip"><span class="label">为什么拿它讲</span>① 是一定会犯的硬错误，②③ 是今天不出事、改天出事的隐患。<b>代码能跑，不等于写对了。</b></div>
+  </div>
+
+  <!-- ===== 22 PTA 7-8 ===== -->
+  <div class="section" id="sec22">
+    <div class="section-title">PTA 7-8：最佳情侣身高差</div>
+    <div class="box"><span class="label">题目</span>最佳的情侣身高差遵循着一个公式：<b>（女方的身高）× 1.09 =（男方的身高）</b>。</div>
+    <div class="section-sub">输入格式</div>
+    <p>第一行给出正整数 <b>N</b>（≤10），为前来查询的用户数。随后 N 行，每行按照"性别 身高"的格式给出，其中 F 表示女性、M 表示男性；身高为区间 [1.0, 3.0] 之间的实数。</p>
+    <div class="section-sub">输出格式</div>
+    <p>对每一个查询，在一行中算出其情侣的最佳身高，保留小数点后 2 位。</p>
+    <div class="box key"><span class="label">分析</span>第一行是<b>个数</b> N，不是数据；随后 N 行每行两项，中间只有一个空格；女 = 身高 × 1.09，男 = 身高 ÷ 1.09。</div>
+    <div class="section-sub">按公式算两组</div>
+    <div class="out">F 1.60  →  1.60 × 1.09 = 1.744  →  1.74
+M 1.80  →  1.80 ÷ 1.09 = 1.6514 →  1.65</div>
+    <div class="box warn"><span class="label">每行末尾都有一个看不见的回车</span>它也会被读走——这正是下一节要出问题的地方。</div>
+  </div>
+
+  <!-- ===== 23 错在哪 ===== -->
+  <div class="section" id="sec23">
+    <div class="section-title">作业里的题：错在哪、怎么写</div>
+    <div class="section-sub">✗ 错在这：%c 前面没空格</div>
+<pre class="code"><span class="cmt">/* 'F' 女 / 'M' 男 */</span>
+<span class="kw">int</span>  n, i;
+<span class="kw">char</span> gender;
+<span class="kw">double</span> h;
+scanf(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+    scanf(<span class="str">"%c%lf"</span>, &amp;gender, &amp;h);</pre>
+    <div class="box warn"><span class="label">为什么错</span>第一轮 gender 拿到的是上一行留下的 <code class="inline">'\n'</code>，身高跟着错位，后面全乱。</div>
+    <div class="section-sub">✓ 规范写法：%c 前加一个空格</div>
+<pre class="code">scanf(<span class="str">" %c%lf"</span>, &amp;gender, &amp;h);</pre>
+    <div class="box tip"><span class="label">为什么加在前面</span>%d 读完后，回车还留在缓冲区，%c 不跳空白、正好取到它。%lf 自己会跳，所以<b>空格要加在 %c 前面</b>。</div>
+    <div class="box key"><span class="label">完整骨架</span>读 N → 循环 N 次 → 每次读"空格 + %c + %lf" → 按性别算 → 输出 %.2f。</div>
+  </div>
+
+  <!-- ===== 24 随堂检测 ===== -->
+  <div class="section" id="sec24">
+    <div class="section-title">随堂检测：四题</div>
+    <div class="card orange">
+      <h4>第 1 题　回车去哪儿了</h4>
+      <p>敲 <b>42</b> 再敲回车，程序依次执行下面两行：</p>
+<pre class="code">scanf(<span class="str">"%d"</span>, &amp;n);
+ch = getchar();</pre>
+      <p>此时 <b>ch</b> 的值是？</p>
+      <div class="box tip"><span class="label">答案 C</span><code class="inline">'\n'</code>。%d 读走 '4'、'2' 就停，后面那个回车一个字节也没动，还留在缓冲区；getchar 取的就是它。用 <code class="inline">[%c]</code> 打印，右括号会掉到下一行。</div>
+    </div>
+    <div class="card purple">
+      <h4>第 2 题　scanf 返回几</h4>
+      <p>敲 <b>abc</b> 再回车，程序执行这一行：</p>
+<pre class="code">r = scanf(<span class="str">"%d"</span>, &amp;x);</pre>
+      <p>此时 <b>r</b> 的值是？</p>
+      <div class="box tip"><span class="label">答案 B</span><code class="inline">0</code>。'a' 一个数字也对不上，返回值是 0，而且它原地没动、还在缓冲区，下一次读到的还是它——不清掉就一直读同一个字符。<code class="inline">== 1</code> 为假，循环一次也进不去。</div>
+    </div>
+    <div class="card green">
+      <h4>第 3 题　实数读歪了</h4>
+<pre class="code">r = scanf(<span class="str">"%lf"</span>, &amp;x);</pre>
+      <p>敲 <b>12,34</b> 再回车，<b>x</b> 的值是？</p>
+      <div class="box tip"><span class="label">答案 B</span><code class="inline">x = 12</code>，r = 1。%lf 读完 12 遇到逗号就停——逗号不是数字、不是小数点，也不是可跳过的空白。缓冲区还剩 <code class="inline">,34</code>，下一轮从这里接着读。</div>
+    </div>
+    <div class="card red">
+      <h4>第 4 题　加了清缓冲之后</h4>
+      <p>敲 <b>42</b> 回车、再敲 <b>A</b> 回车，程序执行下面三行：</p>
+<pre class="code">scanf(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">while</span> (getchar() != <span class="str">'\n'</span>) ;
+ch = getchar();</pre>
+      <p>此时 <b>ch</b> 拿到的是？</p>
+      <div class="box tip"><span class="label">答案 B</span><code class="inline">'A'</code>。while 一个字符一个字符取，取到回车为止，正好把 %d 留下的那个回车吃掉，ch 才等到你敲的 A。和第 1 题比：不加这一行，ch 拿到的是 <code class="inline">'\n'</code>。</div>
+    </div>
+  </div>
+
+  <!-- ===== 25 小结 ===== -->
+  <div class="section" id="sec25">
+    <div class="section-title">本讲小结</div>
+    <ul class="feat">
+      <li><span class="k">① 输入是流</span><span class="v">键盘敲的东西先进缓冲区，程序按需取，取不完留着</span></li>
+      <li><span class="k">② 四种停法</span><span class="v">计数器、'\n' 结束标志、EOF、scanf 返回值</span></li>
+      <li><span class="k">③ 整型后读字符</span><span class="v">%c 前加一个空格，或先 while 清到回车为止</span></li>
+      <li><span class="k">④ 骨架固定</span><span class="v">while (读得动) { 处理；出错清缓冲区再 continue； }</span></li>
+      <li><span class="k">⑤ 格式串是模板</span><span class="v">除了 % 占位符，其余字符都得在输入里对上</span></li>
+    </ul>
+    <div class="box key"><span class="label">记住这一条</span><b>程序读到的，永远是你上一次留下的东西</b>——输入问题查不出来的时候，先怀疑缓冲区里还有残渣，而不是怀疑键盘。</div>
+    <div class="box tip"><span class="label">下一讲</span>第 5 章 数组。</div>
+  </div>
+
+  <div class="footer">
+    C 程序设计基础 · 第 4 章（六）循环中的输入问题<br>
+    手机复习版 · 武汉理工大学 人工智能学院
+  </div>
+
+</div>
+
+<!-- ================= 回到顶部按钮 ================= -->
+<button class="backtop" id="backtop" title="回到顶部">↑</button>
+
+<script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
