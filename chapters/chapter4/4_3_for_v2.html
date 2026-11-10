@@ -830,17 +830,17 @@ printf(<span class="str">"%d, i=%d"</span>, s, i);</pre>
 <section class="slide">
     <div class="s-title">三段都能省，但省了哪个就要在别处补上</div>
     <div class="s-body">
-      <div class="grid c3" style="margin-top:6px; gap:22px;">
-        <div class="card" style="padding:18px 22px;">
+      <div class="grid c3" style="margin-top:6px; gap:8px;">
+        <div class="card" style="padding:8px 10px;">
           <h4>省表达式1</h4>
-          <pre class="code" style="margin:10px 0;">s=<span class="num">0</span>;
+          <pre class="code" style="margin:5px 0;">s=<span class="num">0</span>;
 i=<span class="num">1</span>;
 <span class="kw">for</span>( ; i &lt;=<span class="num"> 100</span>; i++ )
     s+=i;</pre>
           <p>初值挪到 for 前面，<b>先赋好再进</b></p>
           省 1 → 前面另写赋值；
         </div>
-        <div class="card orange" style="padding:18px 22px;">
+        <div class="card orange" style="padding:8px 10px;">
           <h4>省表达式2</h4>
           <pre class="code" style="margin:10px 0;"><span class="kw">for</span>( s=<span class="num">0</span>, i=<span class="num">1</span>; ; i++ ) {
     s += i;
@@ -848,7 +848,7 @@ i=<span class="num">1</span>;
 }</pre>
           <p>省 2 → 等同于 while(1) ＝<b>永真</b>，必须通过 break跳出循环</p>
         </div>
-        <div class="card green" style="padding:18px 22px;">
+        <div class="card green" style="padding:8px 10px;">
           <h4>省表达式3</h4>
           <pre class="code" style="margin:10px 0;"><span class="kw">for</span>( s = <span class="num">0</span>, i = <span class="num">1</span>; i &lt;=<span class="num"> 100</span>; )
     s += i++;</pre>
