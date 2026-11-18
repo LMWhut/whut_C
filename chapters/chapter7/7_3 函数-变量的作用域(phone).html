@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 7 章（三）变量的作用域 · 手机版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Source Han Sans SC",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+
+  /* ===== 内存面板 ===== */
+  .memwrap{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+  .zone{border:2px dashed #b9d3e8;border-radius:12px;background:#f7fbff;padding:8px 12px 12px;}
+  .zone.on{border:2px solid #1a6fb5;background:#eaf3fb;}
+  .zcap{font-size:15px;color:#7f96aa;font-weight:700;}
+  .zone.on .zcap{color:#124f83;}
+  .mcards{display:flex;gap:10px;justify-content:center;margin-top:6px;}
+  .mc{flex:1;border:2px solid #1a6fb5;border-radius:10px;background:#fff;text-align:center;padding:4px 0 6px;}
+  .mc .nm{display:block;font-size:14px;color:#7f96aa;line-height:1.2;}
+  .mc .vv{display:block;font-size:22px;font-weight:800;color:#124f83;line-height:1.15;}
+  .mc.hot{border-color:#e8720c;background:#fdf1e4;}
+  .mc.hot .vv{color:#b95a05;}
+  .copyrow{text-align:center;font-size:14px;color:#b9d3e8;}
+
+  /* ===== 内存布局 ===== */
+  .mmap{border:2px solid #b9d3e8;border-radius:12px;overflow:hidden;margin:12px 0;background:#fff;}
+  .mrow{padding:8px 12px 10px;border-bottom:1px solid #e6f0f8;}
+  .mrow:last-child{border-bottom:none;}
+  .mrow.r1{border-left:8px solid #e8720c;background:#fef8f1;}
+  .mrow.r2{border-left:8px solid #9fb3c4;background:#f7f9fb;}
+  .mrow.r3{border-left:8px solid #2e8b57;background:#f4fbf6;}
+  .mrow.r4{border-left:8px solid #1a6fb5;background:#f4f9fd;}
+  .mrow .mt{font-size:16px;font-weight:700;display:block;line-height:1.35;}
+  .mrow.r1 .mt{color:#b95a05;}
+  .mrow.r2 .mt{color:#5b7285;}
+  .mrow.r3 .mt{color:#1f6b41;}
+  .mrow.r4 .mt{color:#124f83;}
+  .mrow .ms{font-size:15px;color:#41627c;line-height:1.65;display:block;}
+  .mrow .mv{margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;}
+  .mrow .mv span{font-family:Consolas,"Courier New",monospace;font-size:15px;border:1px solid #9dc0da;border-radius:7px;padding:0 8px;color:#124f83;background:#fff;}
+  .mrow .mv b{color:#b95a05;font-family:inherit;}
+
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.55;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 页脚 ================= */
+  .footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:24px 16px 40px;
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 移动端布局微调 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部固定栏 ================= -->
+<div class="topbar">
+  <h1>第 7 章（三）变量的作用域</h1>
+  <button class="btn-toc" id="btnToc">
+    目录 <span class="arrow">▼</span>
+  </button>
+</div>
+
+<!-- ================= 目录浮层 ================= -->
+<div class="toc-panel" id="tocPanel">
+  <div class="toc-group open">
+    <div class="toc-group-title">开场 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec1">本讲内容</a>
+      <a href="#sec2">本讲学习目标</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">一、换不过来的两个数 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec3">改不动的实参</a>
+      <a href="#sec4">四个各不相同的变量</a>
+      <a href="#sec5">什么叫作用域</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">二、局部变量 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec6">只在本函数内有效</a>
+      <a href="#sec7">进函数分配，返回回收</a>
+      <a href="#sec8">形参也是局部变量</a>
+      <a href="#sec9">花括号也是边界</a>
+      <a href="#sec10">没给初值时是几</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">三、全局变量 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec11">写在所有函数外面</a>
+      <a href="#sec12">和程序同寿命</a>
+      <a href="#sec13">好用，但代价不小</a>
+      <a href="#sec14">什么时候该用它</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">四、同名遮蔽 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec15">同名时用哪一个</a>
+      <a href="#sec16">一段代码三个 n</a>
+      <a href="#sec17">想改全局却改了自己</a>
+      <a href="#sec18">编译器怎么找名字</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">五、内存里的位置 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec19">栈区与静态区</a>
+      <a href="#sec20">加了 static 的局部</a>
+      <a href="#sec21">作用域与生存期</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">六、函数程序举例 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec22">同一件事两种写法</a>
+      <a href="#sec23">两种写法怎么取舍</a>
+      <a href="#sec24">三个函数拼起来</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">七、易错与收尾 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec25">五个常见错误</a>
+      <a href="#sec26">随堂检测</a>
+      <a href="#sec27">本讲小结</a>
+      <a href="#sec28">下一讲与作业</a>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ===== 1 本讲内容 ===== -->
+  <div class="section" id="sec1">
+    <div class="section-title">本讲内容</div>
+    <ul class="feat">
+      <li><span class="k">换不过来的数</span><span class="v">写对了逻辑，结果一点没变</span></li>
+      <li><span class="k">局部变量</span><span class="v">只在本函数内有效</span></li>
+      <li><span class="k">全局变量</span><span class="v">谁都能看见，也谁都能改</span></li>
+      <li><span class="k">同名遮蔽</span><span class="v">两个同名，到底用哪个</span></li>
+      <li><span class="k">找名字的规则</span><span class="v">由内向外，找到就停</span></li>
+      <li><span class="k">栈区与静态区</span><span class="v">变量到底存在哪块内存</span></li>
+      <li><span class="k">空间与时间</span><span class="v">作用域和生存期说的不是一回事</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== 2 本讲学习目标 ===== -->
+  <div class="section" id="sec2">
+    <div class="section-title">本讲学习目标</div>
+    <ul class="feat">
+      <li><span class="k">① 说得出</span><span class="v">为什么函数里改了形参，外面那个变量一点没动</span></li>
+      <li><span class="k">② 分得清</span><span class="v">局部和全局各自的作用范围、存在多久、初值是什么</span></li>
+      <li><span class="k">③ 判断准</span><span class="v">两个同名变量摆在一起，能一眼看出这行用的是哪个</span></li>
+      <li><span class="k">④ 用得住</span><span class="v">知道什么时候该用全局，什么时候会给自己添麻烦</span></li>
+      <li><span class="k">⑤ 改得动</span><span class="v">拿到靠全局变量串起来的代码，能改成靠参数传递</span></li>
+    </ul>
+    <div class="box tip"><span class="label">这一讲的重点</span>上一讲看到「每层栈帧各有各的 n」。这一讲把这句话讲清楚：<b>名字只在它被定义的那一小块地方算数</b>。</div>
+  </div>
+
+  <!-- ===== 3 换不过来的两个数 ===== -->
+  <div class="section" id="sec3">
+    <div class="section-title">换不过来的两个数</div>
+    <p>想把两个数换个位置，于是写了下面这个 swap。</p>
+<pre class="code"><span class="cmt">/* 把两个数换个位置 */</span>
+<span class="kw">void</span> swap(<span class="kw">int</span> a, <span class="kw">int</span> b)
+{
+    <span class="kw">int</span> t = a;
+    a = b;
+    b = t;
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> x = <span class="num">3</span>, y = <span class="num">8</span>;
+    swap(x, y);
+    printf(<span class="str">"%d %d\n"</span>, x, y);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="box warn"><span class="label">先猜一下</span>swap 里明明换了，t = a、a = b、b = t 三步一步不缺。那 main 输出应该是 <code class="inline" style="white-space:nowrap;">8 3</code> 吧？</div>
+    <div class="out">3 8</div>
+    <div class="box red"><span class="label">没换过来</span>一个都没动。程序不报错、不警告，就这么安安静静地什么都没干。</div>
+    <div class="box tip"><span class="label">为什么</span><code class="inline" style="white-space:nowrap;">swap(x, y)</code> 只把 3 和 8 这两个<b>值</b>交过去，a、b 各拿一份抄件，x、y 本身留在 main 里没动。</div>
+  </div>
+
+  <!-- ===== 4 a、b 和 x、y 是四个变量 ===== -->
+  <div class="section" id="sec4">
+    <div class="section-title">a、b 和 x、y 是四个变量</div>
+    <div class="memwrap">
+      <div class="zone on">
+        <div class="zcap">main 的栈帧</div>
+        <div class="mcards">
+          <div class="mc"><span class="nm">x</span><span class="vv">3</span></div>
+          <div class="mc"><span class="nm">y</span><span class="vv">8</span></div>
+        </div>
+      </div>
+      <div class="copyrow">↓　调用 swap(x, y)，3 和 8 各抄一份　↓</div>
+      <div class="zone on">
+        <div class="zcap">swap 的栈帧（副本）</div>
+        <div class="mcards">
+          <div class="mc"><span class="nm">t</span><span class="vv">3</span></div>
+          <div class="mc hot"><span class="nm">a</span><span class="vv">8</span></div>
+          <div class="mc hot"><span class="nm">b</span><span class="vv">3</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="box"><span class="label">① 调用时抄一份</span><code class="inline" style="white-space:nowrap;">swap(x, y)</code> 把 3 抄给 a、8 抄给 b。</div>
+    <div class="box warn"><span class="label">② 换的是抄件</span>a、b 在 swap 内部确实换成了 8、3，但换的是这两份抄件；t 是换的时候临时留的底。</div>
+    <div class="box"><span class="label">③ 结束就回收</span>a、b、t 一起消失，x、y 从头到尾没人碰过，还是 3、8。</div>
+    <div class="box key"><span class="label">一句话</span>a、b 和 x、y 是四个各不相同的变量，只是开局时值一样。</div>
+    <div class="box tip"><span class="label">这叫值传递</span>C 语言把实参的值复制给形参，单向的，抄过去就断开了。</div>
+  </div>
+
+  <!-- ===== 5 什么叫作用域 ===== -->
+  <div class="section" id="sec5">
+    <div class="section-title">什么叫作用域</div>
+    <div class="box"><span class="label">定义</span>一个变量能被程序按名字找到的那段代码范围，叫它的<b>作用域</b>。出了这个范围，名字就不认识了。</div>
+    <ul class="feat">
+      <li><span class="k">① 是空间概念</span><span class="v">说的是代码里的哪几行能用这个名字，跟时间无关</span></li>
+      <li><span class="k">② 由位置决定</span><span class="v">变量写在哪一行，决定了它的作用范围有多大，写完就定死</span></li>
+      <li><span class="k">③ 编译器要查</span><span class="v">按名字找变量，找不到就报 undeclared，程序根本编不过</span></li>
+    </ul>
+    <div class="box key"><span class="label">换个说法</span>名字能不能用，取决于你<b>站在哪一行</b>。站在 swap 里就看不见 main 的 x，站在 main 里也看不见 swap 的 a。</div>
+  </div>
+
+  <!-- ===== 6 局部变量：只在本函数内有效 ===== -->
+  <div class="section" id="sec6">
+    <div class="section-title">局部变量：只在本函数内有效</div>
+<pre class="code"><span class="kw">void</span> f(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> k = <span class="num">1</span>;        <span class="cmt">/* 局部 */</span>
+    printf(<span class="str">"%d\n"</span>, k);
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    f();
+    printf(<span class="str">"%d\n"</span>, k);  <span class="cmt">/* 报错 */</span>
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="box red"><span class="label">编译不过</span><code class="inline" style="white-space:nowrap;">'k' undeclared</code>。k 是 f 里定义的，main 里没有这个名字。</div>
+    <div class="box"><span class="label">定义</span>在函数内部（或复合语句内部）定义的变量，叫<b>局部变量</b>。</div>
+    <div class="box tip"><span class="label">注意</span>这不是「权限不够」。是这个变量根本不存在，编译器连它的类型都不知道。</div>
+  </div>
+
+  <!-- ===== 7 进函数时分配，出函数时回收 ===== -->
+  <div class="section" id="sec7">
+    <div class="section-title">进函数时分配，出函数时回收</div>
+<pre class="code"><span class="kw">void</span> f(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> k = <span class="num">0</span>;
+    k++;
+    printf(<span class="str">"%d "</span>, k);
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    f();
+    f();
+    f();
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">1 1 1</div>
+    <div class="box tip"><span class="label">不是该 1 2 3 吗</span>不是。k 是局部变量，每调用一次 f 就重新分配一个，仍从 0 开始。上一次调用里的 k，在函数返回时已经被回收了。</div>
+    <div class="box key"><span class="label">记住这一条</span>局部变量的存在时间就是这一次函数调用：<b>调用时分配，返回时回收</b>。三次调用，三个不同的 k。</div>
+  </div>
+
+  <!-- ===== 8 形参也是局部变量 ===== -->
+  <div class="section" id="sec8">
+    <div class="section-title">形参也是局部变量</div>
+<pre class="code"><span class="kw">int</span> add(<span class="kw">int</span> a)     <span class="cmt">/* a 是形参 */</span>
+{
+    a = a + <span class="num">100</span>;    <span class="cmt">/* 改副本 */</span>
+    <span class="kw">return</span> a;
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> x = <span class="num">7</span>;
+    printf(<span class="str">"%d\n"</span>, add(x));
+    printf(<span class="str">"%d\n"</span>, x);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">107
+7</div>
+    <div class="box"><span class="label">形参的身份</span>形参是函数自己造出来接值的变量，只是写在参数表里。它和函数体第一行写一句 <code class="inline" style="white-space:nowrap;">int a;</code> 没有区别。</div>
+    <div class="box warn"><span class="label">所以</span>在函数里给形参赋值，只影响这个副本。想通过改形参把结果带回去，这条路走不通。</div>
+  </div>
+
+  <!-- ===== 9 花括号也是一道边界 ===== -->
+  <div class="section" id="sec9">
+    <div class="section-title">花括号也是一道边界</div>
+<pre class="code"><span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> s = <span class="num">0</span>;
+    {
+        <span class="kw">int</span> s = <span class="num">10</span>;   <span class="cmt">/* 内层 s */</span>
+        printf(<span class="str">"内层 %d\n"</span>, s);
+    }
+    printf(<span class="str">"外层 %d\n"</span>, s);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">内层 10
+外层 0</div>
+    <div class="box tip"><span class="label">两个 s</span>里层那对花括号里声明的 s，只管到花括号结束。出了花括号这个名字就不再有效，看到的又变回外面的 s。</div>
+    <div class="box"><span class="label">范围最小的局部</span>函数的形参、函数体的一对花括号、if / for / while 后面的一对花括号，每一对都圈出一块地。</div>
+  </div>
+
+  <!-- ===== 10 局部变量没给初值时是几 ===== -->
+  <div class="section" id="sec10">
+    <div class="section-title">局部变量没给初值时是几</div>
+<pre class="code"><span class="kw">int</span> g;                <span class="cmt">/* 全局，没初值 */</span>
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> a;            <span class="cmt">/* 局部，没初值 */</span>
+    <span class="kw">static int</span> s;     <span class="cmt">/* 静态，没初值 */</span>
+    printf(<span class="str">"g = %d\n"</span>, g);
+    printf(<span class="str">"s = %d\n"</span>, s);
+    printf(<span class="str">"a = %d\n"</span>, a);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="box red"><span class="label">局部变量是不定值</span>这一次跑出来 <code class="inline" style="white-space:nowrap;">a = 0</code>，看着挺正常。但换个机器、改几行代码，它可能是 32764 或者别的数。<b>它不是 0，只是这次恰好是 0。</b></div>
+    <div class="box tip"><span class="label">全局和静态是 0</span>g 和 s 没写初值，编译器会把它们清成 0。这一条是标准保证的，可以放心用。</div>
+    <div class="box key"><span class="label">建议</span>局部变量定义的时候顺手给个初值。这一行能省掉半天的排查。</div>
+  </div>
+
+  <!-- ===== 11 全局变量：写在所有函数外面 ===== -->
+  <div class="section" id="sec11">
+    <div class="section-title">全局变量：写在所有函数外面</div>
+<pre class="code"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+
+<span class="kw">int</span> total;      <span class="cmt">/* ① 函数外面 */</span>
+<span class="kw">int</span> cnt;
+
+<span class="kw">void</span> add(<span class="kw">int</span> s)  <span class="cmt">/* ② 这里起可见 */</span>
+{
+    total += s;
+    cnt++;
+}
+<span class="cmt">/* main 里也看得见 */</span></pre>
+    <div class="box"><span class="label">定义</span>在函数外面定义的变量，叫<b>全局变量</b>。它的作用范围是从定义那一行起，到本文件结束。</div>
+    <div class="box warn"><span class="label">位置有讲究</span>全局变量必须写在<b>要用它的函数之前</b>。写在 main 后面，前面的 add 就看不见它。</div>
+    <div class="box tip"><span class="label">习惯</span>统一写在 <code class="inline" style="white-space:nowrap;">#include</code> 之后、第一个函数之前。一眼就能看出这个程序有哪些共享数据。</div>
+  </div>
+
+  <!-- ===== 12 全局变量和程序同寿命 ===== -->
+  <div class="section" id="sec12">
+    <div class="section-title">全局变量和程序同寿命</div>
+    <ul class="feat">
+      <li><span class="k">写在哪</span><span class="v">局部在函数或复合语句内部；全局在所有函数外面</span></li>
+      <li><span class="k">作用范围</span><span class="v">局部到所在块结束；全局到本文件结束</span></li>
+      <li><span class="k">存在多久</span><span class="v">局部进函数时分配、返回时回收；全局到程序结束</span></li>
+      <li><span class="k">没给初值</span><span class="v">局部是不定值；全局自动为 0</span></li>
+      <li><span class="k">谁看得到</span><span class="v">局部只有本函数；全局所有函数都能用</span></li>
+    </ul>
+    <div class="box key"><span class="label">最容易记的一条</span>局部变量是<b>每次调用新建</b>，全局变量是<b>整个程序只有一份</b>。所以前面那段 <code class="inline" style="white-space:nowrap;">f(); f(); f();</code> 输出的是 1 1 1，把 k 改成全局就变成 1 2 3 了。</div>
+  </div>
+
+  <!-- ===== 13 全局变量好用，但代价不小 ===== -->
+  <div class="section" id="sec13">
+    <div class="section-title">全局变量好用，但代价不小</div>
+    <div class="box red"><span class="label">① 谁都能改</span>任何一个函数都能动它，出了问题不知道该找谁。查一个数为什么变成 99，得把所有函数翻一遍。</div>
+    <div class="box warn"><span class="label">② 函数不再独立</span>用了全局变量的函数，换到别的程序里就编不过。它偷偷依赖了一个外面看不见的东西。</div>
+    <div class="box tip"><span class="label">③ 名字容易撞</span>全局名字多起来，随便起个 <code class="inline" style="white-space:nowrap;">i</code>、<code class="inline" style="white-space:nowrap;">sum</code> 就可能和别处的重名，然后就遮蔽了。</div>
+    <div class="box"><span class="label">对照一下</span>上一讲的递归函数，每层栈帧的 n 都是自己的局部变量，所以互不干扰。要是把那个 n 写成全局变量，五层调用共用一个 n，压到最里面的时候 n 已经变成 1，外面那些层全乱。</div>
+    <div class="box key"><span class="label">记住这一条</span>能用参数传的，就别用全局变量。参数写在函数头上，谁给了什么一目了然。</div>
+  </div>
+
+  <!-- ===== 14 什么时候该用全局变量 ===== -->
+  <div class="section" id="sec14">
+    <div class="section-title">什么时候该用全局变量</div>
+    <ul class="feat">
+      <li><span class="k" style="color:#2e8b57;">✓</span><span class="v">多个函数共享同一份数据，比如统计总人数、计数器</span></li>
+      <li><span class="k" style="color:#2e8b57;">✓</span><span class="v">常量，定义一次到处用，谁也不改它，比如数组长度</span></li>
+      <li><span class="k" style="color:#c0392b;">✗</span><span class="v">只是想把一个结果从函数里带出来，用返回值就够了</span></li>
+      <li><span class="k" style="color:#c0392b;">✗</span><span class="v">图省事少写几个参数，改成参数传递更清楚</span></li>
+      <li><span class="k" style="color:#c0392b;">✗</span><span class="v">几个函数各算各的中间结果，各用各的局部变量</span></li>
+    </ul>
+    <div class="box tip"><span class="label">判断办法</span>看一条：<b>这个数据在整个程序里是否只有一份？</b>是，比如全班人数，才考虑全局；不是，比如这次调用算出的中间结果，就放在局部变量里。</div>
+    <div class="box warn"><span class="label">拿总分试一试</span>一个班的总分，全局一份够用。要同时统计两个班，只有一个 total 就把两班混在一起了。</div>
+  </div>
+
+  <!-- ===== 15 同名的时候，用哪一个 ===== -->
+  <div class="section" id="sec15">
+    <div class="section-title">同名的时候，用哪一个</div>
+    <div class="box"><span class="label">定义</span>内层定义了一个和外层同名的变量，就把外层<b>遮住</b>了，叫<b>同名遮蔽</b>。遮住的只是名字，外层那个变量的值一点没变。</div>
+    <div class="box tip"><span class="label">怎么判断用哪个</span>看这一行站在第几层，就先用哪一层的。由内往外一层层找，找到第一个就停。</div>
+    <div class="box"><span class="label">花括号一结束</span>遮挡消失，外面那个原样露出来，值没动。</div>
+  </div>
+
+  <!-- ===== 16 一段代码，三个 n ===== -->
+  <div class="section" id="sec16">
+    <div class="section-title">一段代码，三个 n</div>
+<pre class="code"><span class="kw">int</span> n = <span class="num">100</span>;        <span class="cmt">/* 全局 n */</span>
+<span class="kw">void</span> f(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> n = <span class="num">5</span>;      <span class="cmt">/* 局部 n */</span>
+    printf(<span class="str">"f   : %d\n"</span>, n);
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    printf(<span class="str">"main: %d\n"</span>, n);
+    f();
+    printf(<span class="str">"back: %d\n"</span>, n);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">main: 100
+f   : 5
+back: 100</div>
+    <ul class="feat">
+      <li><span class="k">main 第一句</span><span class="v">用的是全局的 100</span></li>
+      <li><span class="k">f 里面那句</span><span class="v">用的是 f 自己的 5</span></li>
+      <li><span class="k">main 最后一句</span><span class="v">还是全局的 100</span></li>
+    </ul>
+    <div class="box tip"><span class="label">看清一点</span>f 里那个 n 从头到尾没碰到全局的 n，回来以后全局还是 100。</div>
+  </div>
+
+  <!-- ===== 17 想改全局，却改了自己的 ===== -->
+  <div class="section" id="sec17">
+    <div class="section-title">想改全局，却改了自己的</div>
+<pre class="code"><span class="kw">int</span> count = <span class="num">0</span>;      <span class="cmt">/* 全局计数 */</span>
+<span class="kw">void</span> tick(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> count = <span class="num">0</span>;  <span class="cmt">/* 多写这行 */</span>
+    count++;
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    tick(); tick(); tick();
+    printf(<span class="str">"%d\n"</span>, count);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">0</div>
+    <div class="box red"><span class="label">错在哪</span>tick 里那一行 <code class="inline" style="white-space:nowrap;">int count = 0;</code> 造了一个新的局部变量，把全局的 count 挡住了。加了三趟，加的全是这一个临时的副本，函数一返回就没了。</div>
+    <div class="box tip"><span class="label">规范写法</span>要用全局那个，就别在函数里再定义同名变量。直接把那一行删掉，count++ 加的就是全局的。</div>
+  </div>
+
+  <!-- ===== 18 编译器是怎么找名字的 ===== -->
+  <div class="section" id="sec18">
+    <div class="section-title">编译器是怎么找名字的</div>
+    <div class="box"><span class="label">1　这一对花括号</span>先在自己所在的最内层块里找，形参也算这一层。</div>
+    <div class="box warn"><span class="label">2　外面一层块</span>没有就退到外面那对花括号，一层层往外。</div>
+    <div class="box tip"><span class="label">3　函数外的全局</span>最后才看文件开头定义的那些。</div>
+    <div class="box red"><span class="label">4　都没有</span>报 undeclared，程序编不过。</div>
+    <div class="box"><span class="label">规则就一句</span>由内往外，找到就停。找到第一个同名的就用它，不再往外找。</div>
+    <div class="box key"><span class="label">排查办法</span>遇到「明明赋了值怎么没变」，先数一遍同名的变量有几个，再看你那一行站在第几层。</div>
+  </div>
+
+  <!-- ===== 19 变量到底存在哪块内存 ===== -->
+  <div class="section" id="sec19">
+    <div class="section-title">变量到底存在哪块内存</div>
+    <div class="mmap">
+      <div class="mrow r1">
+        <span class="mt">栈区</span>
+        <span class="ms">局部变量、形参。进函数才分配，返回就收回。栈从高地址往低地址长：每调用一个函数，就往下压入一块。</span>
+        <span class="mv"><span><b>a</b> 0061FE4C</span></span>
+      </div>
+      <div class="mrow r2">
+        <span class="mt">堆区</span>
+        <span class="ms">由 malloc、calloc 这类函数动态申请的内存，用完要自己释放。第 6 章再讲。</span>
+      </div>
+      <div class="mrow r3">
+        <span class="mt">静态区</span>
+        <span class="ms">全局变量、static 变量。程序一启动就划好，存在到程序结束，没给初值就是 0。</span>
+        <span class="mv"><span><b>g</b> 00407970</span><span><b>s</b> 00407030</span></span>
+      </div>
+      <div class="mrow r4">
+        <span class="mt">代码区</span>
+        <span class="ms">编译好的机器指令，只读，程序运行期间一直在这儿。</span>
+      </div>
+    </div>
+<pre class="code"><span class="cmt">/* 在一台机器上实跑 */</span>
+&amp;g = <span class="num">00407970</span>   <span class="cmt">/* 全局 */</span>
+&amp;s = <span class="num">00407030</span>   <span class="cmt">/* 静态 */</span>
+&amp;a = <span class="num">0061FE4C</span>   <span class="cmt">/* 局部 */</span></pre>
+    <div class="box tip"><span class="label">三组地址不在一处</span>全局和 static 都在 0040 段，局部在 0061 段，确实分属不同的区域。</div>
+    <div class="box"><span class="label">数字不用记</span>每台机器、每次运行都不一样。只要知道<b>局部在栈区，全局和 static 在静态区</b>。</div>
+  </div>
+
+  <!-- ===== 20 加了 static 的局部变量 ===== -->
+  <div class="section" id="sec20">
+    <div class="section-title">加了 static 的局部变量</div>
+<pre class="code"><span class="kw">void</span> f(<span class="kw">void</span>)
+{
+    <span class="kw">static int</span> k = <span class="num">0</span>;  <span class="cmt">/* 只给一次 */</span>
+    k++;
+    printf(<span class="str">"%d "</span>, k);
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    f(); f(); f();
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="box"><span class="label">三次调用，静态区里只有一个 k</span>
+      第 1 次：0 加 1 输出 1<br>
+      第 2 次：1 加 1 输出 2<br>
+      第 3 次：2 加 1 输出 3<br>
+      初始化那一行只在程序启动时算过一次，后两趟直接跳过。
+    </div>
+    <div class="out">1 2 3</div>
+    <div class="box"><span class="label">和第 7 节比一比</span>同样调用三次，没加 static 输出 1 1 1，加了 static 输出 1 2 3。区别只有两个字。</div>
+    <div class="box tip"><span class="label">static 改了什么</span>只改了<b>存在哪</b>：从栈搬到静态区，于是函数返回也不回收。作用域没变，还是只有 f 能用，main 里照样看不见 k。</div>
+    <div class="box warn"><span class="label">注意</span><code class="inline" style="white-space:nowrap;">static int k = 0;</code> 里的 <code class="inline" style="white-space:nowrap;">= 0</code> 整个程序只执行一次，第二趟进来不会重置。</div>
+  </div>
+
+  <!-- ===== 21 作用域与生存期 ===== -->
+  <div class="section" id="sec21">
+    <div class="section-title">作用域和生存期，两个问题</div>
+    <div class="box"><span class="label">作用域</span>问的是代码里哪几行能用这个名字。举例：f 里的 k，出了 f 就找不到。</div>
+    <div class="box"><span class="label">生存期</span>问的是内存什么时候分配、什么时候回收。举例：static 的 k 在 f 返回后仍然存在。</div>
+    <div class="box key"><span class="label">一个说地方，一个说时间</span>作用域说的是<b>空间</b>，名字在代码哪个范围有效；生存期说的是<b>时间</b>，变量在内存里存在多久。这两件事可以不一致：static 局部出了 f 谁也用不了，可它的内存一直都在。</div>
+    <div class="box tip"><span class="label">这一讲的重点</span>写函数时先问一句「这个名字在哪儿能用」，这就是作用域。生存期记住一条：局部变量出了函数就没了，只有加了 static 才留到程序结束（第 20 节）。</div>
+  </div>
+
+  <!-- ===== 22 同一件事，两种写法 ===== -->
+  <div class="section" id="sec22">
+    <div class="section-title">同一件事，两种写法</div>
+    <div class="section-sub">版本一 · 靠全局变量</div>
+<pre class="code"><span class="kw">int</span> total;         <span class="cmt">/* 全局 */</span>
+<span class="kw">void</span> add(<span class="kw">int</span> s)
+{
+    total += s;
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    total = <span class="num">0</span>;
+    add(<span class="num">78</span>); add(<span class="num">85</span>); add(<span class="num">92</span>);
+    printf(<span class="str">"%d\n"</span>, total);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="section-sub">版本二 · 靠参数传递</div>
+<pre class="code"><span class="kw">int</span> add(<span class="kw">int</span> t, <span class="kw">int</span> s)
+{
+    <span class="kw">return</span> t + s;
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> t = <span class="num">0</span>;
+    t = add(t, <span class="num">78</span>);
+    t = add(t, <span class="num">85</span>);
+    t = add(t, <span class="num">92</span>);
+    printf(<span class="str">"%d\n"</span>, t);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">255</div>
+    <div class="box tip"><span class="label">两个都输出 255</span>结果一样，写法不同。版本一少写两个参数，代价是 add 从此离不开 total。</div>
+  </div>
+
+  <!-- ===== 23 两种写法怎么取舍 ===== -->
+  <div class="section" id="sec23">
+    <div class="section-title">两种写法怎么取舍</div>
+    <ul class="feat">
+      <li><span class="k">调用写起来</span><span class="v">版本一 add(78) 少写参数；版本二 t = add(t, 78) 啰嗦</span></li>
+      <li><span class="k">能不能搬走</span><span class="v">版本一离开 total 编不过；版本二拷到哪都能用</span></li>
+      <li><span class="k">出错好查吗</span><span class="v">版本一难，谁都能改 total；版本二看函数头就知道</span></li>
+      <li><span class="k">同时算两笔</span><span class="v">版本一做不到，只有一份；版本二可以，各用各的</span></li>
+    </ul>
+    <div class="box key"><span class="label">这门课的做法</span>一律<b>先写版本二</b>，全局变量只在整个程序只有一份的场合才用（第 14 节那张清单）。</div>
+    <div class="box tip"><span class="label">最后一条最要紧</span>哪天要同时统计两个班的总分，版本一就写不出来，只有一个 total；版本二加一个变量就行。</div>
+  </div>
+
+  <!-- ===== 24 函数程序举例：三个函数拼起来 ===== -->
+  <div class="section" id="sec24">
+    <div class="section-title">函数程序举例：三个函数拼起来</div>
+<pre class="code"><span class="kw">int</span> fix(<span class="kw">int</span> s)      <span class="cmt">/* 修正 */</span>
+{
+    <span class="kw">if</span> (s &gt; <span class="num">100</span>) s = <span class="num">100</span>;
+    <span class="kw">if</span> (s &lt; <span class="num">0</span>)   s = <span class="num">0</span>;
+    <span class="kw">return</span> s;
+}
+<span class="kw">int</span> total(<span class="kw">int</span> a, <span class="kw">int</span> b, <span class="kw">int</span> c)
+{
+    <span class="kw">return</span> a + b + c;
+}</pre>
+<pre class="code"><span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> s1, s2, s3;
+    scanf(<span class="str">"%d%d%d"</span>, &amp;s1, &amp;s2, &amp;s3);
+    s1 = fix(s1);
+    s2 = fix(s2);
+    s3 = fix(s3);
+    printf(<span class="str">"%d\n"</span>, total(s1,s2,s3)/<span class="num">3</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="box key"><span class="label">看变量都住哪</span>fix 里的 s、total 里的 a b c、main 里的 s1 s2 s3，全是各自的局部变量。三组人各干各的，靠参数交接，谁也不碰谁的东西。</div>
+    <div class="box tip"><span class="label">验一遍</span>输入 <code class="inline" style="white-space:nowrap;">120 85 -5</code>，结果是 <code class="inline" style="white-space:nowrap;">61</code>。120 修成 100，-5 修成 0，(100+85+0)/3 = 61。</div>
+  </div>
+
+  <!-- ===== 25 五个常见错误 ===== -->
+  <div class="section" id="sec25">
+    <div class="section-title">五个常见错误</div>
+    <div class="box red"><span class="label">① 指望函数改掉实参</span>形参是副本，改了也带不回去。办法：用返回值带出来。</div>
+    <div class="box red"><span class="label">② 函数里又定义同名变量</span>遮蔽了，改的是局部那个。办法：删掉重复定义。</div>
+    <div class="box warn"><span class="label">③ 局部变量没给初值就用</span>值是不定的，不是 0。办法：定义时顺手赋值。</div>
+    <div class="box warn"><span class="label">④ 全局变量写在函数后面</span>前面读不到这个名字。办法：统一写在最前面。</div>
+    <div class="box"><span class="label">⑤ 返回后还想用局部变量</span>那块内存已经回收了。办法：返回前把值交出去。</div>
+    <div class="box tip"><span class="label">第 ④ 条的真报错</span><code class="inline" style="white-space:nowrap">error: 'total' undeclared</code>，读到那一行时还没见过这个名字。C 语言从前往后扫，只认已经出现过的东西。</div>
+    <div class="box tip"><span class="label">第 ⑤ 条</span>等学完指针会见到「返回指向局部变量的指针」，编译能过，跑起来结果飘忽。</div>
+  </div>
+
+  <!-- ===== 26 随堂检测 ===== -->
+  <div class="section" id="sec26">
+    <div class="section-title">随堂检测</div>
+
+    <div class="section-sub">第 1 题　swap 之后输出什么</div>
+    <p style="font-size:15px;color:#4d6376;line-height:1.7;">swap 里面把 a、b 换了个位置，main 里写 swap(x, y) 之后输出 x、y（单选）：</p>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">A. 8 3</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">B. 3 8</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">C. 0 0</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">D. 编译错</div>
+    <details style="margin:10px 0;background:#eaf7ef;border:1px solid #cfe8d9;border-radius:8px;padding:0 14px;">
+      <summary style="padding:12px 0;font-size:15.5px;font-weight:700;color:#2e8b57;cursor:pointer;">看解析</summary>
+      <div style="padding:0 0 12px;font-size:15px;line-height:1.75;color:#4d6376;">选 <b>B</b>。swap 里换的是形参 a、b，也就是 x、y 的两份副本。副本换成 8、3 之后，函数一返回就被回收，x、y 从头到尾没被碰过。程序不报错，只是白干一趟。</div>
+    </details>
+
+    <div class="section-sub">第 2 题　三层同名的 a</div>
+    <p style="font-size:15px;color:#4d6376;line-height:1.7;">全局 a 是 10，main 里 a 是 20，花括号里 a 是 30，三处各输出一次（单选）：</p>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">A. 20 30 10</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">B. 20 30 20</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">C. 10 30 10</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">D. 30 30 30</div>
+    <details style="margin:10px 0;background:#eaf7ef;border:1px solid #cfe8d9;border-radius:8px;padding:0 14px;">
+      <summary style="padding:12px 0;font-size:15.5px;font-weight:700;color:#2e8b57;cursor:pointer;">看解析</summary>
+      <div style="padding:0 0 12px;font-size:15px;line-height:1.75;color:#4d6376;">选 <b>B</b>，输出 <code class="inline" style="white-space:nowrap;">20 30 20</code>。第一句站在 main 里，用的是 main 自己的 20；第二句进了花括号，用 30；出来花括号那一层没了，又回到 main 的 20。全局的 10 从头到尾被挡着，一次都没用上。</div>
+    </details>
+
+    <div class="section-sub">第 3 题　static 的 k</div>
+    <p style="font-size:15px;color:#4d6376;line-height:1.7;">f 里把 k 定义成静态局部变量，初值 0，接着 k++ 并输出。main 连调三次 f（单选）：</p>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">A. 1 1 1</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">B. 1 2 3</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">C. 3 3 3</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">D. 0 0 0</div>
+    <details style="margin:10px 0;background:#eaf7ef;border:1px solid #cfe8d9;border-radius:8px;padding:0 14px;">
+      <summary style="padding:12px 0;font-size:15.5px;font-weight:700;color:#2e8b57;cursor:pointer;">看解析</summary>
+      <div style="padding:0 0 12px;font-size:15px;line-height:1.75;color:#4d6376;">选 <b>B</b>，输出 <code class="inline" style="white-space:nowrap;">1 2 3</code>。static 让 k 从栈搬到静态区，第一次调用时初始化成 0 之后就再也不重置，三趟调用共用同一个 k，所以一路加上去。没写 static 的话才是 A 的 1 1 1。</div>
+    </details>
+
+    <div class="section-sub">第 4 题　没给初值的两个变量</div>
+    <p style="font-size:15px;color:#4d6376;line-height:1.7;">一个全局变量 g，一个局部变量 a，都没赋值，现在把它们输出（单选）：</p>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">A. 都是 0</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">B. 都不定</div>
+    <div style="border:1px solid #d6e2ee;border-radius:8px;padding:8px 12px;margin:6px 0;background:#f8fbfe;font-size:15px;">C. g 是 0，a 不定</div>
+    <details style="margin:10px 0;background:#eaf7ef;border:1px solid #cfe8d9;border-radius:8px;padding:0 14px;">
+      <summary style="padding:12px 0;font-size:15.5px;font-weight:700;color:#2e8b57;cursor:pointer;">看解析</summary>
+      <div style="padding:0 0 12px;font-size:15px;line-height:1.75;color:#4d6376;">选 <b>C</b>。全局变量放在静态区，程序启动时整块清零，所以 g 一定是 0，这一条标准有保证。局部变量在栈上，栈上留着上一次用过的数据，所以 a 是那次残留的值，可能是 0，也可能是别的数。第 10 节实跑时 a 恰好是 0，换个环境就不一定。</div>
+    </details>
+  </div>
+
+  <!-- ===== 27 本讲小结 ===== -->
+  <div class="section" id="sec27">
+    <div class="section-title">本讲小结</div>
+    <ul class="feat">
+      <li><span class="k">① 值传递</span><span class="v">实参的值抄一份给形参，函数里改的是副本，带不回去</span></li>
+      <li><span class="k">② 局部变量</span><span class="v">只在本函数或本块有效，进函数才分配，返回就回收，初值不定</span></li>
+      <li><span class="k">③ 全局变量</span><span class="v">从定义处到文件末都能用，存在到程序结束，初值自动为 0</span></li>
+      <li><span class="k">④ 同名遮蔽</span><span class="v">由内往外找，找到就停；挡住的是名字，不是值</span></li>
+      <li><span class="k">⑤ static 局部</span><span class="v">作用域不变，生存期变成整个程序，初值只给一次</span></li>
+      <li><span class="k">⑥ 空间与时间</span><span class="v">作用域看空间，生存期看时间；static 局部这两件事不一致</span></li>
+    </ul>
+    <div class="box key"><span class="label">一句话</span>一个变量归谁管，看它写在哪一行。写在函数里的只归这个函数，写在花括号里的只归这对花括号，写在函数外面的才归所有人。</div>
+  </div>
+
+  <!-- ===== 28 下一讲与作业 ===== -->
+  <div class="section" id="sec28">
+    <div class="section-title">下一讲与作业</div>
+    <div class="box"><span class="label">下一讲</span>《变量的存储类型》：这一讲说名字在哪儿能用，下一讲说变量放在哪、活多久。</div>
+    <div class="box tip"><span class="label">带着这个问题来</span>同一个 static，写在函数里和写在函数外，意思一样吗？答案下一讲给。</div>
+    <div class="box tip"><span class="label">作业 · 四道题</span><br>
+      ① 写出 swap 的正确思路，说明为什么换不过来<br>
+      ② 一段三层同名的代码，逐行写出各变量的值<br>
+      ③ 用 static 局部变量写计数器，验证三次调用<br>
+      ④ 把全局变量版改成参数传递版
+    </div>
+    <div class="box warn"><span class="label">要求</span>第 ④ 题改完，把全局那行<b>删掉</b>再编译一遍。能编过、结果还对，才算真改干净了。</div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>

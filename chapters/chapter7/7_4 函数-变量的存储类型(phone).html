@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 7 章（四）变量的存储类型 · 手机版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Source Han Sans SC",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.55;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 页脚 ================= */
+  .footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:24px 16px 40px;
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 移动端布局微调 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部固定栏 ================= -->
+<div class="topbar">
+  <h1>第 7 章（四）变量的存储类型</h1>
+  <button class="btn-toc" id="btnToc">目录 <span class="arrow">▼</span></button>
+</div>
+
+<!-- ================= 目录浮层 ================= -->
+<div class="toc-panel" id="tocPanel">
+  <div class="toc-group open">
+    <div class="toc-group-title">开场 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec1">这一讲讲什么</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">一、变量放在哪 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec2">内存分四块</a>
+      <a href="#sec3">四个关键字</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">二、static <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec4">只初始化一次</a>
+      <a href="#sec5">写在函数外</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">三、extern 与 register <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec6">两个关键字</a>
+    </div>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-title">四、收尾 <span class="arrow">▼</span></div>
+    <div class="toc-items">
+      <a href="#sec7">本讲小结</a>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ===== 1 这一讲讲什么 ===== -->
+  <div class="section" id="sec1">
+    <div class="section-title">这一讲讲什么</div>
+    <div class="box">上一讲说的是「这个名字在代码哪几行有效」。这一讲换一个问题：<b>写变量时前面能加哪个关键字，加了之后它放进哪块内存、存在多久</b>。</div>
+    <ul class="feat">
+      <li><span class="k">auto</span><span class="v">不写它就是它，变量放栈区</span></li>
+      <li><span class="k">static</span><span class="v">放静态区，函数返回也不收回；写在函数外，只本文件可见</span></li>
+      <li><span class="k">extern</span><span class="v">只是声明，东西定义在别的文件里</span></li>
+      <li><span class="k">register</span><span class="v">建议放寄存器，编译器可以不理</span></li>
+    </ul>
+    <div class="box tip"><span class="label">掌握到哪一步</span><b>static 用在局部变量</b>这一种要会写，其余三个知道名字和一句话的区别就够了。</div>
+  </div>
+
+  <!-- ===== 2 内存分四块 ===== -->
+  <div class="section" id="sec2">
+    <div class="section-title">内存里分四块地方</div>
+    <div class="box"><span class="label">代码区</span>编译好的机器指令，只读。</div>
+    <div class="box"><span class="label">静态区</span>全局变量、static 变量。程序一启动就划好，存在到程序结束。</div>
+    <div class="box"><span class="label">栈区</span>局部变量、形参。进函数才分配，返回就收回，编译器自动管理。</div>
+    <div class="box"><span class="label">堆区</span>malloc 这类函数动态申请的空间，第 6 章再讲。</div>
+<pre class="code"><span class="kw">int</span> g;              <span class="cmt">/* 函数外：静态区 */</span>
+<span class="kw">void</span> f(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> k;          <span class="cmt">/* 栈区 */</span>
+    <span class="kw">static int</span> s;   <span class="cmt">/* 静态区 */</span>
+}</pre>
+    <div class="box key"><span class="label">放哪块区，看两件事</span>写在哪：函数里还是函数外。加没加 static：加了就绕过栈区，直接进静态区。</div>
+  </div>
+
+  <!-- ===== 3 四个关键字 ===== -->
+  <div class="section" id="sec3">
+    <div class="section-title">四个关键字，先看全貌</div>
+    <div class="box"><span class="label">int x;</span>栈区，出函数就收回，初值是残留值，只有本函数能用。</div>
+    <div class="box"><span class="label">static int x;（写函数里）</span>静态区，到程序结束，初值 0，作用范围还是本函数。</div>
+    <div class="box"><span class="label">static int x;（写函数外）</span>静态区，到程序结束，初值 0，只有本文件能用。</div>
+    <div class="box"><span class="label">extern int x;</span>东西在别处，自己不占内存，跟定义一样存在。</div>
+    <div class="box"><span class="label">register int x;</span>寄存器，出函数就收回，只是一个建议。</div>
+    <div class="box tip"><span class="label">两处值得盯一下</span>register 只是建议，编译器可以不理；extern 不分内存，只替别处报个名字。</div>
+  </div>
+
+  <!-- ===== 4 static 局部 ===== -->
+  <div class="section" id="sec4">
+    <div class="section-title">static 局部：只初始化一次</div>
+<pre class="code"><span class="kw">void</span> f(<span class="kw">void</span>)
+{
+    <span class="kw">static int</span> k = <span class="num">0</span>;  <span class="cmt">/* 只给一次 */</span>
+    k++;
+    printf(<span class="str">"%d "</span>, k);
+}
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    f(); f(); f();
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <div class="out">1 2 3</div>
+    <div class="box"><span class="label">三次调用，静态区里只有一个 k</span>第 1 次：0 加 1 输出 1；第 2 次：1 加 1 输出 2；第 3 次：2 加 1 输出 3。<code class="inline" style="white-space:nowrap;">static int k = 0;</code> 那一行只在程序启动时算过一次，后两次直接跳过。</div>
+    <div class="box"><span class="label">和第 7 节比一比</span>同样调用三次，没加 static 输出 1 1 1，加了 static 输出 1 2 3。</div>
+    <div class="box tip"><span class="label">static 改了什么</span>只改了<b>存在哪</b>：从栈搬到静态区，于是函数返回也不收回。作用域没变，还是只有 f 能用，main 里照样看不见 k。</div>
+  </div>
+
+  <!-- ===== 5 static 写在函数外 ===== -->
+  <div class="section" id="sec5">
+    <div class="section-title">static 写在函数外面：只在本文件可见</div>
+<pre class="code"><span class="cmt">/* a.c */</span>
+<span class="kw">static int</span> cnt = <span class="num">10</span>;
+<span class="kw">void</span> addA(<span class="kw">void</span>) { cnt++; }
+<span class="kw">int</span>  getA(<span class="kw">void</span>) { <span class="kw">return</span> cnt; }
+
+<span class="cmt">/* b.c */</span>
+<span class="kw">static int</span> cnt = <span class="num">20</span>;
+<span class="kw">void</span> addB(<span class="kw">void</span>) { cnt += <span class="num">2</span>; }
+<span class="kw">int</span>  getB(<span class="kw">void</span>) { <span class="kw">return</span> cnt; }</pre>
+    <div class="out">A=11  B=22</div>
+    <div class="box key"><span class="label">改的是什么</span>改的是名字对别的文件可不可见。加了 static，这个名字不往外送，链接的时候别的文件找不到它。</div>
+    <div class="box warn"><span class="label">不加会怎样</span>两个文件都写 <code class="inline" style="white-space:nowrap;">int cnt;</code>，链接时会报重复定义。加了 static，两个 cnt 各管各的。</div>
+    <div class="box tip"><span class="label">函数也一样</span>函数前面加 static，就是只给本文件用，别的文件调不到。</div>
+  </div>
+
+  <!-- ===== 6 extern 与 register ===== -->
+  <div class="section" id="sec6">
+    <div class="section-title">extern 和 register：知道有这两个就行</div>
+    <div class="box"><span class="label">extern：声明，不是定义</span><code class="inline" style="white-space:nowrap;">extern int g;</code> 只是告诉编译器「有这么个名字，定义在别的文件里」，<b>不分配内存</b>。</div>
+<pre class="code"><span class="kw">int</span> g = <span class="num">0</span>;        <span class="cmt">/* 定义：内存在这儿 */</span>
+<span class="kw">extern int</span> g;     <span class="cmt">/* 声明：不占内存 */</span></pre>
+    <div class="box tip"><span class="label">写几次</span>定义全程序只能一处，声明可以写多次。两个 .c 文件怎么编到一起，真用到时再查。</div>
+    <div class="box"><span class="label">register：只是一个建议</span>意思是「这个变量用得勤，尽量放进 CPU 寄存器」。<b>尽量</b>，编译器可以直接忽略。</div>
+<pre class="code"><span class="kw">register int</span> i;
+<span class="kw">int</span> *p = &amp;i;       <span class="cmt">/* 取地址：报错 */</span></pre>
+    <div class="box red"><span class="label">为什么报错</span>寄存器不在内存里，没有地址，所以 register 变量不能取地址。</div>
+  </div>
+
+  <!-- ===== 7 本讲小结 ===== -->
+  <div class="section" id="sec7">
+    <div class="section-title">本讲小结</div>
+    <ul class="feat">
+      <li><span class="k">① 内存分四块</span><span class="v">栈区放局部变量和形参，静态区放全局和 static，堆区靠 malloc，代码区放指令</span></li>
+      <li><span class="k">② static 局部</span><span class="v">放进静态区，只初始化一次，函数返回不收回，连调三次输出 1 2 3</span></li>
+      <li><span class="k">③ static 在外</span><span class="v">名字只在本文件可见，别的文件找不到；函数前面加 static 也是这个意思</span></li>
+      <li><span class="k">④ 其余两个</span><span class="v">extern 只是声明，不分配内存；register 只是建议，还不能取地址</span></li>
+    </ul>
+    <div class="box key"><span class="label">一句话</span>加哪个关键字，决定变量放进哪块内存、存在多久。四种写法里，先把 static 局部这一种用熟。</div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
