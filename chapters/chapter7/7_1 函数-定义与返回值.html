@@ -447,6 +447,11 @@
     display:grid;
     grid-template-columns:repeat(4,1fr);
     gap:14px;align-items:start;
+    max-height:calc(100vh - 206px);
+    overflow-y:auto;
+    padding-right:10px;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(255,255,255,.35) transparent;
   }
   .toc-group{
     background:rgba(255,255,255,.05);
@@ -572,6 +577,7 @@
   .dv b.q-true{color:var(--green);}
   .dv b.q-false{color:var(--red);}
   .demo-note{margin-top:12px;font-size:30px;color:var(--muted);line-height:1.45;min-height:58px;}
+  .two > div{min-width:0;}
 </style>
 </head>
 <body>
@@ -582,7 +588,7 @@
   <section class="slide cover active">
     <div class="cover-inner">
       <div class="cover-kicker">武汉理工大学 人工智能学院</div>
-      <h1>函数：把一段活儿交出去</h1>
+      <h1>函数：把一段逻辑封装起来</h1>
       <div class="cover-bar"></div>
       <div class="cover-sub">第 7 章（一）函数 · 定义与返回值</div>
       <div class="cover-meta">主讲：李　民</div>
@@ -594,11 +600,11 @@
     <div class="s-title">本讲内容</div>
     <div class="s-body">
       <div class="grid c2">
-        <div class="card"><h4><span class="ico">🔁</span>从三个循环说起</h4><p>同一段事儿，抄了三遍</p></div>
+        <div class="card"><h4><span class="ico">🔁</span>从三个循环说起</h4><p>同一段逻辑，重复三遍</p></div>
         <div class="card orange"><h4><span class="ico">🧩</span>函数是什么</h4><p>一个能反复用的黑箱</p></div>
         <div class="card green"><h4><span class="ico">🔧</span>定义的四个零件</h4><p>返回类型 · 名字 · 参数 · 函数体</p></div>
         <div class="card purple"><h4><span class="ico">🗂️</span>四种形态</h4><p>有返无返 × 有参无参</p></div>
-        <div class="card red"><h4><span class="ico">↩️</span>return 的规矩</h4><p>带回一个值，立刻就走</p></div>
+        <div class="card red"><h4><span class="ico">↩️</span>return 的规矩</h4><p>返回一个值，随即结束</p></div>
         <div class="card"><h4><span class="ico">📊</span>成绩统计 v1</h4><p>贯穿案例的第一块</p></div>
         <div class="card orange"><h4><span class="ico">📝</span>作业里的题</h4><p>三道 PTA 题，各写两版</p></div>
         <div class="card green"><h4><span class="ico">🎯</span>随堂检测</h4><p>四道题，当堂判断</p></div>
@@ -613,7 +619,7 @@
       <ul class="feat">
         <li><span class="k">① 说得出</span><span class="v">什么样的段落该抽成函数，三个判断信号</span></li>
         <li><span class="k">② 写得出</span><span class="v">定义的四个零件，一个都不漏</span></li>
-        <li><span class="k">③ 分得清</span><span class="v">有没有返回值 × 有没有参数，四种形态各长什么样</span></li>
+        <li><span class="k">③ 分得清</span><span class="v">有没有返回值 × 有没有参数，四种形态各是什么形式</span></li>
         <li><span class="k">④ 讲得明</span><span class="v">return 带回什么、什么时候该提前返回</span></li>
         <li><span class="k">⑤ 用得上</span><span class="v">把前面学过的循环程序，改造成函数版</span></li>
       </ul>
@@ -630,12 +636,12 @@
     <div class="s-body">
       <div class="grid c3">
         <div class="card"><h4><span class="ico">⬇️</span>顺序结构</h4><p>从上到下，一句一句执行</p></div>
-        <div class="card orange"><h4><span class="ico">🔀</span>选择结构</h4><p>if / switch，决定走哪条路</p></div>
+        <div class="card orange"><h4><span class="ico">🔀</span>选择结构</h4><p>if / switch，选择执行分支</p></div>
         <div class="card green"><h4><span class="ico">🔁</span>循环结构</h4><p>while / for，决定重复多少遍</p></div>
       </div>
       <div class="box warn" style="margin-top:26px;">
         <span class="label">但是</span>
-        三种结构解决的全是「<b>怎么走</b>」的问题。写到最后，代码还是密密麻麻全挤在
+        三种结构解决的都是「<b>执行流程</b>」的问题。写到最后，代码还是密密麻麻全挤在
         <code class="inline">main</code> 里，一百多行，从上拉到下。
       </div>
       <div class="box key" style="margin-top:14px;">
@@ -648,7 +654,7 @@
 
   <!-- 5 三个循环 -->
   <section class="slide">
-    <div class="s-title">先看一个问题：三个循环，同一段事儿</div>
+    <div class="s-title">先看一个问题：三个循环，同一段逻辑</div>
     <div class="s-body">
       <div class="two" style="margin-top:0;">
         <div>
@@ -665,8 +671,8 @@ printf(<span class="str">"%ld\n"</span>, f1 / (f2 * f3));</pre>
         </div>
         <div>
           <div class="box warn" style="margin-top:0;">
-            <span class="label">看出来了吗</span>
-            三个循环<b>长得一模一样</b>，只差一个上限：10、3、7。
+            <span class="label">观察</span>
+            三个循环<b>结构完全相同</b>，只差一个上限：10、3、7。
           </div>
           <div class="box red" style="margin-top:12px;">
             <span class="label">危险在哪</span>
@@ -675,8 +681,8 @@ printf(<span class="str">"%ld\n"</span>, f1 / (f2 * f3));</pre>
           </div>
           <div class="box tip" style="margin-top:12px;">
             <span class="label">注意</span>
-            这段代码<b>没有错</b>，能跑，结果也对。它的问题不在对错，
-            在于这三段活儿<b>没有名字</b>。
+            这段代码<b>没有错</b>，可以运行，结果也正确。问题不在对错，
+            在于三段逻辑<b>没有名字</b>。
           </div>
           <div class="box green" style="margin-top:2px;">
             <span class="label">不用换 double</span>
@@ -690,7 +696,7 @@ printf(<span class="str">"%ld\n"</span>, f1 / (f2 * f3));</pre>
 
   <!-- 6 抽成函数 -->
   <section class="slide">
-    <div class="s-title">抽出去，给它一个名字</div>
+    <div class="s-title">提取成函数，为它命名</div>
     <div class="s-body">
       <div class="two" style="margin-top:6px;">
         <div>
@@ -703,7 +709,7 @@ printf(<span class="str">"%ld\n"</span>, f1 / (f2 * f3));</pre>
     <span class="kw">return</span> r;
 }
 
-<span class="cmt">/* 用的时候，只要说出「几的阶乘」 */</span>
+<span class="cmt">/* 调用时只写几的阶乘 */</span>
 printf(<span class="str">"%ld"</span>,
        fact(<span class="num">10</span>) / (fact(<span class="num">3</span>) * fact(<span class="num">7</span>)));</pre>
         </div>
@@ -715,41 +721,41 @@ printf(<span class="str">"%ld"</span>,
           </div>
           <div class="box key" style="margin-top:12px;">
             <span class="label">关键</span>
-            函数把「<b>怎么做</b>」藏了起来，只把「<b>做什么</b>」露在外面。
+            函数把「<b>怎么做</b>」隐藏起来，只把「<b>做什么</b>」暴露在外。
             看到 <code class="inline">fact(10)</code>，你不需要读循环，就知道它在算 10 的阶乘。
           </div>
           <div class="box green" style="margin-top:12px;">
             <span class="label">于是</span>
-            要改算法？只改 <code class="inline">fact</code> 一处，三处调用自动跟着变。
+            要改算法？只改 <code class="inline">fact</code> 一处，三处调用一并更新。
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 7 三段式重构法 -->
+  <!-- 7 四步重构法 -->
   <section class="slide">
-    <div class="s-title">怎么拆：三段式重构法</div>
+    <div class="s-title">怎么拆分：四步重构法</div>
     <div class="s-body">
       <div class="steps" style="margin-top:10px;">
         <div class="step"><div class="n">1</div><div class="t">先写出来</div>
-          <div class="d">按顺序、选择、循环<br>照老办法写完<br>先让它跑通</div></div>
+          <div class="d">按顺序、选择、循环<br>照原写法写完<br>先让它能运行</div></div>
         <div class="step orange"><div class="n">2</div><div class="t">圈出段落</div>
-          <div class="d">哪几行在做同一件事<br>用笔圈起来<br>给它起个名字</div></div>
+          <div class="d">哪几行在做同一件事<br>用笔圈起来<br>为它命名</div></div>
         <div class="step green"><div class="n">3</div><div class="t">抽出去</div>
-          <div class="d">圈里的代码搬到<br>main 外面<br>补上返回值</div></div>
+          <div class="d">圈出的代码移到<br>main 外面<br>补上返回值</div></div>
         <div class="step purple"><div class="n">4</div><div class="t">换成调用</div>
-          <div class="d">原来的位置<br>写成 名字(参数)<br>数据用参数送进去</div></div>
+          <div class="d">原来的位置<br>写成 名字(参数)<br>数据通过参数传入</div></div>
       </div>
       <div class="box warn" style="margin-top:26px;">
-        <span class="label">三个信号，出现任意一个就该拆</span>
+        <span class="label">三个信号，出现任意一个就应当拆分</span>
         <b>① 同一段代码写了第二次</b>　·　
         <b>② 一段代码能用一句话说清</b>（“算阶乘”“打印表头”）　·　
-        <b>③ main 长到要滚动才看得完</b>
+        <b>③ main 长到需要滚动才能看完</b>
       </div>
       <div class="box tip" style="margin-top:12px;">
         <span class="label">别反过来</span>
-        不要一开始就想着「我要写几个函数」。<b>先写通，再拆</b>。
+        不要一开始就想着「我要写几个函数」。<b>先实现，再拆分</b>。
         一上来就设计函数，新生最容易卡住。
       </div>
     </div>
@@ -760,21 +766,21 @@ printf(<span class="str">"%ld"</span>,
     <div class="s-title">函数是什么：一个黑箱</div>
     <div class="s-body">
       <div class="steps" style="margin-top:14px;">
-        <div class="step"><div class="n">1</div><div class="t">送进去</div>
-          <div class="d">调用时把数据<br>放进括号<br>这叫<b>参数</b></div></div>
+        <div class="step"><div class="n">1</div><div class="t">传入</div>
+          <div class="d">调用时把数据<br>写进括号<br>这叫<b>参数</b></div></div>
         <div class="step orange"><div class="n">2</div><div class="t">里面算</div>
           <div class="d">箱子里怎么算<br>外面不用管<br>这叫<b>函数体</b></div></div>
-        <div class="step green"><div class="n">3</div><div class="t">交回来</div>
-          <div class="d">算完把结果交回<br>这叫<b>返回值</b><br>也可以不交</div></div>
+        <div class="step green"><div class="n">3</div><div class="t">返回</div>
+          <div class="d">计算完成后返回结果<br>这叫<b>返回值</b><br>也可以不返回</div></div>
       </div>
       <div class="box key" style="margin-top:26px;">
         <span class="label">这就是抽象</span>
         你不需要知道 <code class="inline">fact</code> 里面是循环还是递归，
-        只要知道：给它 <b>10</b>，它给你 <b>3628800</b>。
-        <b>用一个名字，代替一整套细节</b>。以后你写程序，靠的就是这个。
+        只要知道：传入 <b>10</b>，得到 <b>3628800</b>。
+        <b>用一个名字，代替一整套细节</b>。以后写程序，依据的就是这一点。
       </div>
       <div class="box tip" style="margin-top:12px;">
-        <span class="label">其实你早就在用了</span>
+        <span class="label">你早就在用了</span>
         <code class="inline">printf</code>、<code class="inline">scanf</code>、<code class="inline">sqrt</code>
         都是别人写好的函数，你只管调用，从没看过它们的源码。
         这一章要做的，是<b>自己造这样的箱子</b>。
@@ -794,17 +800,17 @@ printf(<span class="str">"%ld"</span>,
 }</pre>
           <div class="box tip" style="margin-top:14px;">
             <span class="label">读法</span>
-            「<b>int</b> 类型的 <b>max</b>，要两个 int，交回一个 int」。把这一句念顺，这个函数你就看懂了。
+            「<b>int</b> 类型的 <b>max</b>，需要两个 int 参数，返回一个 int」。把这一句读顺，这个函数就清楚了。
           </div>
         </div>
         <div>
           <table class="tb" style="table-layout:fixed;">
             <thead><tr><th style="width:140px;">零件</th><th style="width:285px;">本例</th><th>作用</th></tr></thead>
             <tbody>
-              <tr><th>返回类型</th><td><code class="inline" style="white-space:nowrap;">int</code></td><td>交回什么类型；不交写 <code class="inline">void</code></td></tr>
+              <tr><th>返回类型</th><td><code class="inline" style="white-space:nowrap;">int</code></td><td>返回什么类型；不返回写 <code class="inline">void</code></td></tr>
               <tr><th>函数名</th><td><code class="inline" style="white-space:nowrap;">max</code></td><td>以后就用这个名字叫它</td></tr>
               <tr><th>参数表</th><td><code class="inline" style="white-space:nowrap;">(int a, int b)</code></td><td>需要你给什么；不给写 <code class="inline">()</code></td></tr>
-              <tr><th>函数体</th><td><code class="inline" style="white-space:nowrap;">{ … }</code></td><td>真正干活的地方</td></tr>
+              <tr><th>函数体</th><td><code class="inline" style="white-space:nowrap;">{ … }</code></td><td>实际执行计算的语句</td></tr>
             </tbody>
           </table>
         </div>
@@ -871,7 +877,7 @@ printf(<span class="str">"%ld"</span>,
         <div>
           <div class="box tip" style="margin-top:0;">
             <span class="label">void</span>
-            「空」的意思：<b>不往回交值</b>。函数干完就结束，调用处拿不到东西。
+            「空」的意思：<b>不返回值</b>。函数执行完毕后结束，调用处得不到结果。
           </div>
           <div class="box key" style="margin-top:12px;">
             <span class="label">调用三件套</span>
@@ -914,7 +920,7 @@ printf(<span class="str">"%ld"</span>,
           </div>
           <div class="box key" style="margin-top:12px;">
             <span class="label">一句话说清</span>
-            同一段活儿，<b>换个数据再做一遍</b>，这就是参数的用处。
+            同一段逻辑，<b>换一组数据再执行一次</b>，这就是参数的作用。
           </div>
           <div class="out" style="margin-top:12px;">第 1 位： 92 分
 第 2 位： 78 分</div>
@@ -946,14 +952,14 @@ printf(<span class="str">"%ld"</span>,
         <div>
           <div class="box tip" style="margin-top:0;">
             <span class="label">什么时候用</span>
-            数据不用你送进去：函数自己从<b>键盘</b>读、自己取<b>系统时间</b>。
-            括号里空着，但结果它交回来。
+            数据不由调用方传入：函数自行从<b>键盘</b>读取、自行获取<b>系统时间</b>。
+            参数表为空，但仍有返回值。
           </div>
           <div class="box key" style="margin-top:12px;">
             <span class="label">看清楚这一行</span>
             <code class="inline">op = getChoice();</code><br>
-            等号右边的<b>这一次调用，整个被它的返回值顶替</b>。
-            所以这一行等价于：先调函数拿到数，再赋给 op。
+            等号右边的<b>这一次调用，整个被替换成它的返回值</b>。
+            所以这一行等价于：先调用函数取得返回值，再赋给 op。
           </div>
           <div class="box green" style="margin-top:12px;">
             <span class="label">换个写法</span>
@@ -987,15 +993,15 @@ printf(<span class="str">"%ld"</span>,
         </div>
         <div>
           <div class="box tip" style="margin-top:0;">
-            <span class="label">送进去，交回来</span>
-            这是完整形态：<b>进去有参数，出来有返回值</b>。
-            数学里的函数几乎都能直接翻成这种形态。
+            <span class="label">参数传入，返回值传出</span>
+            这是最常用的形态：<b>double 传入，double 返回</b>。
+            数学里的函数几乎都能写成这种形态。
           </div>
           <div class="box key" style="margin-top:12px;">
             <span class="label">返回值也能直接参与运算</span>
             <code class="inline">power(2,10) + 1</code>、
             <code class="inline">power(2,10) / 2</code> 都合法，
-            因为调用处拿到的就是一个数。
+            因为调用处得到的就是一个数。
           </div>
           <div class="out" style="margin-top:12px;">1024.00</div>
         </div>
@@ -1008,18 +1014,18 @@ printf(<span class="str">"%ld"</span>,
     <div class="s-title">四种形态，一张表</div>
     <div class="s-body">
       <table class="tb" style="margin-top:10px;">
-        <thead><tr><th style="width:230px;">形态</th><th style="width:420px;">定义长什么样</th><th>典型例子</th></tr></thead>
+        <thead><tr><th style="width:230px;">形态</th><th style="width:420px;">定义的形式</th><th>典型例子</th></tr></thead>
         <tbody>
           <tr><th>无返无参</th><td><code class="inline">void f()</code></td><td>打印表头 <code class="inline">printTitle()</code></td></tr>
           <tr><th>无返有参</th><td><code class="inline">void f(类型 名)</code></td><td>打印一条记录 <code class="inline">printScore(no, score)</code></td></tr>
-          <tr><th>有返无参</th><td><code class="inline">类型 f()</code></td><td>读一个选项 <code class="inline">getChoice()</code></td></tr>
+          <tr><th>有返无参</th><td><code class="inline">类型 f()</code></td><td>读取一个选项 <code class="inline">getChoice()</code></td></tr>
           <tr><th>有返有参</th><td><code class="inline">类型 f(类型 名)</code></td><td>算乘方 <code class="inline">power(x, n)</code></td></tr>
         </tbody>
       </table>
       <div class="box key" style="margin-top:22px;">
         <span class="label">怎么记</span>
-        两个问句就够了：<b>它要交东西回来吗？</b>（定 void 还是类型）
-        <b>它需要你给它东西吗？</b>（定参数表空不空）。
+        两个问句就够了：<b>它有没有返回值？</b>（定 void 还是类型）
+        <b>它需不需要参数？</b>（定参数表空不空）。
       </div>
       <div class="box tip" style="margin-top:12px;">
         <span class="label">提醒</span>
@@ -1031,17 +1037,17 @@ printf(<span class="str">"%ld"</span>,
 
   <!-- 16 return 三件事 -->
   <section class="slide">
-    <div class="s-title">return 干三件事</div>
+    <div class="s-title">return 的三个作用</div>
     <div class="s-body">
       <div class="two" style="margin-top:6px;">
         <div>
           <pre class="code" style="margin-top:0;"><span class="kw">int</span> check(<span class="kw">int</span> x)
 {
     <span class="kw">if</span> (x &lt; <span class="num">0</span>)
-        <span class="kw">return</span> <span class="num">0</span>;      <span class="cmt">/* 提前走 */</span>
+        <span class="kw">return</span> <span class="num">0</span>;      <span class="cmt">/* 提前返回 */</span>
     <span class="kw">if</span> (x &gt; <span class="num">100</span>)
-        <span class="kw">return</span> <span class="num">100</span>;    <span class="cmt">/* 提前走 */</span>
-    <span class="kw">return</span> x;          <span class="cmt">/* 正常交货 */</span>
+        <span class="kw">return</span> <span class="num">100</span>;    <span class="cmt">/* 提前返回 */</span>
+    <span class="kw">return</span> x;          <span class="cmt">/* 正常返回 */</span>
 }</pre>
           <div class="out" style="margin-top:12px;">check(-5) → 0
 check(95) → 95
@@ -1050,10 +1056,10 @@ check(120) → 100</div>
         <div>
           <div class="box tip" style="margin-top:0;">
             <span class="label">① 立刻结束函数</span>
-            后面的语句<b>一句都不再执行</b>，直接把控制权交回调用处。
+            后面的语句<b>一句都不再执行</b>，直接把控制权交还调用处。
           </div>
           <div class="box key" style="margin-top:10px;">
-            <span class="label">② 交回一个值</span>
+            <span class="label">② 返回一个值</span>
             值的类型必须和「返回类型」对得上。写 <code class="inline">int</code> 却
             <code class="inline">return 3.7</code>，会被截成 3。
           </div>
@@ -1100,7 +1106,7 @@ check(120) → 100</div>
           </div>
           <div class="box key" style="margin-top:12px;">
             <span class="label">声明的作用</span>
-            提前告诉编译器：<b>有这么个函数，长这个样子</b>。它长什么样，就是返回类型、名字、参数表。
+            提前告诉编译器：<b>有这样一个函数，形式如下</b>。它的形式就是返回类型、名字、参数表。
           </div>
           <div class="box tip" style="margin-top:12px;">
             <span class="label">顺手</span>
@@ -1119,7 +1125,7 @@ check(120) → 100</div>
       <table class="tb" style="margin-top:10px;">
         <thead><tr><th style="width:200px;">　</th><th style="width:480px;">声明</th><th>定义</th></tr></thead>
         <tbody>
-          <tr><th>干什么</th><td>只写返回类型、函数名、参数</td><td>把函数体完整写出来</td></tr>
+          <tr><th>作用</th><td>只写返回类型、函数名、参数</td><td>把函数体完整写出来</td></tr>
           <tr><th>有没有函数体</th><td>没有，<b>以分号结尾</b></td><td>有 <code class="inline">{ }</code>，<b>不加分号</b></td></tr>
           <tr><th>能写几次</th><td>可以写多次</td><td>只能写一次</td></tr>
           <tr><th>什么时候必须写</th><td>定义写在调用之后时</td><td>永远必须有</td></tr>
@@ -1190,14 +1196,14 @@ check(120) → 100</div>
     <div class="s-body">
       <ul class="feat" style="margin-top:6px;">
         <li><span class="k">main 变成目录</span><span class="v">打招呼 → 一条条报成绩 → 报总数，三句话读完</span></li>
-        <li><span class="k">细节藏起来了</span><span class="v">表头长什么样、第几位怎么对齐，全在两个函数里</span></li>
+        <li><span class="k">细节隐藏起来了</span><span class="v">表头的形式、第几位怎么对齐，全在两个函数里</span></li>
         <li><span class="k">改格式只改一处</span><span class="v">想把「分」改成「points」，只动 printScore</span></li>
         <li><span class="k">加功能不用重写</span><span class="v">下一讲要加平均分、最高分，再挂两个函数，main 几乎不动</span></li>
       </ul>
       <div class="box key" style="margin-top:24px;">
         <span class="label">怎么算分对了</span>
-        看改需求时要动几处。动一处就改完，说明分干净了；
-        要动五处，说明还有一段活儿没抽出来。
+        看改需求时要动几处。动一处就改完，说明拆分彻底了；
+        要动五处，说明还有一段逻辑没有提取出来。
       </div>
       <div class="box tip" style="margin-top:12px;">
         <span class="label">顺便</span>
@@ -1216,15 +1222,18 @@ check(120) → 100</div>
           <div class="box tip" style="margin-top:0;">
             <span class="label">题目</span>
             输入两个正整数 M 和 N（都不超过 1000），输出它们的最大公约数，
-            再输出最小公倍数，中间空一格。这版能过，12 行。
+            再输出最小公倍数，中间空一格。这一版可以通过，12 行。
           </div>
           <div class="out" style="margin-top:12px;">输入　511 292
 输出　73 2044</div>
           <div class="box warn" style="margin-top:12px;">
-            <span class="label">算法就一句</span>
-            两数相除留余数，余数不为 0 就把「小数、余数」当成新的一对再做一遍；
-            余数为 0 时，那个小数就是最大公约数。最小公倍数是两数之积再除以它，
-            先除后乘，免得溢出。
+            <span class="label">算法</span>
+            辗转相除法第 4 章已讲过，不再重复。最小公倍数写成
+            <code class="inline" style="white-space:nowrap;">m / a * n</code>，先除后乘。
+          </div>
+          <div class="box tip" style="margin-top:10px;padding:9px 26px;line-height:1.35;">
+            <span class="label">为什么加 a = m; b = n;</span>
+            m、n 还要用来算最小公倍数，辗转相除交给副本 a、b 去做。
           </div>
         </div>
         <div>
@@ -1248,9 +1257,9 @@ check(120) → 100</div>
     </div>
   </section>
 
-  <!-- 22 PTA 把 gcd 拎出来 -->
+  <!-- 22 PTA 把 gcd 提取出来 -->
   <section class="slide">
-    <div class="s-title">同一道题，把辗转相除拎出来</div>
+    <div class="s-title">同一道题，把辗转相除提取出来</div>
     <div class="s-body">
       <div class="two" style="margin-top:6px;">
         <div>
@@ -1265,7 +1274,7 @@ check(120) → 100</div>
 }</pre>
           <div class="box tip" style="margin-top:14px;">
             <span class="label">形状</span>
-            两个数进去，一个数出来，跟第 14 页的
+            两个数传入，一个数传出，与第 14 页的
             <code class="inline">power(x, n)</code> 一个形状。里面的 a、b 是形参。
           </div>
         </div>
@@ -1280,7 +1289,7 @@ check(120) → 100</div>
 }</pre>
           <div class="box key" style="margin-top:8px;">
             <span class="label">main 剩下什么</span>
-            读进来、求最大公约数、算最小公倍数、打出去，四行。程序行为一点没变，511 292 进去，还是 73 2044 出来。
+            读入、求最大公约数、求最小公倍数、输出，四行。程序行为没有变化，输入 511 292，输出仍是 73 2044。
             <code class="inline">gcd</code> 写在 main 上面，第 17 页那条「先声明后使用」也满足了。
           </div>
         </div>
@@ -1290,27 +1299,27 @@ check(120) → 100</div>
 
   <!-- 23 三个改动试一遍 -->
   <section class="slide">
-    <div class="s-title">拆与不拆，拿三个改动试一遍</div>
+    <div class="s-title">拆分与不拆分，用三个需求变更验证</div>
     <div class="s-body">
       <table class="tb" style="margin-top:8px;">
         <thead><tr><th style="width:400px;">后来遇到的情况</th><th style="width:470px;">上一页那种写法</th><th>这一页这种写法</th></tr></thead>
         <tbody>
-          <tr><th>题目改成三个数求公约数</th><td>六行再抄一遍，变量另起一套</td><td><code class="inline">gcd(gcd(a,b), c)</code>，一行</td></tr>
-          <tr><th>换一道新题，也要约分</th><td>换个程序，从头再想一遍</td><td>把 <code class="inline">gcd</code> 贴过去，只改输入输出</td></tr>
-          <tr><th>发现 a、b 写反了要改</th><td>用一次改一次，抄三遍改三遍</td><td>只改 <code class="inline">gcd</code> 里那两行</td></tr>
-          <tr><th>隔一周再回来看代码</th><td>12 行，算法混在中间</td><td>8 行，一眼看到整个流程</td></tr>
+          <tr><th>题目改成三个数求公约数</th><td>六行重写一遍，变量另起一套</td><td><code class="inline">gcd(gcd(a,b), c)</code>，一行</td></tr>
+          <tr><th>换一道新题，也要约分</th><td>换一个程序，重新推导一遍</td><td>把 <code class="inline">gcd</code> 复制过去，只改输入输出</td></tr>
+          <tr><th>发现 a、b 写反了要改</th><td>用一次改一次，三处都要修改</td><td>只改 <code class="inline">gcd</code> 里那两行</td></tr>
+          <tr><th>隔一周再回来看代码</th><td>12 行，算法混在中间</td><td>8 行，能直接看到完整流程</td></tr>
         </tbody>
       </table>
       <div class="box key" style="margin-top:18px;">
-        <span class="label">说句实话</span>
+        <span class="label">需要说明</span>
         <b>总行数没有变少</b>：函数 9 行，main 8 行，加起来比原来还多几行。
-        少的是 main 里要同时装着的东西。拿到一个程序先读 main，
-        能看出它在干什么，这就够了。
+        少的是 main 里要同时容纳的内容。读一个程序先读 main，
+        能看出它做什么，这就足够了。
       </div>
       <div class="box tip" style="margin-top:12px;">
         <span class="label">还有一条</span>
-        跨程序复用，还是得把 <code class="inline">gcd</code> 那九行复制走。
-        但复制的是现成、有名字、验过的代码，不用再想一遍辗转相除怎么转。
+        跨程序复用，仍须把 <code class="inline">gcd</code> 那九行复制过去。
+        但复制的是现成、有名字、验证过的代码，不必重新推导辗转相除的过程。
       </div>
     </div>
   </section>
@@ -1335,12 +1344,12 @@ check(120) → 100</div>
           <div class="box key" style="margin-top:12px;">
             <span class="label">怎么约</span>
             分子分母同除以最大公约数。上一题那个 <code class="inline">gcd</code>，
-            原样贴在这个程序的开头，一个字都没改。
+            原样复制到这个程序的开头，一个字都没改。
           </div>
         </div>
         <div>
           <pre class="code" style="margin-top:0;"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
-<span class="cmt">/* gcd 那九行贴在这里，一字未改 */</span>
+<span class="cmt">/* gcd 那九行复制在这里，一字未改 */</span>
 
 <span class="kw">int</span> main()
 {
@@ -1352,7 +1361,7 @@ check(120) → 100</div>
 }</pre>
           <div class="box key" style="margin-top:12px;">
             <span class="label">main 只剩三件事</span>
-            读一个分数，除以 <code class="inline">gcd</code>，打出来。
+            读入一个分数，除以 <code class="inline">gcd</code>，输出。
           </div>
         </div>
       </div>
@@ -1402,7 +1411,7 @@ check(120) → 100</div>
 
   <!-- 26 抽一个 printLine -->
   <section class="slide">
-    <div class="s-title">一行图案，抽成一个函数</div>
+    <div class="s-title">一行图案，提取成一个函数</div>
     <div class="s-body">
       <div class="two" style="margin-top:6px;">
         <div>
@@ -1417,7 +1426,7 @@ check(120) → 100</div>
 }</pre>
           <div class="box tip" style="margin-top:14px;">
             <span class="label">只管一行</span>
-            给它第几行、总共几行，它还你一行图案。
+            传入第几行与总行数，输出对应的一行图案。
           </div>
         </div>
         <div>
@@ -1432,7 +1441,7 @@ check(120) → 100</div>
     <span class="kw">return</span> <span class="num">0</span>;
 }</pre>
           <div class="box key" style="margin-top:12px;padding:12px 26px;">
-            <span class="label">两个 for 只差 i 怎么走</span>
+            <span class="label">两个 for 语句仅循环变量的走向不同</span>
             循环体都是 <code class="inline">printLine(i, n)</code>，一星后跟一个空格的写法全程序只写了一次。
           </div>
         </div>
@@ -1440,7 +1449,124 @@ check(120) → 100</div>
     </div>
   </section>
 
-  <!-- 27 三题放在一起看 -->
+  <!-- 27 再细化一层 -->
+  <section class="slide">
+    <div class="s-title">再细化一层：三个函数各管一件事</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:6px;">
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">void</span> printBlank(<span class="kw">int</span> n)
+{
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= n; i++)
+        printf(<span class="str">"  "</span>);
+}
+
+<span class="kw">void</span> printStar(<span class="kw">int</span> n)
+{
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= n; i++)
+        printf(<span class="str">"* "</span>);
+}</pre>
+          <div class="out" style="margin-top:10px;">一个管缩进，一个管星号，各含一个循环</div>
+        </div>
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">void</span> printLine(<span class="kw">int</span> i, <span class="kw">int</span> n)
+{
+    printBlank((n+<span class="num">1</span>)/<span class="num">2</span> - i);
+    printStar(<span class="num">2</span>*i-<span class="num">1</span>);
+    printf(<span class="str">"\n"</span>);
+}</pre>
+          <div class="box key" style="margin-top:10px;padding:8px 26px;line-height:1.4;">
+            <span class="label">只动了函数内部</span>
+            上一页的两个 for 循环各自独立成函数，<code class="inline">main</code> 一个字没改。
+          </div>
+          <div class="box green" style="margin-top:8px;padding:8px 26px;line-height:1.4;">
+            <span class="label">术语：函数的嵌套调用</span>
+            在一个函数体内调用另一个函数，称为函数的嵌套调用。<code class="inline">printLine</code> 调 <code class="inline">printBlank</code>、<code class="inline">printStar</code>，即是一例。
+          </div>
+          <div class="box tip" style="margin-top:8px;padding:8px 26px;line-height:1.4;">
+            <span class="label">封装到哪一层为止</span>
+            判据两条：能否一句话说清，以后会不会单独修改。两条都成立才拆。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 28 能否并成一个函数 -->
+  <section class="slide">
+    <div class="s-title">能不能只写一个函数？</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:4px;">
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">void</span> printBlank(<span class="kw">int</span> n)
+{
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= n; i++)
+        <span style="background:rgba(255,196,110,.16);border-radius:4px;outline:2px solid #ffb26b;outline-offset:1px;">printf(<span class="str">"  "</span>);</span>
+}
+
+<span class="kw">void</span> printStar(<span class="kw">int</span> n)
+{
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= n; i++)
+        <span style="background:rgba(255,196,110,.16);border-radius:4px;outline:2px solid #ffb26b;outline-offset:1px;">printf(<span class="str">"* "</span>);</span>
+}</pre>
+          <div class="box key" style="margin-top:12px;padding:7px 26px;line-height:1.35;font-size:30px;">
+            并排一放，差别只剩 printf 里那个字符。
+          </div>
+        </div>
+        <div>
+          <div class="steps-vertical" style="gap:10px;">
+            <div class="step">
+              <div class="step-head"><span class="n">1</span><span class="t">相同的部分占多少</span></div>
+              <div class="d">两个函数共十二行，十行一模一样。</div>
+            </div>
+            <div class="step orange">
+              <div class="step-head"><span class="n">2</span><span class="t">不同的那处是什么</span></div>
+              <div class="d">不是结构，是数据。一个字符而已。</div>
+            </div>
+            <div class="step green">
+              <div class="step-head"><span class="n">3</span><span class="t">数据能不能也变成参数</span><button class="demo-btn qbtn" data-q="qa28" style="margin-left:auto;padding:8px 18px;">看答案</button></div>
+              <div class="d">形参表里已经有一个 <code class="inline">int n</code>，再加一个放字符？那样函数就不必知道自己打的是什么，交给调用处决定。</div>
+            </div>
+          </div>
+          <div class="box tip" style="margin-top:12px;padding:9px 26px;line-height:1.4;">
+            <span class="label">当堂动手</span>
+            把这两个函数并成一个。先想形参怎么定，再想上一页 printLine 里那两处调用要不要跟着改。
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="qans" id="qa28" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:1420px;max-width:92%;max-height:82%;overflow:auto;box-sizing:border-box;background:#fff;border:3px solid #2f6fb3;border-radius:16px;padding:24px 34px 18px;box-shadow:0 20px 60px rgba(8,28,52,.35);z-index:80;font-size:32px;line-height:1.45;color:#12344f;">
+      <div style="font-weight:700;color:#124f83;margin-bottom:14px;">答案 · 一个函数，字符作参数</div>
+      <div style="display:flex;gap:26px;align-items:flex-start;">
+        <div style="width:600px;flex:0 0 auto;">
+          <pre class="code" style="margin:0;line-height:1.36;"><span class="kw">void</span> printChar(<span class="kw">int</span> n, <span class="kw">char</span> c)
+{
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = <span class="num">1</span>; i &lt;= n; i++)
+        printf(<span class="str">"%c "</span>, c);
+}</pre>
+        </div>
+        <div style="flex:1 1 auto;min-width:0;">
+          <pre class="code" style="margin:0;line-height:1.36;"><span class="kw">void</span> printLine(<span class="kw">int</span> i, <span class="kw">int</span> n)
+{
+    printChar((n+<span class="num">1</span>)/<span class="num">2</span> - i, <span class="str">' '</span>);
+    printChar(<span class="num">2</span>*i-<span class="num">1</span>, <span class="str">'*'</span>);
+    printf(<span class="str">"\n"</span>);
+}</pre>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:30px;line-height:1.42;">
+        <code class="inline" style="white-space:nowrap;">"%c "</code> 表示一个字符后面跟一个空格：传 <code class="inline" style="white-space:nowrap;">' '</code> 得到两个空格，传 <code class="inline" style="white-space:nowrap;">'*'</code> 得到星号加一个空格，宽度都是两个字符。函数名换成一个、实参各多一个字符，<code class="inline">main</code> 一行不用动。
+      </div>
+      <div style="margin-top:12px;padding-top:10px;border-top:2px dashed #cfe0f0;font-size:30px;line-height:1.3;color:#7f9ab5;">再点一次「看答案」收起来</div>
+    </div>
+  </section>
+
+  <!-- 29 三题放在一起看 -->
   <section class="slide">
     <div class="s-title">三道题放在一起看</div>
     <div class="s-body">
@@ -1449,19 +1575,190 @@ check(120) → 100</div>
         <tbody>
           <tr><th>最大公约数</th><td>辗转相除那六行</td><td><code class="inline">int gcd(int a, int b)</code></td><td>读、求、算、打</td></tr>
           <tr><th>约分最简分式</th><td>又用一次辗转相除</td><td>直接调 <code class="inline">gcd</code>，不新写</td><td>读、约、打</td></tr>
-          <tr><th>打印菱形</th><td>上下两半，四行一样</td><td><code class="inline">void printLine(i, n)</code></td><td>两个 for，各一行调用</td></tr>
+          <tr><th>打印菱形</th><td>上下两半，循环体相同</td><td><code class="inline">void printLine(i, n)</code></td><td>两个 for，各一行调用</td></tr>
         </tbody>
       </table>
       <div class="box key" style="margin-top:22px;">
         <span class="label">对回第 7 页的三个信号</span>
         <b>gcd</b> 这条是「同一段代码写了第二次」；
         <b>菱形</b> 这条是「能用一句话说清」：打印一行，空几个、星几个；
-        <b>约分</b> 这条最省事：已经有人替你写过，直接调。
+        <b>约分</b> 这条最省事：已有现成实现，直接调用。
       </div>
       <div class="box tip" style="margin-top:12px;">
         <span class="label">自己动手</span>
         这三道题在 PTA 上都有。回去各写两版，放在一起看，
         比听我讲十遍有用。写的时候别删旧版，两版都留着。
+      </div>
+      <p style="margin-top:16px;font-size:30px;line-height:1.5;color:#41627c;">
+        下一页还有一道判素的题。它会把这一页学到的内容一次用上：<br>先写成内联版，再抽成函数，最后在两个地方调它。
+      </p>
+    </div>
+  </section>
+
+  <!-- 30 第四道：统计素数并求和 -->
+  <section class="slide">
+    <div class="s-title">再一道：统计素数并求和</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:6px;">
+        <div>
+          <pre class="code" style="margin-top:0;"><span class="kw">int</span> main()
+{
+    <span class="kw">int</span> m, n, i, k, num = <span class="num">0</span>, sum = <span class="num">0</span>;
+    scanf(<span class="str">"%d %d"</span>, &amp;m, &amp;n);
+    <span class="kw">for</span> (i = m; i &lt;= n; i++) {
+        <span class="kw">for</span> (k = <span class="num">2</span>; k &lt; i; k++)
+            <span class="kw">if</span> (i % k == <span class="num">0</span>) <span class="kw">break</span>;
+        <span class="kw">if</span> (k == i &amp;&amp; i &gt;= <span class="num">2</span>) {
+            sum += i; num++;
+        }
+    }
+    printf(<span class="str">"%d %d\n"</span>, num, sum);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+        </div>
+        <div>
+          <div class="box warn" style="margin-top:0;padding:9px 24px;line-height:1.5;">
+            <span class="label">题目</span>
+            输入两个正整数 M 和 N（2 ≤ M ≤ N ≤ 10000），统计 M 到 N 之间（含两端）有几个素数，并求这些素数的和。
+          </div>
+          <div class="box key" style="padding:9px 24px;line-height:1.5;">
+            <span class="label">算法三步</span>
+            ① 读入 M 和 N；<br>
+            ② i 从 M 到 N，每一步判断「i 是不是素数」，是则计数并累加；<br>
+            ③ 输出个数与和。
+          </div>
+          <div class="box tip" style="padding:9px 24px;line-height:1.5;">
+            <span class="label">中间那一步，你能一句话说清吗</span>
+            「i 是素数吗」五个字，落到代码上是三行循环加一个判断。第 7 页说过，<b>能用一句话说清</b>就是应当拆分的信号。
+          </div>
+          <div class="out" style="margin-top:10px;">输入 10 50 → 11 311</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 31 把「是素数」提取出来 -->
+  <section class="slide">
+    <div class="s-title">把「是素数」这个判断提取出来</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:2px;">
+        <div>
+          <div class="box" style="margin-top:0;padding:8px 24px;line-height:1.35;">
+            <span class="label">原来的样子</span>
+            三行代码，混在 main 的循环里
+          </div>
+          <pre class="code" style="margin-top:8px;"><span class="kw">for</span> (i = m; i &lt;= n; i++) {
+    <span class="kw">for</span> (k = <span class="num">2</span>; k &lt; i; k++)
+        <span class="kw">if</span> (i % k == <span class="num">0</span>) <span class="kw">break</span>;
+    <span class="kw">if</span> (k == i &amp;&amp; i &gt;= <span class="num">2</span>) {
+        sum += i; num++;
+    }
+}</pre>
+        </div>
+        <div>
+          <div class="box" style="margin-top:0;padding:8px 24px;line-height:1.35;">
+            <span class="label">提取之后</span>
+            传入一个数，返回是或不是
+          </div>
+          <pre class="code" style="margin-top:8px;"><span class="kw">int</span> isPrime(<span class="kw">int</span> n)
+{
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = <span class="num">2</span>; i &lt; n; i++)
+        <span class="kw">if</span> (n % i == <span class="num">0</span>) <span class="kw">break</span>;
+    <span class="kw">if</span> (i == n &amp;&amp; n &gt;= <span class="num">2</span>) <span class="kw">return</span> <span class="num">1</span>;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+        </div>
+      </div>
+      <div class="box key" style="margin-top:14px;padding:12px 26px;line-height:1.45;">
+        <span class="label">返回值不一定是个数</span>
+        前面 <code class="inline">power(2, 10)</code> 算出 1024，<code class="inline">gcd(511, 292)</code> 算出 73，都是数值；<code class="inline">isPrime</code> 算出来只有 1 和 0，它在回答「是」还是「不是」。<br>
+        判闰年、判回文、判完全数都是这个形状，调用处写成 <code class="inline">if (isPrime(i))</code>，读起来就是一句自然语言。
+      </div>
+    </div>
+  </section>
+
+  <!-- 32 两版 isPrime，差的不是风格 -->
+  <section class="slide">
+    <div class="s-title">两版 isPrime，差的不是风格</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:2px;">
+        <div>
+          <div class="box" style="margin-top:0;padding:7px 24px;line-height:1.3;">
+            <span class="label">A 版</span>
+            试到 √n 就停，但没有管 0、1 和负数
+          </div>
+          <pre class="code" style="margin-top:6px;"><span class="kw">int</span> isPrime(<span class="kw">int</span> num)
+{
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = <span class="num">2</span>; i &lt;= sqrt(num); i++)
+        <span class="kw">if</span> (num % i == <span class="num">0</span>) <span class="kw">break</span>;
+    <span class="kw">if</span> (i &gt; sqrt(num)) <span class="kw">return</span> <span class="num">1</span>;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+        </div>
+        <div>
+          <div class="box tip" style="margin-top:0;padding:7px 24px;line-height:1.3;">
+            <span class="label">B 版</span>
+            速度相同，多一道守卫
+          </div>
+          <pre class="code" style="margin-top:6px;"><span class="kw">int</span> isPrime(<span class="kw">int</span> num)
+{
+    <span class="kw">int</span> i, p = <span class="num">1</span>;
+    <span class="kw">if</span> (num &lt; <span class="num">2</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">for</span> (i = <span class="num">2</span>; i &lt;= sqrt(num); i++)
+        <span class="kw">if</span> (num % i == <span class="num">0</span>) p = <span class="num">0</span>;
+    <span class="kw">return</span> p;
+}</pre>
+        </div>
+      </div>
+      <div class="out" style="margin-top:8px;">0 和 1 两个输入：A 版给 1，B 版给 0</div>
+      <div class="box warn" style="margin-top:10px;padding:8px 26px;line-height:1.4;">
+        <span class="label">A 版错在哪</span>
+        循环一次都不跑时 <code class="inline">i</code> 停在 2，<code class="inline">i &gt; sqrt(num)</code> 成立，0 和 1 就被判成素数。B 版那行守卫，堵的就是这里。
+      </div>
+    </div>
+  </section>
+
+  <!-- 33 写一次，用三处 -->
+  <section class="slide">
+    <div class="s-title">写一次，用三处</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:2px;">
+        <div>
+          <div class="box" style="margin-top:0;padding:7px 24px;line-height:1.3;">
+            <span class="label">同一个 isPrime，两种用法</span>
+            判素只写一次，下面两处都是调用
+          </div>
+          <pre class="code" style="margin-top:6px;"><span class="cmt">/* ① n 以内最大的 k 个素数 */</span>
+<span class="kw">for</span> (i = n; i &gt;= <span class="num">2</span> &amp;&amp; pc &lt; k; i--)
+    <span class="kw">if</span> (isPrime(i)) {
+        pc++; sum += i;
+        printf(pc==<span class="num">1</span>?<span class="str">"%d"</span>:<span class="str">"+%d"</span>, i);
+    }
+<span class="cmt">/* ② 列出 N 以内的素数，每行 8 个 */</span>
+<span class="kw">for</span> (i = <span class="num">2</span>; i &lt;= n; i++)
+    <span class="kw">if</span> (isPrime(i)) {
+        printf(<span class="str">"%5d"</span>, i);
+        <span class="kw">if</span> (++cnt%<span class="num">8</span>==<span class="num">0</span>) printf(<span class="str">"\n"</span>);
+    }</pre>
+        </div>
+        <div>
+          <table class="tb" style="margin-top:0;table-layout:fixed;">
+            <thead><tr><th style="width:190px;">要做什么</th><th>没有 isPrime</th><th>有了 isPrime</th></tr></thead>
+            <tbody>
+              <tr><th>统计并求和</th><td>写 5 行</td><td>一行 if</td></tr>
+              <tr><th>最大的 k 个</th><td>再写 5 行</td><td>一行 if</td></tr>
+              <tr><th>N 以内全列</th><td>再写 5 行</td><td>一行 if</td></tr>
+              <tr><th>合计</th><td>15 行，改三处</td><td>9 行 + 3 行调用</td></tr>
+            </tbody>
+          </table>
+          <div class="box key" style="margin-top:12px;padding:9px 26px;line-height:1.35;">
+            <span class="label">对回第 6 页那句话</span>
+            「要改算法？只改一处，三处调用自动跟着变。」这里就是那三个调用处；哪天换成筛法，只改 <code class="inline">isPrime</code> 一个函数。<br>
+            三个程序最初都是先写成内联版的 —— 先实现，再拆分。
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1537,12 +1834,12 @@ check(120) → 100</div>
             </div>
           </div>
           <div class="step purple">
-            <div class="step-head"><span class="n">4</span><span class="t">判断：要不要拆</span><button class="demo-btn qbtn" data-q="q4" style="margin-left:auto;padding:8px 18px;">看解析</button></div>
+            <div class="step-head"><span class="n">4</span><span class="t">判断：是否需要拆分</span><button class="demo-btn qbtn" data-q="q4" style="margin-left:auto;padding:8px 18px;">看解析</button></div>
             <div class="d">
               连续 6 行「<b>读数 → 判断奇偶 → 打印</b>」，在三个地方原样出现。要不要抽成函数？
               <div style="display:flex;gap:10px;margin-top:8px;">
-                <span style="flex:1 0 0;text-align:center;padding:4px 10px;border:2px solid #cfe0f0;border-radius:10px;background:#f8fbfe;">A. 不用，能跑就行</span>
-                <span style="flex:1 0 0;text-align:center;padding:4px 10px;border:2px solid #cfe0f0;border-radius:10px;background:#f8fbfe;">B. 要，第二次就该拆</span>
+                <span style="flex:1 0 0;text-align:center;padding:4px 10px;border:2px solid #cfe0f0;border-radius:10px;background:#f8fbfe;">A. 不用，能正确运行即可</span>
+                <span style="flex:1 0 0;text-align:center;padding:4px 10px;border:2px solid #cfe0f0;border-radius:10px;background:#f8fbfe;">B. 需要，第二次出现就应当拆分</span>
               </div>
             </div>
           </div>
@@ -1551,12 +1848,12 @@ check(120) → 100</div>
     </div>
     <div class="qans" id="q1" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:1240px;max-width:88%;max-height:76%;overflow:auto;box-sizing:border-box;background:#fff;border:3px solid #2f6fb3;border-radius:16px;padding:26px 34px 22px;box-shadow:0 20px 60px rgba(8,28,52,.35);z-index:80;font-size:32px;line-height:1.5;color:#12344f;">
       <div style="font-weight:700;color:#124f83;margin-bottom:8px;">答案 1 · 哪个定义合法</div>
-      <div style="line-height:1.55;">选 <b>B</b>。<b>A</b> 第二个参数 <code class="inline">b</code> 没写类型，<b>C</b> 漏了返回类型，<b>D</b> 有返回值却写成 <code class="inline">a+1;</code>，没有 <code class="inline">return</code>，交回去的是个不确定的值。B 四个零件齐全。</div>
+      <div style="line-height:1.55;">选 <b>B</b>。<b>A</b> 第二个参数 <code class="inline">b</code> 没写类型，<b>C</b> 漏了返回类型，<b>D</b> 有返回值却写成 <code class="inline">a+1;</code>，没有 <code class="inline">return</code>，返回的是一个不确定的值。B 四个零件齐全。</div>
       <div style="margin-top:16px;padding-top:12px;border-top:2px dashed #cfe0f0;font-size:30px;line-height:1.3;color:#7f9ab5;">再点一次「看解析」收起来</div>
     </div>
     <div class="qans" id="q2" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:1240px;max-width:88%;max-height:76%;overflow:auto;box-sizing:border-box;background:#fff;border:3px solid #2f6fb3;border-radius:16px;padding:26px 34px 22px;box-shadow:0 20px 60px rgba(8,28,52,.35);z-index:80;font-size:32px;line-height:1.5;color:#12344f;">
       <div style="font-weight:700;color:#124f83;margin-bottom:8px;">答案 2 · swap 白忙一场</div>
-      <div style="line-height:1.55;">选 <b>B</b>，x 和 y 还是 <b>3 和 5</b>。调用时传进去的是<b>值的副本</b>：<code class="inline">a</code>、<code class="inline">b</code> 是另外两块内存，在里面怎么换都动不到 x、y。这一讲先记住结论，<b>下一讲讲透为什么</b>，第 8 章用指针才能真正换过来。</div>
+      <div style="line-height:1.55;">选 <b>B</b>，x 和 y 还是 <b>3 和 5</b>。调用时传入的是<b>值的副本</b>：<code class="inline">a</code>、<code class="inline">b</code> 是另外两块内存，在里面怎么换都动不到 x、y。这一讲先记住结论，<b>下一讲讲透为什么</b>，第 8 章用指针才能真正换过来。</div>
       <div style="margin-top:16px;padding-top:12px;border-top:2px dashed #cfe0f0;font-size:30px;line-height:1.3;color:#7f9ab5;">再点一次「看解析」收起来</div>
     </div>
     <div class="qans" id="q3" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:1240px;max-width:88%;max-height:76%;overflow:auto;box-sizing:border-box;background:#fff;border:3px solid #2f6fb3;border-radius:16px;padding:26px 34px 22px;box-shadow:0 20px 60px rgba(8,28,52,.35);z-index:80;font-size:32px;line-height:1.5;color:#12344f;">
@@ -1565,8 +1862,8 @@ check(120) → 100</div>
       <div style="margin-top:16px;padding-top:12px;border-top:2px dashed #cfe0f0;font-size:30px;line-height:1.3;color:#7f9ab5;">再点一次「看解析」收起来</div>
     </div>
     <div class="qans" id="q4" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:1240px;max-width:88%;max-height:76%;overflow:auto;box-sizing:border-box;background:#fff;border:3px solid #2f6fb3;border-radius:16px;padding:26px 34px 22px;box-shadow:0 20px 60px rgba(8,28,52,.35);z-index:80;font-size:32px;line-height:1.5;color:#12344f;">
-      <div style="font-weight:700;color:#124f83;margin-bottom:8px;">答案 4 · 要不要拆</div>
-      <div style="line-height:1.55;">选 <b>B</b>。同一段代码出现第二次，就是最硬的拆分信号；而且这六行能一句话说清（「读一个数，判断奇偶，打印」），三条信号占了两条。抽成 <code class="inline">void checkOne()</code> 之后，三处都变成一行调用，将来改打印格式只改一处。</div>
+      <div style="font-weight:700;color:#124f83;margin-bottom:8px;">答案 4 · 是否需要拆分</div>
+      <div style="line-height:1.55;">选 <b>B</b>。同一段代码出现第二次，就是最明确的拆分信号；而且这六行能一句话说清（「读一个数，判断奇偶，打印」），三条信号占了两条。封装成 <code class="inline">void checkOne()</code> 之后，三处都变成一行调用，将来改打印格式只改一处。</div>
       <div style="margin-top:16px;padding-top:12px;border-top:2px dashed #cfe0f0;font-size:30px;line-height:1.3;color:#7f9ab5;">再点一次「看解析」收起来</div>
     </div>
   </section>
@@ -1576,20 +1873,20 @@ check(120) → 100</div>
     <div class="s-title">本讲小结</div>
     <div class="s-body">
       <ul class="feat">
-        <li><span class="k">① 为什么要拆</span><span class="v">main 越长，改一处越容易漏三处</span></li>
-        <li><span class="k">② 怎么拆</span><span class="v">写出来 → 圈重复 → 抽出去 → 原处换调用</span></li>
+        <li><span class="k">① 为什么要拆分</span><span class="v">main 越长，改一处越容易漏掉另外两处</span></li>
+        <li><span class="k">② 怎么拆分</span><span class="v">写出来 → 圈出重复 → 提取成函数 → 原处改为调用</span></li>
         <li><span class="k">③ 四个零件</span><span class="v">返回类型、函数名、参数表、函数体</span></li>
         <li><span class="k">④ 四种形态</span><span class="v">有无返回值 × 有无参数，两个问句就能定</span></li>
-        <li><span class="k">⑤ 拿作业试过</span><span class="v">gcd、约分、菱形，三道题都改成了函数版</span></li>
+        <li><span class="k">⑤ 用作业验证过</span><span class="v">gcd、约分、菱形，都改成了函数版；菱形还试了参数化合并</span></li>
       </ul>
       <div class="box key" style="margin-top:22px;">
         <span class="label">记住这一条</span>
-        <b>函数就是给一段代码起名字。</b>有了名字，你才能在另一处说「把这件事做一遍」，
-        而不必把细节再抄一遍。
+        <b>函数就是为一段代码命名。</b>有了名字，你才能在另一处调用它，
+        而不必重复写出细节。
       </div>
       <div class="box tip" style="margin-top:12px;">
         <span class="label">下一讲</span>
-        调用时值怎么传进去？swap 为什么换不过来？第 7 章（二）函数调用与参数传递。
+        调用时值如何传入？swap 为什么换不过来？第 7 章（二）函数调用与参数传递。
       </div>
     </div>
   </section>
@@ -1603,7 +1900,7 @@ check(120) → 100</div>
   </section>
 
   <!-- 导航 UI -->
-  <div class="pageinfo"><b id="cur">1</b> / <span id="total">31</span></div>
+  <div class="pageinfo"><b id="cur">1</b> / <span id="total">37</span></div>
 
   <div class="nav">
     <button class="tocbtn" id="btnCopy" title="复制本页全部代码（按 C 键）">复制代码</button>
@@ -1649,8 +1946,8 @@ check(120) → 100</div>
     { title: "一、为什么要有函数", items: [
       { i: 3, t: "三种结构之后" },
       { i: 4, t: "三个循环" },
-      { i: 5, t: "抽成函数" },
-      { i: 6, t: "三段式重构法" }
+      { i: 5, t: "封装成函数" },
+      { i: 6, t: "四步重构法" }
     ]},
     { title: "二、函数是什么", items: [
       { i: 7, t: "黑箱模型" },
@@ -1664,47 +1961,53 @@ check(120) → 100</div>
       { i: 13, t: "有返有参" },
       { i: 14, t: "四种形态一张表" }
     ]},
-    { title: "四、return 与声明", items: [
-      { i: 15, t: "return 三件事" },
+    { title: "四、return 与实战", items: [
+      { i: 15, t: "return 的三个作用" },
       { i: 16, t: "先声明后使用" },
-      { i: 17, t: "声明与定义" }
-    ]},
-    { title: "五、贯穿案例", items: [
+      { i: 17, t: "声明与定义" },
       { i: 18, t: "成绩统计 v1" },
       { i: 19, t: "改需求要动几处" }
     ]},
-    { title: "六、作业里的题", items: [
+    { title: "五、作业里的题", items: [
       { i: 20, t: "最大公约数（循环版）" },
-      { i: 21, t: "抽出 gcd" },
-      { i: 22, t: "三个改动试一遍" },
+      { i: 21, t: "提取 gcd" },
+      { i: 22, t: "三个需求变更" },
       { i: 23, t: "约分最简分式" },
       { i: 24, t: "打印菱形（循环版）" },
-      { i: 25, t: "抽出 printLine" },
-      { i: 26, t: "三道题一起看" }
+      { i: 25, t: "提取 printLine" },
+      { i: 26, t: "再细化一层" },
+      { i: 27, t: "能否并成一个函数" },
+      { i: 28, t: "三道题一起看" }
+    ]},
+    { title: "六、素数这一道", items: [
+      { i: 29, t: "统计并求和" },
+      { i: 30, t: "提取 isPrime" },
+      { i: 31, t: "两版判素" },
+      { i: 32, t: "一处定义三处用" }
     ]},
     { title: "七、易错与检测", items: [
-      { i: 27, t: "六个常见错误" },
-      { i: 28, t: "随堂检测" },
-      { i: 29, t: "本讲小结" }
+      { i: 33, t: "六个常见错误" },
+      { i: 34, t: "随堂检测" },
+      { i: 35, t: "本讲小结" }
     ]}
   ];
 
   tocGroups.forEach(function(group){
     var g = document.createElement('div');
     g.className = 'toc-group';
-    g.style.padding = '8px 8px 10px';
+    g.style.padding = '5px 8px 6px';
     var h = document.createElement('div');
     h.className = 'toc-group-title';
     h.textContent = group.title;
-    h.style.marginBottom = '6px';
+    h.style.marginBottom = '4px';
     h.style.paddingBottom = '6px';
     g.appendChild(h);
     group.items.forEach(function(item){
       var a = document.createElement('a');
       a.textContent = item.t;
-      a.style.padding = '6px 10px';
-      a.style.marginBottom = '2px';
-      a.style.lineHeight = '1.2';
+      a.style.padding = '2px 10px';
+      a.style.marginBottom = '0';
+      a.style.lineHeight = '1.15';
       a.onclick = function(){ go(item.i); closeToc(); };
       g.appendChild(a);
     });
@@ -1760,6 +2063,7 @@ check(120) → 100</div>
     var pres = slides[cur].querySelectorAll('pre');
     var blocks = [];
     for (var i = 0; i < pres.length; i++) {
+      if (pres[i].closest('.qans')) continue;   // 答案浮层里的代码不参与复制
       var t = pres[i].innerText.replace(/\u00a0/g, ' ').replace(/\s+$/, '');
       if (t.replace(/\s/g, '').length > 0) blocks.push(t);
     }
@@ -1823,6 +2127,13 @@ check(120) → 100</div>
       return;
     }
 
+    if (k === 'Escape') {
+      var anyAns = document.querySelectorAll('.qans');
+      for (var b = 0; b < anyAns.length; b++) {
+        if (anyAns[b].style.display === 'block') { e.preventDefault(); closeAns(); return; }
+      }
+    }
+
     if ((k === ' ' || k === 'Enter') &&
         String(window.getSelection()).replace(/\s/g, '').length > 0) {
       return;  // 正在选择文字，空格不翻页
@@ -1874,6 +2185,11 @@ check(120) → 100</div>
     if (e.target.closest('a')) return;
     if (e.target.closest('.qbtn')) return;
     if (e.target.closest('.qans')) return;
+    // 有答案卡展开时，点空白处只收起，不翻页
+    var opened = document.querySelectorAll('.qans');
+    for (var a = 0; a < opened.length; a++) {
+      if (opened[a].style.display === 'block') { closeAns(); return; }
+    }
     // 刚才拖过鼠标，或页面上已有选中文字 → 这一下是“选内容”，不是“翻页”
     if (dragged) { dragged = false; return; }
     var sel = window.getSelection();
