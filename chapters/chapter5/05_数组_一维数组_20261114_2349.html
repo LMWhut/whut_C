@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  C 语言课件 · 通用模板（参考用）
+  ----------------------------------------------------------------------------
+  本模板已内置“设计系统 + 演示引擎”，做其他主题的课件时：
+    1. 复制本文件，改 <title> 与封面文案；
+    2. 按需增删 <section class="slide"> 页面；
+    3. 底部脚本里的 tocGroups 数组按“页面索引 i : 目录文字 t”改写；
+    4. 其余 CSS / JS 引擎无需改动即可直接使用。
+
+  ★ 制作规则（2026-10-27 与任课教师沟通后定稿，做新课件时逐条遵守）
+    ① 版本化：不在原稿上改。每次改动前先复制为 原名_YYYYMMDD_HHMM.html，原稿保持不动，
+       最新成果＝时间戳最新的那一份。
+    ② 满宽不居中：正文交给 .fit 自动缩放（fitSlide 已内置补丁——按 1/s 加宽再整体缩回、
+       origin 左上），缩小后仍占满整行宽，绝不出现“内容挤在中间、左右两侧大片留白”。
+       版心需要更宽时给 .slide 加 .tightL（左右各 22px）。
+    ③ 字号：在“不溢出”前提下尽量大，判据是“播放时教室第 7 排能看清”。
+       **代码块固定 32px**，一页约装 14 行（行高 1.55 ≈ 49.6px，上限 709px）；
+       放不下时先“掐头去尾只留关键片段”，再“分栏 .two（代码列 ≥1.6fr）”，
+       都不行才加页。**不许降字号、不许让整页缩放、不许静默横裁。**
+       其它正文按 .s-body 字号档：标题 56／小标题 30／正文 28~32／注释 22。
+    ④ 每页必验：本机无头浏览器（Edge/Firefox）已不能出图，改用三层——
+       ① lint.py（结构）② latex_inject.py --check（裸数学）③ inject_check.py 生成
+       _check.html，普通浏览器打开“测”→“扫全部页”。新画的图另用
+       scripts/svg_render.py（PIL 光栅化）看线条是否重叠、文字是否出框。
+    ⑤ 图一律内嵌：截图、流程图用 <img src="data:image/png;base64,...">，
+       不引外部文件、不做“点击上传”，换电脑不丢图。
+    ⑥ 先题后析用 .coll 可折叠块（默认收起，点标题展开并自动重算 .fit）；
+       需要一次性全展示的内容不要用 .reveal。
+    ⑦ 流程图只用 .fc-* 图元类（配色/线宽/箭头见元件库），不自创形态；
+       已审定的图形不擅自改。**图内文字一律 ≥24px，且显示缩放比 ≥1**
+       （实际字号 = font-size × min(容器宽,max-width) / viewBox 宽）。
+       **分支标签一律放“右侧、上侧”**：向下分支标在竖线右侧，向右分支标在水平段上方。
+       模板后面几页的流程图是**版式演示**（早期尺寸，字号偏小）；实际画图按
+       flowchart-spec §1.1 与资料库元件库的框尺寸，别照抄示例页的框。
+    ⑧ 嵌套：N-S 图内层与外层**重合的线只画一遍**（内层不套外框，只补父级没有的分界线）；
+       传统流程图的嵌套循环**外层走外圈、内层走内圈**，左右各两条通道由内向外排开，
+       两层 0 出口不许并线（详见 references/flowchart-spec.md §5.6、§6）。
+    ⑨ 数学公式一律 LaTeX：正文写 \(\sqrt{x}\)、\(x^{2}\)、\(i\le\sqrt{x}\)，
+       不写裸 √x / 2^7 / sqrt(x)（sqrt(x) 原样只允许出现在 C 代码里）。
+       渲染器已内置在本模板（.tex 命名空间 + texScan），断网可用，无需外链。
+    ⑩ 封面与结束页不显示页码徽标（引擎已处理）；目录 tocGroups 的索引必须与实际页序一致。
+    ⑪ 交付前校验：页数、每页 div/table/svg/pre/g/text 标签平衡、data:image 张数。
+    ⑫ 放大镜已内置（右下角 🔍，光标为中心放大、单击锁定、滚轮 1.5–8×、左下角可调尺寸）。
+    ⑬ 位运算 / 二进制演示用 .bits-wrap：每行一个 .bit-row（左侧 .bit-cap 固定 140px 对齐），
+       格子 .bit-cell on|off；**结果那一行加 .bits-result**，它的格子默认是虚线空槽，
+       **点一下出 1 位**、出全再点重置、翻页自动清空（引擎已处理，不用写脚本）。
+       不要把结果行写死——学生一眼看到答案就没得讲；一页最多放两组（两组就接近 709 上限）。
+
+  组件速查（详见各示例页）：
+    · 标题  .s-title
+    · 副标题 .s-sub / .s-sub.blue
+    · 提示框 .box + .tip(绿)/.warn(橙)/.key(紫)/.red(红)，内含 <span class="label">
+    · 代码  pre.code（.kw/.str/.cmt/.num 高亮）；行内 code.inline；结果 .out
+    · 表格  table.tb（单元格 .c-red/.c-green/.c-blue）
+    · 卡片  .card + .orange/.green/.purple/.red（含 .ico + h4）
+    · 布局  .grid.c2 / .grid.c3；.two / .two.wide；.feat 特性列表
+    · 流程图  .flow 容器 + .fc-* 图元类（fc-term/fc-proc/fc-io/fc-dec/fc-ns/fc-ns-cond/fc-line/fc-yes/fc-no）；N-S 用三角分割（顺序/双分支/单分支/多分支嵌套三角/前测试·后测试循环），传统用菱形判断（单/双分支·多分支公共汇合线·前测试·后测试循环·switch），任意新图复用同类即风格一致
+    · 习题  .reveal（默认隐藏）+ .reveal-hint（脉冲按钮）：先题后析
+    · 位运算  .bits-wrap（点击逐位揭示）+ .bit-row / .bit-cap / .bit-cell on|off / .bit-op，结果行加 .bits-result
+    · 封面  .slide.cover ；结束 .slide.end
+  交互：← → ↑ ↓ / 空格 / Enter 翻页；Home/End 首尾；O 目录；B/. 黑屏；
+        Esc 关目录；滚轮/触屏滑动翻页；点击左右半屏翻页（代码区可复制）；
+        点位运算面板（.bits-wrap）逐位揭示结果，不翻页。
+  ============================================================================
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>C程序设计基础 · 第五章 数组（一维数组）</title>
+<style>
+  :root{
+    --fs-title: 48px; --fs-body: 32px; --fs-other: 30px; --fs-list: 29px;
+    --blue-900:#0a3d63; --blue-700:#124f83; --blue-600:#1a6fb5; --blue-400:#4a97d4; --blue-100:#e8f2fb;
+    --orange:#e8720c; --orange-soft:#fdf1e4;
+    --green:#2e8b57; --green-soft:#eaf7ef;
+    --purple:#8e44ad; --purple-soft:#f5ecfa;
+    --red:#c0392b; --red-soft:#fdeceb;
+    --ink:#1d2b36; --muted:#4d6376; --line:#d6e2ee;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;overflow:hidden;background:var(--blue-900);font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;-webkit-font-smoothing:antialiased;}
+  #stage{position:fixed;left:50%;top:50%;width:1600px;height:900px;transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center center;background:#fff;overflow:hidden;transition:opacity .22s ease;}
+  body.blackout #stage{opacity:0;}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:30px 64px 60px;background:linear-gradient(180deg,#ffffff 0%,#f4faff 100%);}
+  .slide.active{display:flex;animation:fadeUp .26s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  @keyframes itemIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
+  .slide.active .s-title{animation:itemIn .42s ease both;}
+  .slide.active .fit > *:not(.reveal):not(.reveal-hint){animation:itemIn .42s ease both;}
+  .slide.active .fit > *:not(.reveal):not(.reveal-hint):nth-child(1){animation-delay:.08s;}
+  .slide.active .fit > *:not(.reveal):not(.reveal-hint):nth-child(2){animation-delay:.16s;}
+  .slide.active .fit > *:not(.reveal):not(.reveal-hint):nth-child(3){animation-delay:.24s;}
+  .slide.active .fit > *:not(.reveal):not(.reveal-hint):nth-child(4){animation-delay:.32s;}
+  .slide.active .fit > *:not(.reveal):not(.reveal-hint):nth-child(5){animation-delay:.40s;}
+  .slide.active .fit > *:not(.reveal):not(.reveal-hint):nth-child(6){animation-delay:.48s;}
+  .slide.cover.active .s-title,.slide.end.active .s-title{animation:none;}
+  .slide::after{content:"";position:absolute;right:-90px;bottom:-90px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(26,111,181,.10) 0%,rgba(26,111,181,0) 70%);pointer-events:none;}
+  .s-title{flex:0 0 auto;align-self:flex-start;background:linear-gradient(135deg,#1a6fb5 0%,#124f83 100%);color:#fff;font-size:48px;font-weight:700;letter-spacing:1.5px;line-height:1.15;padding:14px 30px 14px 24px;border-left:10px solid var(--orange);border-radius:0 12px 12px 0;margin-bottom:18px;box-shadow:0 6px 16px rgba(18,79,131,.18);}
+  .s-sub{font-size:var(--fs-body);font-weight:700;color:var(--blue-700);border-left:7px solid var(--orange);padding:2px 0 2px 14px;margin:14px 0 10px;}
+  .s-sub:first-child{margin-top:0;}
+  .s-sub.blue{border-left-color:var(--blue-600);}
+  .s-body{flex:1 1 auto;min-height:0;overflow:hidden;font-size:32px;line-height:1.5;color:var(--ink);}
+  .fit{overflow:hidden;}
+  /* 版心临时加宽（左右 22px）——需要贴边排版时给 .slide 加 .tightL */
+  .slide.tightL{padding-left:22px;padding-right:22px;} .slide.tightL .code{padding-left:18px;}
+  /* 可折叠块（先题后析 / 解析 / 运行结果）：默认收起，点标题展开 */
+  .coll{margin-top:12px;}
+  .coll-hd{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#e8720c,#c55807);color:#fff;font-size:24px;padding:9px 22px;border-radius:999px;cursor:pointer;box-shadow:0 5px 12px rgba(232,114,12,.3);user-select:none;transition:filter .2s,box-shadow .2s;}
+  .coll-hd:hover{filter:brightness(1.07);box-shadow:0 7px 16px rgba(232,114,12,.4);}
+  .coll-hd::after{content:"▾";font-size:19px;line-height:1;}
+  .coll.open .coll-hd{background:linear-gradient(135deg,#1a6fb5,#124f83);box-shadow:0 5px 12px rgba(18,79,131,.28);}
+  .coll.open .coll-hd::after{content:"▴";}
+  .coll-bd{max-height:0;opacity:0;overflow:hidden;transition:max-height .5s ease,opacity .4s ease;}
+  .coll.open .coll-bd{max-height:3200px;opacity:1;margin-top:12px;}
+  .s-body p{margin:8px 0;}
+  .s-body p:first-child{margin-top:0;}
+  .s-body ul,.s-body ol{padding-left:1.5em;margin:8px 0;}
+  .s-body li{margin:4px 0;}
+  .s-body ul>li::marker{color:var(--blue-600);}
+  .s-body ol>li::marker{color:var(--orange);font-weight:800;}
+  b,strong{color:var(--blue-700);}
+  table.tb{width:100%;border-collapse:separate;border-spacing:0;font-size:var(--fs-other);line-height:1.45;margin:6px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(18,79,131,.08);}
+  table.tb thead th{background:linear-gradient(135deg,#1a6fb5,#124f83);color:#fff;font-weight:600;font-size:var(--fs-other);padding:12px 18px;text-align:left;}
+  table.tb td,table.tb tbody th{padding:11px 18px;background:#fff;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.tb tbody tr:last-child td,table.tb tbody tr:last-child th{border-bottom:none;}
+  table.tb tbody th{background:#eaf3fb;color:var(--blue-700);font-weight:600;text-align:left;white-space:nowrap;}
+  table.tb tbody tr:nth-child(even) td{background:#f7fafd;}
+  .c-red{color:var(--red);font-weight:600;} .c-green{color:var(--green);font-weight:700;} .c-blue{color:var(--blue-600);font-weight:700;}
+  .box{border-left:7px solid var(--blue-600);background:var(--blue-100);border-radius:0 10px 10px 0;padding:16px 28px;margin:10px 0;font-size:30px;line-height:1.7;}
+  .box .label{display:inline-block;font-weight:800;color:var(--blue-700);margin-right:10px;}
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);} .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);} .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);} .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);} .box.red .label{color:var(--red);}
+  pre.code{background:#0d2b45;color:#d8e9f5;border-left:6px solid var(--orange);border-radius:0 12px 12px 0;padding:14px 22px;margin:8px 0;font-family:Consolas,"Courier New",monospace;font-size:32px;line-height:1.55;white-space:pre;overflow:hidden;box-shadow:0 8px 22px rgba(13,43,69,.22);}
+  pre.code .kw{color:#6ec1ff;} pre.code .str{color:#ffc17a;} pre.code .cmt{color:#7fa5c0;font-style:italic;} pre.code .num{color:#ff9d6b;}
+  code.inline{font-family:Consolas,"Courier New",monospace;background:var(--blue-100);color:#c0392b;padding:2px 8px;font-size:32px;border-radius:5px;}
+  .out{background:#0d2b45;color:#bfe4ff;border-left:6px solid var(--blue-400);border-radius:0 12px 12px 0;padding:12px 22px;margin:8px 0;font-family:Consolas,"Courier New",monospace;font-size:32px;line-height:1.5;white-space:pre;}
+  .grid{display:grid;gap:14px;} .grid.c2{grid-template-columns:1fr 1fr;} .grid.c3{grid-template-columns:repeat(3,1fr);} .grid.c4{grid-template-columns:repeat(4,1fr);} .grid{ gap:26px 14px; }
+  .card{background:#fff;border:1px solid var(--line);border-top:7px solid var(--blue-600);border-radius:0 0 16px 16px;padding:22px 28px;box-shadow:0 6px 16px rgba(18,79,131,.08);} .card.orange{border-top-color:var(--orange);} .card.green{border-top-color:var(--green);} .card.purple{border-top-color:var(--purple);} .card.red{border-top-color:var(--red);} .card h4{font-size:30px;color:var(--blue-700);margin-bottom:8px;display:flex;align-items:center;gap:10px;line-height:1.2;} .card.orange h4{color:#b95a05;} .card.green h4{color:var(--green);} .card.purple h4{color:var(--purple);} .card.red h4{color:var(--red);} .card p{font-size:27px;color:var(--muted);line-height:1.7;margin:0;} .card .ico{font-size:30px;line-height:1;}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;} .two.wide{grid-template-columns:1.15fr 1fr;}
+  .feat{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;} .feat li{display:flex;align-items:center;gap:22px;background:#fff;border:1px solid var(--line);border-left:7px solid var(--blue-600);border-radius:0 12px 12px 0;padding:12px 24px;box-shadow:0 4px 10px rgba(18,79,131,.06);} .feat li:nth-child(even){border-left-color:var(--orange);} .feat .k{flex:0 0 auto;width:270px;font-size:30px;font-weight:700;color:var(--blue-700);line-height:1.25;} .feat .v{font-size:27px;color:var(--muted);line-height:1.5;}
+  .slide.cover{background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);padding:0 110px 60px;justify-content:center;} .slide.cover::before{content:"";position:absolute;right:-100px;top:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(232,114,12,.18) 0%,rgba(232,114,12,0) 70%);} .slide.cover::after{content:"";position:absolute;left:-100px;bottom:-120px;width:440px;height:440px;border-radius:50%;background:radial-gradient(circle,rgba(74,151,212,.18) 0%,rgba(74,151,212,0) 70%);} .cover-inner{position:relative;z-index:2;} .cover-kicker{display:inline-block;font-size:var(--fs-other);letter-spacing:3px;color:#ffd9b3;border:1px solid rgba(255,217,179,.55);padding:8px 24px;margin-bottom:28px;border-radius:999px;} .cover h1{font-size:82px;font-weight:800;color:#fff;letter-spacing:5px;line-height:1.15;margin-bottom:16px;} .cover-bar{width:650px;height:8px;border-radius:4px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:22px;} .cover-sub{font-size:40px;color:#a9d8f5;letter-spacing:3px;margin-bottom:36px;} .cover-meta{font-size:var(--fs-other);color:#7fb2dd;letter-spacing:2px;}
+  .slide.end{background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);padding:0 110px 60px;justify-content:center;} .slide.end::before{content:"";position:absolute;right:-100px;bottom:-120px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(232,114,12,.16) 0%,rgba(232,114,12,0) 70%);} .end-inner{position:relative;z-index:2;} .end h2{font-size:82px;font-weight:800;color:#fff;letter-spacing:10px;margin-bottom:22px;} .end p{font-size:var(--fs-body);color:#a9d8f5;letter-spacing:2px;}
+  .pageinfo{position:absolute;right:40px;top:22px;z-index:20;font-size:var(--fs-other);color:var(--blue-600);letter-spacing:1px;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:999px;padding:5px 20px;box-shadow:0 4px 10px rgba(18,79,131,.08);} .pageinfo b{font-size:var(--fs-other);color:var(--orange);}
+  .nav{position:absolute;right:36px;bottom:14px;z-index:20;display:flex;align-items:center;gap:10px;} .nav button{height:50px;border:none;cursor:pointer;background:linear-gradient(135deg,#1a6fb5,#124f83);color:#fff;font-size:var(--fs-other);line-height:1;display:flex;align-items:center;justify-content:center;transition:all .18s;font-family:inherit;border-radius:12px;width:50px;box-shadow:0 5px 12px rgba(18,79,131,.28);} .nav button:hover{background:linear-gradient(135deg,#e8720c,#c55807);transform:translateY(-2px);} .nav button:disabled{background:#b9cfe4;cursor:not-allowed;box-shadow:none;transform:none;} .nav .tocbtn{width:auto;padding:0 22px;font-weight:700;letter-spacing:1px;}
+  .progress{position:absolute;left:0;bottom:0;height:6px;width:0;z-index:20;background:linear-gradient(90deg,#1a6fb5,#e8720c);transition:width .3s ease;}
+  .keyhint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:20;font-size:20px;color:#7fa8c4;letter-spacing:1px;background:rgba(255,255,255,.85);border:1px solid var(--line);border-radius:999px;padding:4px 16px;transition:opacity .6s ease;} .keyhint.hide{opacity:0;}
+  .toc{position:absolute;inset:0;z-index:40;background:rgba(10,61,99,.96);display:none;padding:44px 60px 60px;overflow:auto;} .toc.show{display:block;} .toc h3{font-size:40px;color:#fff;letter-spacing:4px;margin-bottom:6px;} .toc .toc-bar{width:110px;height:6px;border-radius:3px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:20px;} .toc-list{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:start;} .toc-group{background:rgba(255,255,255,.05);border-radius:14px;padding:14px 14px 16px;border-top:5px solid var(--blue-400);} .toc-group:nth-child(2){border-top-color:var(--orange);} .toc-group:nth-child(3){border-top-color:var(--green);} .toc-group:nth-child(4){border-top-color:var(--purple);} .toc-group:nth-child(5){border-top-color:var(--red);} .toc-group-title{font-size:22px;color:#ffc17a;font-weight:800;letter-spacing:1px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed rgba(255,255,255,.18);line-height:1.25;} .toc-group a{display:block;color:#cfe6f7;font-size:20px;padding:8px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;text-decoration:none;line-height:1.35;transition:all .16s;} .toc-group a:hover{background:linear-gradient(90deg,#e8720c,#c55807);color:#fff;} .toc-close{position:absolute;right:40px;top:22px;background:none;border:1px solid #7fb2dd;color:#cfe6f7;font-size:var(--fs-other);padding:7px 22px;cursor:pointer;font-family:inherit;border-radius:12px;} .toc-close:hover{background:#e8720c;border-color:#e8720c;color:#fff;}
+  /* 习题解析：先隐藏，点击后动画揭示，避免答案与题目同时出现 */
+  .reveal{max-height:0;opacity:0;overflow:hidden;margin-top:0!important;transition:max-height .55s ease, opacity .45s ease;}
+  .reveal.shown{max-height:3000px;opacity:1;margin-top:14px!important;}
+  .reveal.shown .box{box-shadow:0 0 0 2px rgba(232,114,12,.35), 0 6px 16px rgba(18,79,131,.08);}
+  .reveal-hint{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:linear-gradient(135deg,#e8720c,#c55807);color:#fff;font-size:24px;padding:8px 18px;border-radius:999px;cursor:pointer;box-shadow:0 5px 12px rgba(232,114,12,.3);animation:pulse 1.5s ease-in-out infinite;user-select:none;}
+  .reveal-hint.gone{display:none;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+
+  /* ===== 位运算逐位揭示（bits）：结果行默认是虚线空槽，点一下出 1 位（2026-11-03 并入模板） ===== */
+  .bits-wrap{margin:12px 0;cursor:pointer;}
+  .bit-row{display:flex;align-items:center;gap:8px;margin:8px 0;}
+  .bit-cap{flex:0 0 140px;width:140px;text-align:right;margin-right:8px;font-size:24px;font-weight:700;color:var(--muted);font-family:"Microsoft YaHei",sans-serif;}
+  .bit-cell{width:56px;height:68px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-family:Consolas,"Courier New",monospace;font-size:36px;font-weight:800;border:3px solid var(--line);}
+  .bit-cell.on{background:linear-gradient(135deg,#1a6fb5,#124f83);color:#fff;border-color:#124f83;}
+  .bit-cell.off{background:#eef3f8;color:#7a8fa2;border-color:#c9d8e6;}
+  /* 只有 .bits-result 行参与“逐位揭示”：未 .show 的格子是虚线空槽、数字透明 */
+  .bits-wrap .bits-result .bit-cell:not(.show){background:#f4f8fc;border:3px dashed #cfe0ef;color:transparent;}
+  .bits-wrap .bits-result .bit-cell.show{animation:bitPop .4s ease both;}
+  @keyframes bitPop{0%{transform:scale(.4);opacity:.4;}55%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+  .bit-op{width:46px;text-align:center;font-size:38px;font-weight:800;color:var(--orange);}
+  @media (prefers-reduced-motion:reduce){.bits-wrap .bits-result .bit-cell.show{animation:none;}}
+
+  /* 流程图组件：N-S 图（盒图）与传统流程图通用 */
+  .flow{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;width:100%;gap:6px;}
+  .flow svg{display:block;width:100%;height:auto;}
+  .flow .cap{font-size:23px;font-weight:800;color:var(--blue-700);letter-spacing:1px;text-align:center;line-height:1.3;}
+  .flow svg text{font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;}
+  .fc-term{fill:var(--blue-700);} .fc-term-t{fill:#fff;font-weight:700;}
+  .fc-proc{fill:#fff;stroke:var(--blue-600);stroke-width:2.5;} .fc-proc-t{fill:var(--ink);}
+  .fc-io{fill:#fff;stroke:var(--purple);stroke-width:2.5;} .fc-io-t{fill:var(--purple);font-weight:700;}
+  .fc-dec{fill:var(--orange-soft);stroke:var(--orange);stroke-width:2.5;} .fc-dec-t{fill:#9a4a00;font-weight:700;}
+  .fc-line{stroke:#5a7a93;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .fc-yes{fill:var(--green);font-weight:800;} .fc-no{fill:var(--red);font-weight:800;}
+  .fc-ns{fill:#fff;stroke:var(--blue-600);stroke-width:2.5;} .fc-ns-line{stroke:var(--blue-600);stroke-width:2.5;}
+  .fc-ns-cond{fill:var(--blue-100);stroke:var(--blue-600);stroke-width:2.5;} .fc-ns-t{fill:var(--ink);}
+
+  /* ===== 页面放大镜 loupe 工具（以光标为中心放大 + 单击锁定 + 滑块面板，2026-10-30 改进） ===== */
+  #btnLoupe{position:fixed;right:18px;bottom:84px;z-index:60;width:54px;height:54px;border:none;border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#0e4f86);color:#fff;font-size:24px;cursor:pointer;
+    box-shadow:0 6px 16px rgba(26,111,181,.4);display:flex;align-items:center;justify-content:center;user-select:none;}
+  #btnLoupe.on{background:linear-gradient(135deg,#e8720c,#c55807);box-shadow:0 6px 16px rgba(232,114,12,.45);}
+  #loupe{position:fixed;width:320px;height:320px;border-radius:14px;background:#fff;
+    overflow:hidden;box-shadow:0 0 0 3px #1a6fb5,0 12px 34px rgba(0,0,0,.35);z-index:70;pointer-events:none;display:none;}
+  #loupe .lens-stage{position:absolute;left:0;top:0;transform-origin:0 0;}
+  #loupe .lens-stage *{animation:none !important;transition:none !important;}
+  /* 中心准星：直观标出“正在放大的是这一点” */
+  #loupe::before,#loupe::after{content:'';position:absolute;z-index:3;pointer-events:none;background:rgba(232,114,12,.8);}
+  #loupe::before{left:50%;top:50%;width:1px;height:20px;margin:-10px 0 0 -0.5px;}
+  #loupe::after{left:50%;top:50%;width:20px;height:1px;margin:-0.5px 0 0 -10px;}
+  #loupe.lock{box-shadow:0 0 0 3px #e8720c,0 12px 34px rgba(0,0,0,.35);}
+  #loupeTip{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:rgba(14,79,134,.92);color:#fff;
+    font-size:18px;padding:8px 18px;border-radius:999px;z-index:70;display:none;pointer-events:none;white-space:nowrap;
+    box-shadow:0 6px 16px rgba(0,0,0,.3);}
+  #loupePanel{position:fixed;left:18px;bottom:18px;z-index:75;background:rgba(20,28,38,.92);color:#e8eef5;
+    border-radius:12px;padding:12px 16px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.4);display:none;width:236px;}
+  #loupePanel .ttl{font-size:13px;color:#7fd0ff;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+  #loupePanel .row{display:flex;align-items:center;gap:10px;margin:7px 0;}
+  #loupePanel label{width:40px;color:#9fb4c8;flex:none;}
+  #loupePanel input[type=range]{flex:1;accent-color:#1a6fb5;cursor:pointer;}
+  #loupePanel .val{width:48px;text-align:right;color:#fff;font-variant-numeric:tabular-nums;}
+  body.loupe-on{cursor:crosshair;}
+
+  /* ===== 正文可选中复制：选中 / 拖选 / 长按都不翻页 ===== */
+  #stage .slide{-webkit-user-select:text;user-select:text;}
+  #stage .slide ::selection{background:rgba(232,114,12,.28);}
+  #stage .nav,#stage .nav *,#stage .keyhint,#stage .pageinfo,#stage .progress,
+  #stage .toc,#stage .toc *,#stage .coll-hd,#stage .reveal-hint,
+  #btnLoupe,#loupePanel{-webkit-user-select:none;user-select:none;}
+  #copyTip{position:fixed;left:50%;bottom:96px;z-index:80;display:flex;align-items:center;gap:8px;
+    padding:8px 10px 8px 18px;border-radius:999px;background:rgba(14,79,134,.95);color:#fff;
+    font-size:17px;line-height:1.2;white-space:nowrap;box-shadow:0 10px 26px rgba(0,0,0,.3);
+    opacity:0;pointer-events:none;transform:translateX(-50%) translateY(10px);
+    transition:opacity .18s ease,transform .18s ease;}
+  #copyTip.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);}
+  #copyTip b{color:#ffd08a;font-weight:700;font-variant-numeric:tabular-nums;}
+  #copyTip .kbd{font-size:14px;color:#bcd8ee;border:1px solid rgba(188,216,238,.45);border-radius:6px;padding:1px 7px;}
+  #copyTip button{border:none;cursor:pointer;font-family:inherit;font-size:16px;font-weight:700;
+    padding:6px 15px;border-radius:999px;background:linear-gradient(135deg,#e8720c,#c55807);color:#fff;}
+  #copyTip button:hover{filter:brightness(1.08);}
+  @media (max-width:720px){
+    #copyTip{font-size:15px;padding:6px 8px 6px 14px;gap:6px;}
+    #copyTip .kbd{display:none;}          /* 手机上不显示 Ctrl C，长按有系统菜单 */
+    #copyTip button{font-size:15px;padding:5px 12px;}
+  }
+
+
+  /* ===== LaTeX 行内公式（零依赖、断网可用） ===== */
+  .tex{font-family:"Cambria Math","Latin Modern Math",Cambria,"Times New Roman",Times,serif;font-style:normal;letter-spacing:0;white-space:nowrap;}
+  .tex i{font-style:italic;padding-right:.02em;}
+  .tex .num,.tex .up{font-style:normal;}
+  .tex .fn{font-style:normal;margin:0 .14em;}
+  .tex .op{padding:0 .1em;}
+  .tex sup{font-size:.62em;vertical-align:.55em;line-height:0;}
+  .tex sub{font-size:.62em;vertical-align:-.25em;line-height:0;}
+  .tex .sq{white-space:nowrap;}
+  /* 根号上划线：必须压在 .radical 字形自带的顶笔上，不能穿过被开方字母。
+     Cambria Math 字面 ascent = 0.778em，√（U+221A）笔画范围 −0.041~0.921em，顶笔在 0.856~0.921em，
+     故 top = 0.778 − 0.921 = −0.143em（负值：顶笔高过 ascent 线）；
+     高度 0.065em 与字形顶笔同厚；left −0.04em 使横线插进顶笔右端（√ advance 0.657em，顶笔 0.571~0.714em）避免接缝。
+     改用 Times New Roman 回退时把 top 改到 −.09em。 */
+  .tex .sq-b{position:relative;padding:0 .06em 0 .04em;}
+  .tex .sq-b::before{content:"";position:absolute;left:-.04em;right:0;top:-.143em;height:.065em;min-height:1.5px;background:currentColor;border-radius:1px;}
+  .tex .fx{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.84em;line-height:1.06;margin:0 .14em;}
+  .tex .fx-n{border-bottom:2px solid currentColor;padding:0 .12em;}
+  .tex .fx-d{padding:0 .12em;}
+  </style>
+<style>
+.s-body > .fit{display:flex;flex-direction:column;justify-content:space-evenly;min-height:100%}
+</style>
+</head>
+<body>
+  <div id="stage">
+
+  <!-- 全局流程图箭头定义（供各页 SVG 引用，只需一处） -->
+  <svg aria-hidden="true" height="0" width="0" style="position:absolute; width:0; height:0; overflow:hidden"><defs>
+    <marker id="fcArrow" markerHeight="11" markerUnits="userSpaceOnUse" markerWidth="11" orient="auto" refX="8" refY="5.5">
+      <path d="M1,1 L10,5.5 L1,10 Z" fill="#5a7a93"/>
+    </marker>
+  </defs></svg>
+
+  <!-- 0 封面 -->
+  <section class="slide cover active">
+    <div class="cover-inner">
+      <div class="cover-kicker">武汉理工大学 人工智能学院</div>
+      <h1>C程序设计基础</h1>
+      <div class="cover-bar"></div>
+      <div class="cover-sub">第五章 数组（一维数组 · 定义 / 初始化 / 引用与操作 / 示例）</div>
+      <div class="cover-meta">主讲：李  民</div>
+    </div>
+  </section>
+
+<!-- 1 【例5-1】求平均分 -->
+  <section class="slide">
+    <div class="s-title">【例 5-1】引例：统计平均分</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">问题</span>
+        某组（10 人）刚刚结束了 C 语言期中考试，现在需要统计本组学员的平均分，以及高于平均分的人数。
+      </div>
+      <div class="s-sub" style="margin-top:10px">先解决第一个子问题：求平均分</div>
+      <pre class="code" style="font-size:31px"><span class="kw">float</span> score, sum = <span class="num">0</span>, aver;
+<span class="kw">for</span>(i = <span class="num">1</span>; i &lt;= <span class="num">10</span>; i++){   <span class="cmt">// 逐个读入成绩并累加</span>
+    scanf(<span class="str">"%f"</span>, &amp;score);
+    sum += score;
+}
+aver = sum / <span class="num">10</span>;              <span class="cmt">// 得出平均分</span></pre>
+      <div class="box key" style="margin-top:14px">
+        <span class="label">难点</span>
+        上面的程序只能“边读边算”，读完一个成绩就被下一个覆盖，<b>无法把 10 个成绩都保留下来</b>再与平均分比较。
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 求高于平均分的人数 -->
+  <section class="slide">
+    <div class="s-title">引例：求高于平均分的人数</div>
+    <div class="s-body">
+      <div class="s-sub" style="margin-top:0">要比较“每个成绩”与平均分，必须先把 10 个成绩都存住</div>
+      <div class="two" style="margin-top:10px">
+        <div class="card red">
+          <h4><span class="ico">✕</span>办法一：重新输入</h4>
+          <p>计算完平均分后，再让学员把成绩重新输入一遍，输入的同时与平均分比较。若学员人数较多，工作量翻倍，明显减慢计算速度。</p>
+        </div>
+        <div class="card red">
+          <h4><span class="ico">✕</span>办法二：10 个独立变量</h4>
+          <p>设置 score1、score2 …… score10 共 10 个变量。此时<b>不能使用循环</b>，只能逐个处理；若人数改变，同一段代码就无法复用。</p>
+        </div>
+      </div>
+      <div class="box warn" style="margin-top:16px">
+        <span class="label">症结</span>
+        简单变量一次只能存一个值；而本问题需要<b>一次性保存一批同类型数据</b>并反复使用——这正是“数组”要解决的场景。
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 5.1 什么是数组 -->
+  <section class="slide">
+    <div class="s-title">5.1 什么是数组</div>
+    <div class="s-body">
+      <ul class="feat" style="margin-top:0">
+        <li><span class="k">数据类型</span><span class="v">除 int、float、char 等基本数据类型外，C 语言还提供了<b>构造数据类型</b>，来满足不同应用的需要。</span></li>
+        <li><span class="k">构造数据类型</span><span class="v">由基本数据类型按一定规则组成，也称作“<b>导出类型</b>”。</span></li>
+        <li><span class="k">构造类型实例</span><span class="v">常见的构造数据类型包括 <code class="inline">数组</code>、<code class="inline">结构体</code>、<code class="inline">共用体</code> 等。</span></li>
+      </ul>
+      <div class="box key" style="margin-top:18px">
+        <span class="label">核心</span>
+        数组（array）能把<b>具有相同类型</b>的数据组合在一起，通常用于处理批量数据。
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 引入数组：解决办法 -->
+  <section class="slide">
+    <div class="s-title">解决办法：引入“数组”</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">思路</span>
+        引入构造数据类型——<b>数组</b>，解决“一次输入、多次使用”的需求：把 10 个成绩连续存放在一组同名变量中，再统一与平均分比较。
+      </div>
+      <div class="two" style="margin-top:16px">
+        <div>
+          <div class="s-sub">英语释义</div>
+          <p style="font-size:30px;line-height:1.7">An array is a data type that uses <b>subscripted variables</b> and makes possible the representation of a large number of <b>homogeneous values</b>.</p>
+          <div class="s-sub blue" style="margin-top:14px">下标运算符</div>
+          <p style="font-size:30px"><code class="inline">[ ]</code>　用于访问数组中的元素</p>
+        </div>
+        <div>
+          <pre class="code" style="font-size:32px"><span class="cmt">// 10 个 double 成绩，统一名叫 score</span>
+<span class="kw">double</span> score[<span class="num">10</span>];
+<span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++)
+    scanf(<span class="str">"%lf"</span>, &amp;score[i]);</pre>
+          <div class="out">一次输入，全部保留，可反复使用</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 数组的维数 -->
+  <section class="slide">
+    <div class="s-title">数组的维数</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">概念</span>
+        数组的维数：确定数组中一个元素所需的<b>下标数目</b>。
+      </div>
+      <div style="display:flex;align-items:center;gap:24px">
+        <div style="width:200px;flex:none;display:flex;justify-content:center">
+          <div style="display:flex;gap:4px">
+            <div style="width:26px;height:26px;background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="width:26px;height:26px;background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="width:26px;height:26px;background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="width:26px;height:26px;background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="width:26px;height:26px;background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="width:26px;height:26px;background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+          </div>
+        </div>
+        <div style="font-size:23px;color:#334155">
+          <code class="inline" style="font-size:30px">int a[6];</code>
+          <div style="font-size:21px;color:var(--muted);margin-top:4px">1 × 6 一维数组（线）· 只用<b>一个下标</b></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:24px">
+        <div style="width:200px;flex:none;display:flex;justify-content:center">
+          <div style="display:grid;grid-template-columns:repeat(4,28px);grid-auto-rows:28px;gap:4px">
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+            <div style="background:#3b82c4;border:2px solid #1e4e8c;border-radius:4px"></div>
+          </div>
+        </div>
+        <div style="font-size:23px;color:#334155">
+          <code class="inline" style="font-size:30px">int b[3][4];</code>
+          <div style="font-size:21px;color:var(--muted);margin-top:4px">3 × 4 二维数组（面）· 需用<b>两个下标</b></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:24px">
+        <div style="width:200px;flex:none;display:flex;justify-content:center">
+          <svg viewBox="0 0 124 108" width="150" height="130" style="flex:none" aria-label="三维数组示意">
+            <rect x="40" y="28" width="72" height="54" fill="#bfe0f5" stroke="#2b6cb0" stroke-width="2"/>
+            <line x1="58" y1="28" x2="58" y2="82" stroke="#2b6cb0" stroke-width="1" opacity=".5"/>
+            <line x1="76" y1="28" x2="76" y2="82" stroke="#2b6cb0" stroke-width="1" opacity=".5"/>
+            <line x1="94" y1="28" x2="94" y2="82" stroke="#2b6cb0" stroke-width="1" opacity=".5"/>
+            <line x1="40" y1="46" x2="112" y2="46" stroke="#2b6cb0" stroke-width="1" opacity=".5"/>
+            <line x1="40" y1="64" x2="112" y2="64" stroke="#2b6cb0" stroke-width="1" opacity=".5"/>
+            <line x1="12" y1="46" x2="40" y2="28" stroke="#2b6cb0" stroke-width="2"/>
+            <line x1="84" y1="46" x2="112" y2="28" stroke="#2b6cb0" stroke-width="2"/>
+            <line x1="12" y1="100" x2="40" y2="82" stroke="#2b6cb0" stroke-width="2"/>
+            <line x1="84" y1="100" x2="112" y2="82" stroke="#2b6cb0" stroke-width="2"/>
+            <rect x="12" y="46" width="72" height="54" fill="#3b82c4" stroke="#1e4e8c" stroke-width="2"/>
+            <line x1="30" y1="46" x2="30" y2="100" stroke="#dbeafe" stroke-width="1.5"/>
+            <line x1="48" y1="46" x2="48" y2="100" stroke="#dbeafe" stroke-width="1.5"/>
+            <line x1="66" y1="46" x2="66" y2="100" stroke="#dbeafe" stroke-width="1.5"/>
+            <line x1="12" y1="64" x2="84" y2="64" stroke="#dbeafe" stroke-width="1.5"/>
+            <line x1="12" y1="82" x2="84" y2="82" stroke="#dbeafe" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div style="font-size:23px;color:#334155">
+          <code class="inline" style="font-size:30px">int c[2][3][4];</code>
+          <div style="font-size:21px;color:var(--muted);margin-top:4px">2 × 3 × 4 三维数组（体）· 需用<b>三个下标</b></div>
+        </div>
+      </div>
+      <div class="box key" style="margin-top:8px">
+        <span class="label">本节范围</span>
+        本章先学习最常用、也最基础的<b>一维数组</b>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 定义格式 -->
+  <section class="slide">
+    <div class="s-title">一维数组的定义格式</div>
+    <div class="s-body">
+      <div class="s-sub" style="margin-top:0">定义格式</div>
+      <pre class="code" style="font-size:30px;background:#0d2b45;color:#d8e9f5;border-left:6px solid var(--orange);border-radius:0 12px 12px 0;padding:14px 22px;margin:6px 0;font-family:Consolas,'Courier New',monospace;line-height:1.6;white-space:pre;overflow:hidden;">类型定义符　数组名[整型常量表达式]；</pre>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px">
+        <span style="font-weight:700;color:#1e4e8c;font-size:24px">【例如】</span>
+        <code class="inline" style="font-size:34px;font-family:Consolas,'Courier New',monospace;background:none;padding:0"><span style="color:#2b6cb0;font-weight:700">int</span> a[6];</code>
+      </div>
+      <div style="display:flex;justify-content:space-around;margin:8px 0">
+        <div style="width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:15px solid #3b82c4"></div>
+        <div style="width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:15px solid #3b82c4"></div>
+        <div style="width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:15px solid #3b82c4"></div>
+      </div>
+      <div class="grid c3" style="margin-top:4px">
+        <div class="card"><h4>类型说明符</h4><p>数组中所有元素的<b>数据类型</b>。</p></div>
+        <div class="card orange"><h4>数组名</h4><p>标识符。是所有数组元素<b>统一的名字</b>，代表内存起始地址。</p></div>
+        <div class="card green"><h4>整型常量表达式</h4><p>一维数组中<b>元素的个数</b>（数组长度），用 [ ] 括起来。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 内存示意 int a[6] -->
+  <section class="slide tightL">
+    <div class="s-title">内存映像：int a[6];</div>
+    <div class="s-body">
+      <div style="display:flex;gap:0;margin-top:6px;flex-wrap:nowrap;">
+        <div style="flex:1;text-align:center;border:2px solid var(--blue-600);border-radius:8px 0 0 8px;padding:14px 4px;background:var(--blue-100);font-weight:700;color:var(--blue-700);font-size:26px;">a[0]</div>
+        <div style="flex:1;text-align:center;border:2px solid var(--blue-600);border-left:none;padding:14px 4px;background:var(--blue-100);font-weight:700;color:var(--blue-700);font-size:26px;">a[1]</div>
+        <div style="flex:1;text-align:center;border:2px solid var(--blue-600);border-left:none;padding:14px 4px;background:var(--blue-100);font-weight:700;color:var(--blue-700);font-size:26px;">a[2]</div>
+        <div style="flex:1;text-align:center;border:2px solid var(--blue-600);border-left:none;padding:14px 4px;background:var(--blue-100);font-weight:700;color:var(--blue-700);font-size:26px;">a[3]</div>
+        <div style="flex:1;text-align:center;border:2px solid var(--blue-600);border-left:none;padding:14px 4px;background:var(--blue-100);font-weight:700;color:var(--blue-700);font-size:26px;">a[4]</div>
+        <div style="flex:1;text-align:center;border:2px solid var(--blue-600);border-left:none;border-radius:0 8px 8px 0;padding:14px 4px;background:var(--blue-100);font-weight:700;color:var(--blue-700);font-size:26px;">a[5]</div>
+      </div>
+      <div class="two" style="margin-top:18px">
+        <div>
+          <ul style="font-size:29px;line-height:1.8">
+            <li>数组名 <code class="inline">a</code> 表示内存<b>首地址</b>，是地址常量。</li>
+            <li>编译时系统为数组分配<b>连续</b>内存。</li>
+            <li>内存字节数 = 元素个数 × sizeof(元素类型)。</li>
+          </ul>
+        </div>
+        <div>
+          <div class="box key" style="margin-top:0">
+            <span class="label">本例</span>
+            <code class="inline">a</code> 在内存占 <b>24 字节</b>（6 × 4 字节）。<br>可用 <code class="inline">sizeof(a)</code> 取得。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 方括号内为整型常量表达式 -->
+  <section class="slide">
+    <div class="s-title">方括号内是“整型常量表达式”</div>
+    <div class="s-body">
+      <ul style="font-size:31px;line-height:1.9;margin-top:0">
+        <li>一维数组定义中，方括号内为<b>整型常量表达式</b>。</li>
+        <li>该表达式的值必须为<b>正数</b>，表示数组的大小，即数组中元素的个数。</li>
+        <li>数组元素下标范围：<code class="inline">0</code> ～ <code class="inline">size - 1</code>。</li>
+      </ul>
+      <div class="box warn" style="margin-top:14px">
+        <span class="label">易错</span>
+        下标从 <b>0</b> 开始计数。定义了 <code class="inline">int a[6];</code>，元素是 <code class="inline">a[0] … a[5]</code>，<b>没有 a[6]</b>。
+      </div>
+      <div class="box tip" style="margin-top:12px">
+        <span class="label">提示</span>
+        <code class="inline">size</code> 通常用 <code class="inline">#define</code> 定义为符号常量，便于统一修改。
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 float score[50] 注意 -->
+  <section class="slide">
+    <div class="s-title">定义时的注意事项</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:32px"><span class="cmt">// 用符号常量指定元素个数</span>
+<span class="kw">#define</span> size <span class="num">50</span>
+<span class="kw">float</span>  score[size];
+<span class="kw">char</span>   name[<span class="num">20</span>];</pre>
+      <div class="box warn" style="margin-top:14px">
+        <span class="label">注意</span>
+        通常数组一旦定义，<b>大小就不能再改变</b>。常用符号常量指定元素个数，提高可维护性。
+      </div>
+      <div class="box key" style="margin-top:12px">
+        <span class="label">C99 之后</span>
+        允许用<b>变量</b>表示数组大小（变长数组 VLA），但使用受限，需编译器支持。
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 可变长数组定义的使用 -->
+  <section class="slide">
+    <div class="s-title">注意：可变长数组（VLA）的使用</div>
+    <div class="s-body">
+      <ul style="font-size:29px;line-height:1.85;margin-top:0">
+        <li><b>编译器：</b>使用可变长数组前，必须先确认编译器是否支持。</li>
+        <li><b>取值：</b>用变量定义数组长度前，必须先获取该变量的值。</li>
+        <li><b>数组大小：</b>数组一旦定义，大小就<b>不能再改变</b>（无论常量还是变量定义）。</li>
+      </ul>
+      <div class="two" style="margin-top:12px">
+        <pre class="code" style="font-size:28px"><span class="cmt">// 赋值得到长度</span>
+<span class="kw">int</span> n = <span class="num">50</span>;
+<span class="kw">double</span> score[n];</pre>
+        <pre class="code" style="font-size:28px"><span class="cmt">// 输入得到长度</span>
+<span class="kw">int</span> n;
+scanf(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">double</span> score[n];</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 习题（file2 p9） -->
+  <section class="slide">
+    <div class="s-title">习题 5.2.1</div>
+    <div class="s-body">
+      <div class="s-sub" style="margin-top:0">1　有定义：int a[5]; 则定义了 a[1]、a[2]、a[3]、a[4]、a[5] 共 5 个数组元素。（　）</div>
+      <div style="font-size:28px;color:var(--muted);margin:6px 0 14px">A．正确　　B．错误</div>
+      <div class="reveal-hint">👉 点击显示答案</div>
+      <div class="reveal"><div class="box red">
+        <span class="label">答案</span>
+        <b>B．错误。</b> int a[5]; 定义的是 a[0]、a[1]、a[2]、a[3]、a[4] 共 5 个元素，<b>下标从 0 开始，没有 a[5]</b>。
+      </div></div>
+      <div class="s-sub" style="margin-top:18px">2　以下关于数组的描述正确的是（　）</div>
+      <div style="font-size:27px;line-height:1.7;margin-top:4px">A．大小固定，但可有不同类型的元素　　B．大小可变，但类型必须相同<br>C．大小固定，类型必须相同　　D．大小可变，可有不同类型</div>
+      <div class="reveal-hint">👉 点击显示答案</div>
+      <div class="reveal"><div class="box red">
+        <span class="label">答案</span>
+        <b>C．</b> 数组大小固定，且所有元素类型必须相同。
+      </div></div>
+    </div>
+  </section>
+
+  <!-- 12 语法格式 -->
+  <section class="slide">
+    <div class="s-title">初始化的语法格式</div>
+    <div class="s-body">
+      <div class="s-sub" style="margin-top:0">语法格式</div>
+      <pre class="code" style="font-size:32px">类型说明符　数组名[整型常量表达式] = {值1, 值2, …, 值n};</pre>
+      <pre class="code" style="font-size:32px"><span class="kw">int</span> a[<span class="num">6</span>] = {<span class="num">0</span>, <span class="num">2</span>, <span class="num">4</span>, <span class="num">6</span>, <span class="num">8</span>, <span class="num">10</span>};</pre>
+      <div class="box warn" style="margin-top:12px">
+        <span class="label">注意</span>
+        使用<b>可变长度数组</b>定义数组时，<b>不可</b>进行数组元素初始化！
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 全部初始化·大小可置空 -->
+  <section class="slide">
+    <div class="s-title">全部初始化时，数组大小可置空</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:32px"><span class="kw">int</span> a[<span class="num">6</span>] = {<span class="num">0</span>, <span class="num">2</span>, <span class="num">4</span>, <span class="num">6</span>, <span class="num">8</span>, <span class="num">10</span>};
+<span class="kw">int</span> a[]   = {<span class="num">0</span>, <span class="num">2</span>, <span class="num">4</span>, <span class="num">6</span>, <span class="num">8</span>, <span class="num">10</span>};   <span class="cmt">// 两者等价</span></pre>
+      <div class="box tip" style="margin-top:14px">
+        <span class="label">等价展开</span>
+        a[0]=0; a[1]=2; a[2]=4; a[3]=6; a[4]=8; a[5]=10;
+      </div>
+      <div class="box key" style="margin-top:12px">
+        <span class="label">规则</span>
+        当<b>全部元素均初始化</b>时，方括号中的数组大小可以省略，编译器按初值个数自动确定长度。
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 部分初始化 -->
+  <section class="slide">
+    <div class="s-title">部分初始化：未赋值元素自动补 0</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:32px"><span class="kw">int</span> a[<span class="num">6</span>] = {<span class="num">1</span>, <span class="num">2</span>};          <span class="cmt">// 只给前两个赋初值</span>
+<span class="kw">int</span> a[]   = {<span class="num">1</span>, <span class="num">2</span>};          <span class="cmt">// 等价于 a[0]=1; a[1]=2;</span>
+<span class="kw">int</span> count[<span class="num">10</span>] = {<span class="num">0</span>};       <span class="cmt">// 全部 10 个元素均为 0</span></pre>
+      <div class="box key" style="margin-top:14px">
+        <span class="label">规则</span>
+        a[0]=1; a[1]=2; <b>a[2] ~ a[5] 自动为 0</b>。只给前面部分元素赋初值时，其余元素由系统自动赋 0。
+      </div>
+      <div class="box red" style="margin-top:12px">
+        <span class="label">易错</span>
+        当定义语句中<b>不同时给所有元素赋初值</b>时，方括号内<b>不得为空</b>：<code class="inline">int a[];</code> ×（错误）
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 定义与初始化对比 -->
+  <section class="slide">
+    <div class="s-title">定义 vs 初始化：元素初值从哪来？</div>
+    <div class="s-body">
+      <div class="grid c3" style="margin-top:0;gap:16px">
+        <div class="card">
+          <h4><span class="ico">①</span>不初始化</h4>
+          <pre class="code" style="font-size:27px"><span class="kw">int</span> a[<span class="num">6</span>];</pre>
+          <p>所有元素值均为<b>随机值</b>（程序运行前内存单元中遗留的数据）。</p>
+        </div>
+        <div class="card orange">
+          <h4><span class="ico">②</span>全部赋初值</h4>
+          <pre class="code" style="font-size:27px"><span class="kw">int</span> a[<span class="num">6</span>]={<span class="num">1</span>,<span class="num">2</span>,<span class="num">0</span>,<span class="num">4</span>,<span class="num">0</span>,<span class="num">0</span>};</pre>
+          <p>或 <code class="inline">int a[]={1,2,0,4,0,0};</code></p>
+          <p>所有元素都获明确值：a[0]=1,…,a[5]=0。</p>
+        </div>
+        <div class="card green">
+          <h4><span class="ico">③</span>部分赋初值</h4>
+          <pre class="code" style="font-size:27px"><span class="kw">int</span> a[<span class="num">6</span>]={<span class="num">1</span>,<span class="num">2</span>,<span class="num">0</span>,<span class="num">4</span>};</pre>
+          <p>已给的前 4 个获值，<b>未初始化元素由系统补 0</b>：a[4]=0, a[5]=0。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 习题（file3 p7） -->
+  <section class="slide">
+    <div class="s-title">习题 5.2.2</div>
+    <div class="s-body">
+      <div class="s-sub" style="margin-top:0">有定义：int x[10] = {0, 2, 4}; 则数组 x 在内存中所占字节数是：__________</div>
+      <div class="reveal-hint">👉 点击显示答案</div>
+      <div class="reveal"><div class="box red">
+        <span class="label">答案</span>
+        <b>40 字节。</b> 数组长度由方括号中的 <code class="inline">10</code> 决定（与初值个数无关），10 × sizeof(int) = 10 × 4 = <b>40</b>。
+      </div></div>
+      <div class="box tip" style="margin-top:16px">
+        <span class="label">要点</span>
+        内存大小取决于<b>数组长度</b>（方括号内的值），不是初值个数；未赋初值的元素仍占空间并补 0。
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 引用格式 -->
+  <section class="slide">
+    <div class="s-title">数组元素的引用格式</div>
+    <div class="s-body">
+      <div class="s-sub" style="margin-top:0">1　数组元素的引用格式</div>
+      <pre class="code" style="font-size:36px;background:#0d2b45;color:#d8e9f5;border-left:6px solid var(--orange);border-radius:0 12px 12px 0;padding:16px 24px;margin:8px 0;font-family:Consolas,'Courier New',monospace;line-height:1.6;white-space:pre;overflow:hidden;">数组名[下标]</pre>
+      <div class="two" style="margin-top:12px">
+        <div>
+          <div class="s-sub blue">下标可以是</div>
+          <ul style="font-size:29px;line-height:1.8">
+            <li>常量</li>
+            <li>变量</li>
+            <li>表达式</li>
+          </ul>
+        </div>
+        <div>
+          <div class="s-sub blue">例如</div>
+          <pre class="code" style="font-size:28px">a[<span class="num">1</span>+<span class="num">2</span>]
+score[i]
+score[i+<span class="num">3</span>]
+a[a[<span class="num">4</span>]]</pre>
+        </div>
+      </div>
+      <div class="box tip" style="margin-top:12px">
+        <span class="label">说明</span>
+        下标可以是常量、常量表达式、变量、变量表达式，甚至可以是<b>另一个数组元素</b>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 说明(1) 下标从0 -->
+  <section class="slide">
+    <div class="s-title">说明（1）：下标从 0 开始</div>
+    <div class="s-body">
+      <div class="s-sub" style="margin-top:0">数组元素的下标是元素在该数组中的位置，即距 a[0]（数组首位置）的偏移量。</div>
+      <ul style="font-size:31px;line-height:1.9">
+        <li><code class="inline">a[3]</code> 是距离 a[0] 为 <b>3 个</b>存储单元的元素；</li>
+        <li><code class="inline">a[0]</code> 是距离首位置 <b>0 个</b>存储单元的元素（即第一个元素）。</li>
+      </ul>
+      <div class="box key" style="margin-top:14px">
+        <span class="label">核心</span>
+        下标 <b>从 0 开始</b>，第 k 个元素是 <code class="inline">a[k-1]</code>。这是 C 语言数组最容易出错的地方。
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 说明(2)(3) -->
+  <section class="slide">
+    <div class="s-title">说明（2）（3）：引用规则</div>
+    <div class="s-body">
+      <ul style="font-size:30px;line-height:1.95;margin-top:0">
+        <li><b>（2）单个引用：</b>引用数值型数组元素时，只能<b>单个</b>引用，不能一次引用整个数组。<br>
+          <code class="inline" style="color:var(--red)">a = {3,4,5,6,7};</code> ×　　<code class="inline" style="color:var(--red)">a[6] = {3,4,5,6,7};</code> ×</li>
+        <li><b>（3）下标不要越界：</b>下标超出数组范围，会导致<b>错误的程序结果</b>（甚至崩溃）。</li>
+      </ul>
+      <div class="box warn" style="margin-top:10px">
+        <span class="label">引用能做</span>
+        赋值、输入输出、参与表达式运算…… 针对<b>单个元素</b>进行。
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 获取数组元素的值 -->
+  <section class="slide">
+    <div class="s-title">2　获取数组元素的值</div>
+    <div class="s-body">
+      <ul style="font-size:31px;line-height:1.95;margin-top:0">
+        <li>可以在<b>定义数组时</b>对全部或部分变量赋值（即数组的<b>初始化</b>）。</li>
+        <li>可以在<b>语句中</b>为变量赋值或输入——通常借助<b>循环语句</b>批量完成。</li>
+      </ul>
+      <div class="box key" style="margin-top:14px">
+        <span class="label">套路</span>
+        用循环变量 <code class="inline">i</code> 作下标，遍历 <code class="inline">a[0] … a[size-1]</code>，即可批量输入 / 输出 / 处理数组。
+      </div>
+    </div>
+  </section>
+
+  <!-- 21 例5-2 描述 -->
+  <section class="slide">
+    <div class="s-title">【例 5-2】利用循环输入数组元素</div>
+    <div class="s-body">
+      <div class="s-sub" style="margin-top:0">要求</div>
+      <ul style="font-size:30px;line-height:1.85">
+        <li>输入时，以<b>空格</b>分隔数据；</li>
+        <li>输出时，数据间以<b>逗号</b>分隔，末尾没有多余符号。</li>
+      </ul>
+      <div class="box tip" style="margin-top:14px">
+        <span class="label">程序运行示例</span>
+        <div class="out">7 10 27 22 16↙
+7,10,27,22,16</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 22 例5-2 代码 -->
+  <section class="slide">
+    <div class="s-title">【例 5-2】代码</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:30px"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> i, a[<span class="num">5</span>];
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">5</span>; i++)      <span class="cmt">// 用循环输入数组元素</span>
+        scanf(<span class="str">"%d"</span>, &amp;a[i]);
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">4</span>; i++)      <span class="cmt">// 输出前 4 个，带逗号</span>
+        printf(<span class="str">"%d,"</span>, a[i]);
+    printf(<span class="str">"%d"</span>, a[i]);        <span class="cmt">// 单独输出最后一个，不带逗号</span>
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box tip" style="margin-top:14px">
+        <span class="label">关键技术</span>
+        用 <code class="inline">i</code> 作下标遍历数组；前 4 个用 <code class="inline">printf("%d,", a[i])</code> 输出逗号，最后一个单独输出避免末尾多余逗号。
+      </div>
+    </div>
+  </section>
+
+  <!-- 23 循环赋初值 -->
+  <section class="slide">
+    <div class="s-title">用循环直接为数组赋初值</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:30px"><span class="kw">int</span> main(){
+    <span class="kw">int</span> i, a[<span class="num">5</span>];
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">5</span>; i++)
+        a[i] = i;          <span class="cmt">// 用循环对数组直接赋初值</span>
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">5</span>; i++)
+        printf(<span class="str">"%d,"</span>, a[i]);
+    printf(<span class="str">"\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box tip" style="margin-top:14px">
+        <span class="label">运行结果</span>
+        <div class="out">0,1,2,3,4,</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 24 交互循环赋初值 -->
+  <section class="slide">
+    <div class="s-title">用交互的循环结构对数组赋初值</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:29px"><span class="kw">int</span> main(){
+    <span class="kw">int</span> i, a[<span class="num">5</span>];
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">5</span>; i++){
+        printf(<span class="str">"a[%d]="</span>, i);   <span class="cmt">// 提示当前下标</span>
+        scanf(<span class="str">"%d"</span>, &amp;a[i]);
+    }
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">5</span>; i++)
+        printf(<span class="str">"%d,"</span>, a[i]);
+    printf(<span class="str">"\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box tip" style="margin-top:10px">
+        <span class="label">要点</span>
+        先打印 <code class="inline">a[i]=</code> 提示，再读入，交互更友好；仍用循环变量 <code class="inline">i</code> 作下标。
+      </div>
+    </div>
+  </section>
+
+  <!-- 25 下标越界 off-by-one -->
+  <section class="slide">
+    <div class="s-title">下标越界：差一错误 off-by-one error</div>
+    <div class="s-body">
+      <div class="box red" style="margin-top:0">
+        <span class="label">规则</span>
+        有 N 个元素的数组，其元素下标允许取值范围为 <code class="inline">0</code> 到 <code class="inline">N-1</code>，<b>不存在下标为 N 的元素</b>。
+      </div>
+      <pre class="code" style="font-size:28px"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> i, a[<span class="num">10</span>];
+    <span class="kw">for</span>(i=<span class="num">1</span>; i&lt;=<span class="num">10</span>; i++){   <span class="cmt">// 错误：下标 1~10，越界！</span>
+        a[i] = <span class="num">0</span>;
+        printf(<span class="str">"%d "</span>, a[i]);
+    }
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box warn" style="margin-top:10px">
+        <span class="label">错在哪</span>
+        循环用了 <code class="inline">i=1 … i&lt;=10</code>，访问了不存在的 <code class="inline">a[10]</code>，正确的下标应是 <code class="inline">0 … 9</code>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 26 越界分析 -->
+  <section class="slide">
+    <div class="s-title">下标越界为何会“死循环”？</div>
+    <div class="s-body">
+      <div class="box warn" style="margin-top:0">
+        通常编译器按内存<b>递减</b>方式分配内存，使得内存中 <code class="inline">a[9]</code> 之后的 4 个字节正好分配给循环变量 <code class="inline">i</code>。
+      </div>
+      <div class="box red" style="margin-top:14px">
+        <span class="label">连锁反应</span>
+        本来计数器 <code class="inline">i</code> 要把并不存在的 <code class="inline">a[10]</code> 设为 0；实际是把 <code class="inline">i</code> 自身的值设成了 0。循环体内 <code class="inline">i++</code> 又把 i 变回 10，于是<b>陷入死循环</b>！
+      </div>
+      <div class="box key" style="margin-top:12px">
+        <span class="label">教训</span>
+        越界访问不会报错，却会悄悄破坏其他变量——务必保证下标在 <code class="inline">0 … size-1</code> 范围内。
+      </div>
+    </div>
+  </section>
+<!-- 27 例5-3 描述 -->
+  <section class="slide">
+    <div class="s-title">【例 5-3】一维数组的基本操作</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">任务</span>
+        定义长度为 10 的整型一维数组，并完成以下功能：
+      </div>
+      <ul style="font-size:31px;line-height:1.95">
+        <li>⑴ 从键盘输入 10 个整数，分别存放在 10 个数组元素中；</li>
+        <li>⑵ 输出数组中的各元素值；</li>
+        <li>⑶ 按<b>逆序</b>输出数组中的各元素值。</li>
+      </ul>
+      <div class="box key" style="margin-top:12px">
+        <span class="label">思路</span>
+        用循环变量 <code class="inline">i</code> 作下标：先正序读入并输出，再把循环改成 <code class="inline">i=9 … 0</code> 逆序输出。
+      </div>
+    </div>
+  </section>
+
+  <!-- 28 例5-3 代码 -->
+  <section class="slide">
+    <div class="s-title">【例 5-3】代码</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:26px"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> i, a[<span class="num">10</span>];          <span class="cmt">// 定义数组</span>
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++)      <span class="cmt">// 输入数组元素</span>
+        printf(<span class="str">"第%d个数据: "</span>, i+<span class="num">1</span>), scanf(<span class="str">"%d"</span>, &amp;a[i]);
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++)      <span class="cmt">// 顺序输出</span>
+        printf(<span class="str">"%4d"</span>, a[i]);
+    printf(<span class="str">"\n"</span>);
+    <span class="kw">for</span>(i=<span class="num">9</span>; i&gt;=<span class="num">0</span>; i--)      <span class="cmt">// 逆序输出</span>
+        printf(<span class="str">"%4d"</span>, a[i]);
+    printf(<span class="str">"\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box tip" style="margin-top:6px">
+        <span class="label">关键技术</span>
+        逆序只是把循环方向反过来：<code class="inline">for(i=9; i&gt;=0; i--)</code>。数组本身不变，仅改变访问顺序。
+      </div>
+    </div>
+  </section>
+
+  <!-- 29 例5-4 描述 -->
+  <section class="slide">
+    <div class="s-title">【例 5-4】用数组解决例 5-1</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">数据分析</span>
+        设置包含 <b>10 个 double</b> 的数组 <code class="inline">score[10]</code>，存储所有学员成绩，可反复使用并与平均分比较。
+      </div>
+      <pre class="code" style="font-size:32px"><span class="kw">double</span> score[<span class="num">10</span>];   <span class="cmt">// 存储 10 名学员成绩</span></pre>
+      <div class="box key" style="margin-top:12px">
+        <span class="label">整体流程</span>
+        ① 循环读入并累加求平均分；② 再循环把每个成绩与平均分比较，统计高于平均分的人数。
+      </div>
+    </div>
+  </section>
+
+  <!-- 30 例5-4 代码 -->
+  <section class="slide">
+    <div class="s-title">【例 5-4】代码</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:29px"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> i, count=<span class="num">0</span>; <span class="kw">double</span> score[<span class="num">10</span>], sum=<span class="num">0</span>, aver;
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++){ scanf(<span class="str">"%lf"</span>, &amp;score[i]); sum+=score[i]; }
+    aver = sum/<span class="num">10</span>;
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++)          <span class="cmt">// 依次与平均分比较</span>
+        <span class="kw">if</span>(score[i]&gt;aver) count++;
+    printf(<span class="str">"该组平均分为:%.2f\n"</span>, aver);
+    printf(<span class="str">"高于平均分的人数为:%d\n"</span>, count);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box tip" style="margin-top:12px">
+        <span class="label">要点</span>
+        <code class="inline">&amp;score[i]</code> 取得第 i 个元素的地址；用 <code class="inline">count</code> 累计高于平均分的人数。
+      </div>
+    </div>
+  </section>
+
+  <!-- 31 例5-5 描述 -->
+  <section class="slide">
+    <div class="s-title">【例 5-5】求最大值与最小值</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">任务</span>
+        从键盘输入 10 个数，找出其中的<b>最大值</b>和<b>最小值</b>。
+      </div>
+      <div class="two" style="margin-top:14px">
+        <div>
+          <div class="s-sub blue">分析</div>
+          <p style="font-size:29px;line-height:1.8">直接用循环也能找出最大/最小值，但要想<b>再输出所有值</b>就不可能了。所以采用数组把数据保存下来。</p>
+        </div>
+        <div>
+          <div class="s-sub blue">为何用数组</div>
+          <p style="font-size:29px;line-height:1.8">数组让数据“留得住”，既可比大小，也可随时回看、输出全部元素。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 32 例5-5 运行示例 -->
+  <section class="slide">
+    <div class="s-title">【例 5-5】程序运行示例</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">运行示例</span>
+        <div class="out">Enter 10 integers:
+1:35 2:12 3:88 4:7 5:53 6:90 7:21 8:64 9:43 10:5
+Maximum value is 90
+Minimum value is 5</div>
+      </div>
+      <div class="box key" style="margin-top:14px">
+        <span class="label">说明</span>
+        先打印提示逐个读入，再输出最大值与最小值。下面给出具体算法设计与完整代码。
+      </div>
+    </div>
+  </section>
+
+  <!-- 33 例5-5 算法设计 -->
+  <section class="slide">
+    <div class="s-title">【例 5-5】算法设计</div>
+    <div class="s-body">
+      <ol style="font-size:29px;line-height:1.9">
+        <li><b>输入：</b>for 循环输入 10 个整数；</li>
+        <li><b>处理：</b>
+          <ul style="font-size:27px;line-height:1.8">
+            <li>(a) 先令 <code class="inline">max = min = a[0]</code>；</li>
+            <li>(b) 依次用后续的 <code class="inline">a[i]</code> 与 max、min 比较（循环）：
+              <br>若 <code class="inline">max &lt; a[i]</code>，令 <code class="inline">max = a[i]</code>；
+              <br>若 <code class="inline">min &gt; a[i]</code>，令 <code class="inline">min = a[i]</code>；</li>
+          </ul>
+        </li>
+        <li><b>输出：</b>max 和 min。</li>
+      </ol>
+      <div class="box warn" style="margin-top:10px">
+        <span class="label">关键</span>
+        用第 1 个元素初始化 max/min，再从第 2 个开始比较，避免“空集合”比较错误。
+      </div>
+    </div>
+  </section>
+
+  <!-- 34 例5-5 代码 -->
+  <section class="slide">
+    <div class="s-title">【例 5-5】代码</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:28px"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> a[<span class="num">10</span>], i, max, min;
+    printf(<span class="str">"Enter 10 integers:\n"</span>);
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++){ printf(<span class="str">"%d:"</span>, i+<span class="num">1</span>); scanf(<span class="str">"%d"</span>, &amp;a[i]); }
+    max = min = a[<span class="num">0</span>];
+    <span class="kw">for</span>(i=<span class="num">1</span>; i&lt;<span class="num">10</span>; i++){
+        <span class="kw">if</span>(max &lt; a[i]) max = a[i];
+        <span class="kw">if</span>(min &gt; a[i]) min = a[i];
+    }
+    printf(<span class="str">"Maximum value is %d\n"</span>, max);
+    printf(<span class="str">"Minimum value is %d\n"</span>, min);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    </div>
+  </section>
+
+  <!-- 35 例5-5 续·提问 -->
+  <section class="slide">
+    <div class="s-title">【例 5-5】延伸思考</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">问题 1</span>
+        在例 5-5 的基础上，如何<b>求平均值</b>？（提示：再开一个 sum 变量，循环里累加。）
+      </div>
+      <div class="box warn" style="margin-top:12px">
+        <span class="label">问题 2</span>
+        若这是一个“比赛评分”场景，常需<b>去掉一个最高分、去掉一个最低分</b>后再求平均。如何用数组实现？
+      </div>
+      <div class="box key" style="margin-top:12px">
+        <span class="label">思路</span>
+        总分 = 所有元素之和 − max − min，再除以 (n − 2)。数组让你既能找极值，又能回算总和。
+      </div>
+    </div>
+  </section>
+
+  <!-- 36 例5-6 描述 -->
+  <section class="slide">
+    <div class="s-title">【例 5-6】最小值移到首位</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">任务</span>
+        从键盘输入 10 个数，找出其中的<b>最小值</b>，并将其放置在数列的<b>首位</b>（a[0]）。
+      </div>
+      <div class="box key" style="margin-top:14px">
+        <span class="label">核心操作</span>
+        先定位最小值所在位置，再把它与 <code class="inline">a[0]</code> 交换。下面给出两种算法与对应代码。
+      </div>
+    </div>
+  </section>
+
+  <!-- 37 例5-6 追踪表 -->
+  <section class="slide tightL">
+    <div class="s-title">【例 5-6】查找过程追踪（边找边换）</div>
+    <div class="s-body">
+      <table class="tb" style="font-size:21px;text-align:center">
+        <thead><tr><th style="width:14%">步骤</th><th>a[0]</th><th>a[1]</th><th>a[2]</th><th>a[3]</th><th>a[4]</th><th>a[5]</th><th>a[6]</th><th>a[7]</th><th>a[8]</th><th>a[9]</th></tr></thead>
+        <tbody>
+          <tr><td>初始</td><td>81</td><td>78</td><td>77</td><td>88</td><td>38</td><td>67</td><td>73</td><td>75</td><td>85</td><td>59</td></tr>
+          <tr><td>i=1 后</td><td>78</td><td>81</td><td>77</td><td>88</td><td>38</td><td>67</td><td>73</td><td>75</td><td>85</td><td>59</td></tr>
+          <tr><td>i=2 后</td><td>77</td><td>81</td><td>78</td><td>88</td><td>38</td><td>67</td><td>73</td><td>75</td><td>85</td><td>59</td></tr>
+          <tr><td>i=4 后</td><td class="c-green">38</td><td>81</td><td>78</td><td>88</td><td>77</td><td>67</td><td>73</td><td>75</td><td>85</td><td>59</td></tr>
+        </tbody>
+      </table>
+      <div class="box tip" style="margin-top:14px">
+        <span class="label">说明</span>
+        每发现比 a[0] 更小的元素，就立即与 a[0] 交换，保证 a[0] 始终是当前最小值；最终 38 被换到首位。
+      </div>
+    </div>
+  </section>
+
+  <!-- 38 算法设计-1 -->
+  <section class="slide">
+    <div class="s-title">算法设计-1：边寻找，边交换</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">方法 1</span>
+        用 <code class="inline">a[0]</code> 与之后的所有元素依次比较；当某个元素 <code class="inline">a[i] &lt; a[0]</code> 时，直接把 <code class="inline">a[0]</code> 与其交换，保证 <code class="inline">a[0]</code> 存放当前最小值。
+      </div>
+      <ul style="font-size:29px;line-height:1.85">
+        <li>输入 10 个数给 a[0] ~ a[9]；</li>
+        <li><code class="inline">for(i = 1; i &lt;= 9; i++)</code>：若 <code class="inline">a[i] &lt; a[0]</code>，交换 a[0] 与 a[i]；</li>
+        <li>输出 a[0] ~ a[9]。</li>
+      </ul>
+      <div class="box warn" style="margin-top:10px">
+        <span class="label">特点</span>
+        一旦发现更小值就立刻交换，共可能发生多次交换（上表 i=1、i=2、i=4 各交换一次）。
+      </div>
+    </div>
+  </section>
+
+  <!-- 39 方法1 代码 -->
+  <section class="slide">
+    <div class="s-title">方法 1 代码（边找边换）</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:25px"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> i, t, a[<span class="num">10</span>];
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++) scanf(<span class="str">"%d"</span>, &amp;a[i]);
+    <span class="kw">for</span>(i=<span class="num">1</span>; i&lt;<span class="num">10</span>; i++)
+        <span class="kw">if</span>(a[i] &lt; a[<span class="num">0</span>]){ t=a[<span class="num">0</span>]; a[<span class="num">0</span>]=a[i]; a[i]=t; }
+    printf(<span class="str">"处理后：\n"</span>);
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++) printf(<span class="str">"%4d"</span>, a[i]);
+    printf(<span class="str">"\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box tip" style="margin-top:6px">
+        <span class="label">运行示例</span>
+        <div class="out" style="font-size:26px">输入：81 78 77 88 38 67 73 75 85 59
+输出：38  81  78  88  77  67  73  75  85  59</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 40 算法设计-2 -->
+  <section class="slide">
+    <div class="s-title">算法设计-2：先找到，再交换</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">方法 2</span>
+        先记录最小值的位置（下标 t），最后只把最小值与 a[0] 交换一次即可。
+      </div>
+      <ul style="font-size:28px;line-height:1.8">
+        <li><code class="inline">min</code> 存最小值（初值首元素），<code class="inline">t</code> 存其下标（初值 0）；</li>
+        <li>依次比较，<code class="inline">a[i] &lt; min</code> 时更新 min 与 t；</li>
+        <li>结束将 <code class="inline">a[t]</code> 与 <code class="inline">a[0]</code> 交换一次。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 41 方法2 代码 -->
+  <section class="slide">
+    <div class="s-title">方法 2 代码（先找再换）</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:24px"><span class="kw">#include</span> <span class="str">"stdio.h"</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> i, t=<span class="num">0</span>, a[<span class="num">10</span>], min, k;
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++) scanf(<span class="str">"%d"</span>, &amp;a[i]);
+    min = a[<span class="num">0</span>];
+    <span class="kw">for</span>(i=<span class="num">1</span>; i&lt;<span class="num">10</span>; i++)
+        <span class="kw">if</span>(a[i] &lt; min){ min = a[i]; t = i; }
+    <span class="kw">if</span>(t != <span class="num">0</span>){ k=a[t]; a[t]=a[<span class="num">0</span>]; a[<span class="num">0</span>]=k; }
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++) printf(<span class="str">"%4d"</span>, a[i]);
+    printf(<span class="str">"\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box tip" style="margin-top:6px">
+        <span class="label">运行示例</span>
+        <div class="out" style="font-size:26px">输入：81 78 77 88 38 67 73 75 85 59
+输出：38  78  77  88  81  67  73  75  85  59</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 42 方法3 代码 -->
+  <section class="slide">
+    <div class="s-title">方法 3 代码（直接记下标）</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:27px"><span class="kw">#include</span> <span class="str">"stdio.h"</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> i, t, a[<span class="num">10</span>], min, k;
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++) scanf(<span class="str">"%d"</span>, &amp;a[i]);
+    t = <span class="num">0</span>;
+    <span class="kw">for</span>(i=<span class="num">1</span>; i&lt;<span class="num">10</span>; i++)
+        <span class="kw">if</span>(a[i] &lt; a[t]) t = i;
+    <span class="kw">if</span>(t != <span class="num">0</span>){ k=a[t]; a[t]=a[<span class="num">0</span>]; a[<span class="num">0</span>]=k; }
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++) printf(<span class="str">"%4d"</span>, a[i]);
+    printf(<span class="str">"\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <p style="font-size:23px;line-height:1.5;margin-top:8px;color:var(--muted)">与方法 2 区别：直接用 <code class="inline">a[t]</code> 比较，无需单独的 min 变量，t 始终指向当前最小值下标。</p>
+    </div>
+  </section>
+
+  <!-- 43 例5-7 描述 -->
+  <section class="slide">
+    <div class="s-title">【例 5-7】数据循环左移一位</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">背景</span>
+        在例 5-1 中，老师发现输入成绩错位——第 1 个成绩 score[0] 本应是<b>最后一个</b>学生的成绩。于是需要把数据整体<b>循环左移一位</b>。
+      </div>
+      <div class="box key" style="margin-top:14px">
+        <span class="label">目标</span>
+        把 score[1] 移到 score[0]，score[2] 移到 score[1]，……，score[9] 移到 score[8]；最后把最初的 score[0] 放到 score[9]。
+      </div>
+    </div>
+  </section>
+
+  <!-- 44 例5-7 追踪1 -->
+  <section class="slide tightL">
+    <div class="s-title">【例 5-7】初始数据与下标</div>
+    <div class="s-body">
+      <table class="tb" style="font-size:22px;text-align:center">
+        <thead><tr><th style="width:10%">i</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr></thead>
+        <tbody>
+          <tr><td>a[i]</td><td>38</td><td>81</td><td>78</td><td>88</td><td>77</td><td>67</td><td>73</td><td>75</td><td>85</td><td>59</td></tr>
+        </tbody>
+      </table>
+      <div class="box tip" style="margin-top:16px">
+        <span class="label">思路</span>
+        把除 score[0] 外的所有数据向左（向前）移动一位；C 语言中的“移动”通过<b>为目标位置赋值</b>实现：<code class="inline">score[i] = score[i+1];</code>
+      </div>
+      <div class="box warn" style="margin-top:12px">
+        <span class="label">注意</span>
+        移动前，必须先把将被覆盖的 <code class="inline">score[0]</code> 复制一份，否则它会丢失。
+      </div>
+    </div>
+  </section>
+
+  <!-- 45 例5-7 追踪2 -->
+  <section class="slide tightL">
+    <div class="s-title">【例 5-7】移位过程</div>
+    <div class="s-body">
+      <p style="font-size:28px;line-height:1.8">依次执行 <code class="inline">score[i] = score[i+1]</code>（i = 0 … 8），每个元素被后一个覆盖：</p>
+      <table class="tb" style="font-size:21px;text-align:center;margin-top:8px">
+        <thead><tr><th style="width:18%">i</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr></thead>
+        <tbody>
+          <tr><td>初值</td><td>38</td><td>81</td><td>78</td><td>88</td><td>77</td><td>67</td><td>73</td><td>75</td><td>85</td><td>59</td></tr>
+          <tr><td>i=0 后</td><td class="c-blue">81</td><td>81</td><td>78</td><td>88</td><td>77</td><td>67</td><td>73</td><td>75</td><td>85</td><td>59</td></tr>
+          <tr><td>i=1 后</td><td>81</td><td class="c-blue">78</td><td>78</td><td>88</td><td>77</td><td>67</td><td>73</td><td>75</td><td>85</td><td>59</td></tr>
+          <tr><td>……</td><td>81</td><td>78</td><td>88</td><td>77</td><td>67</td><td>73</td><td>75</td><td>85</td><td class="c-blue">59</td><td>59</td></tr>
+        </tbody>
+      </table>
+      <div class="box key" style="margin-top:12px">
+        <span class="label">收尾</span>
+        最后执行 <code class="inline">score[9] = k</code>（k 为事先保存的原 score[0]），完成“循环”左移。
+      </div>
+    </div>
+  </section>
+
+  <!-- 46 例5-7 解释 -->
+  <section class="slide">
+    <div class="s-title">【例 5-7】关键说明</div>
+    <div class="s-body">
+      <ul style="font-size:30px;line-height:1.95">
+        <li>需要将除 score[0] 外的所有数据向左（向前）移动一位：score[1]→score[0]，score[2]→score[1]，……，score[9]→score[8]。</li>
+        <li>C 语言中“移动”通过<b>为目标位置赋值</b>达成：<code class="inline">score[i] = score[i+1];</code></li>
+        <li>移动前，必须先把<b>将被覆盖的 score[0]</b> 复制一份，否则数据丢失。</li>
+      </ul>
+      <div class="box warn" style="margin-top:12px">
+        <span class="label">顺序很重要</span>
+        必须从 <code class="inline">i=0</code> 开始往后覆盖；若从后往前覆盖，前面的数据会被提前破坏。
+      </div>
+    </div>
+  </section>
+
+  <!-- 47 例5-7 代码 -->
+  <section class="slide">
+    <div class="s-title">【例 5-7】代码</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:22px"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> i, score[<span class="num">10</span>], k;
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++) scanf(<span class="str">"%d"</span>, &amp;score[i]);
+    printf(<span class="str">"\n"</span>);
+    k = score[<span class="num">0</span>];            <span class="cmt">// 复制首元素，以免被覆盖</span>
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">9</span>; i++){ score[i] = score[i+<span class="num">1</span>]; } <span class="cmt">// 后一位前移</span>
+    score[i] = k;              <span class="cmt">// 原首元素放到末尾</span>
+    printf(<span class="str">"移动后：\n"</span>);
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++) printf(<span class="str">"%d "</span>, score[i]);
+    printf(<span class="str">"\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box tip" style="margin-top:6px">
+        <span class="label">运行示例</span>
+        <div class="out" style="font-size:26px">输入：81 78 77 88 38 67 73 75 85 59
+移动后：78 77 88 38 67 73 75 85 59 81</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 48 2048 习题 -->
+  <section class="slide">
+    <div class="s-title">习题：2048 游戏模拟（单行左移叠加）</div>
+    <div class="s-body">
+      <div class="two" style="margin-top:0;align-items:start">
+        <div>
+          <p style="font-size:22px;line-height:1.6">模拟《2048》单行左移叠加：输入一行 4 个格子初值（空白为 0），向左移动后所有数字向左靠拢，<b>相同数字相撞时相加</b>，输出叠加后的 4 个数（空格分隔，行末无空格）。</p>
+          <p style="font-size:22px;line-height:1.6;margin-top:8px"><b>输入：</b>4 个整数（空格分隔）。<b>输出：</b>叠加后的 4 个数。</p>
+        </div>
+        <div>
+          <div class="s-sub blue" style="margin-top:0">输入样例</div>
+          <div class="out" style="font-size:24px">2 0 2 2</div>
+          <div class="s-sub blue" style="margin-top:12px">输出样例</div>
+          <div class="out" style="font-size:24px">4 2 0 0</div>
+        </div>
+      </div>
+      <div class="box key" style="margin-top:10px">
+        <span class="label">提示</span>
+        先把非零数字向左“压缩”，再从前往后两两合并相同值，右侧补 0；用数组保存 4 个格子。
+      </div>
+    </div>
+  </section>
+
+  <!-- 49 例5-4 函数版 描述 -->
+  <section class="slide">
+    <div class="s-title">【例 5-4】（函数版）数据分析</div>
+    <div class="s-body">
+      <div class="box tip" style="margin-top:0">
+        <span class="label">任务</span>
+        仍是用数组解决例 5-1，但把“统计高于平均分人数”封装成<b>函数</b>，体会数组在<b>函数间传递</b>的方式。
+      </div>
+      <pre class="code" style="font-size:32px"><span class="kw">double</span> score[<span class="num">10</span>];   <span class="cmt">// 存储 10 名学员成绩</span></pre>
+      <div class="box key" style="margin-top:14px">
+        <span class="label">关键</span>
+        数组作为函数参数时，传递的是<b>首地址</b>，函数内可通过下标访问全部元素，且能修改原数组。下一页给出主函数，下下页给出被调函数。
+      </div>
+    </div>
+  </section>
+
+  <!-- 50 例5-4 函数版 代码（主函数） -->
+  <section class="slide">
+    <div class="s-title">【例 5-4】（函数版）主函数</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:28px"><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">int</span> main(){
+    <span class="kw">int</span> i, count=<span class="num">0</span>;
+    <span class="kw">double</span> score[<span class="num">10</span>], sum=<span class="num">0</span>;
+    <span class="kw">for</span>(i=<span class="num">0</span>; i&lt;<span class="num">10</span>; i++){ scanf(<span class="str">"%lf"</span>, &amp;score[i]); sum+=score[i]; }
+    <span class="cmt">// 调用函数 countNum 计算高于平均分的人数</span>
+    count = countNum(score, <span class="num">10</span>, sum/<span class="num">10</span>);
+    printf(<span class="str">"该组平均分为:% .2f\n"</span>, sum/<span class="num">10</span>);
+    printf(<span class="str">"高于平均分的人数为:%d\n"</span>, count);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      <div class="box tip" style="margin-top:12px">
+        <span class="label">调用方式</span>
+        <code class="inline">countNum(score, 10, sum/10)</code>：数组名 <code class="inline">score</code> 即首地址，10 为长度，sum/10 为平均分。
+      </div>
+    </div>
+  </section>
+
+  <!-- 51 函数 countNum -->
+  <section class="slide">
+    <div class="s-title">被调函数：countNum</div>
+    <div class="s-body">
+      <pre class="code" style="font-size:29px"><span class="kw">int</span> countNum(<span class="kw">double</span> a[], <span class="kw">int</span> n, <span class="kw">double</span> aver)
+{
+    <span class="kw">int</span> i=<span class="num">0</span>, cnt=<span class="num">0</span>;
+    <span class="kw">for</span>(; i&lt;n; i++)
+    {
+        <span class="kw">if</span>(a[i] &gt; aver) cnt++;
+    }
+    <span class="kw">return</span> cnt;
+}</pre>
+      <div class="box key" style="margin-top:14px">
+        <span class="label">要点</span>
+        形参 <code class="inline">double a[]</code> 接收数组首地址，函数内用 <code class="inline">a[i]</code> 访问原数组元素；返回高于平均分的人数 <code class="inline">cnt</code>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 52 结束页 -->
+  <section class="slide end">
+    <div class="end-inner">
+      <h2>谢　谢</h2>
+      <p>下一部分：二维数组与字符数组</p>
+    </div>
+  </section>
+
+  <!-- 导航 UI（无需改动） -->
+  <div class="pageinfo"><b id="cur">1</b> / <span id="total">25</span></div>
+  <div class="nav">
+    <button class="tocbtn" id="btnToc" title="目录（按 O 键）">目录</button>
+    <button id="btnPrev" title="上一页（←）">‹</button>
+    <button id="btnNext" title="下一页（→ / 空格）">›</button>
+  </div>
+  <div class="keyhint" id="keyhint">← → 翻页　·　空格下一页　·　拖动选中文字可直接复制　·　B 黑屏　·　O 目录　·　Esc 关闭</div>
+  <div class="progress" id="progress"></div>
+  <div class="toc" id="toc">
+    <button class="toc-close" id="btnTocClose">关闭 ✕</button>
+    <h3>目录</h3>
+    <div class="toc-bar"></div>
+    <div class="toc-list" id="tocList"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+/* 极简 LaTeX 子集渲染：\(\sqrt{x}\)、x^2、a_{i}、\frac、希腊字母与常见运算符
+   零依赖，断网可用。转成 HTML 片段（.tex 命名空间内）。 */
+function texToHtml(src){
+  var SYM = {
+    le:'<=', leq:'<=', ge:'>=', geq:'>=', ne:'!=', neq:'!=', approx:'~',
+    times:'*', div:'/', cdot:'.', pm:'+-', mp:'-+', infty:'oo', pi:'pi',
+    alpha:'a', beta:'b', gamma:'c', theta:'t', lambda:'l', mu:'m', omega:'w',
+    to:'->', rightarrow:'->', Rightarrow:'=>', bmod:' mod ', '%':'%',
+    sin:'sin', cos:'cos', tan:'tan', log:'log', ln:'ln', max:'max', min:'min', exp:'exp'
+  };
+  var HTML = {
+    le:'&le;', leq:'&le;', ge:'&ge;', geq:'&ge;', ne:'&ne;', neq:'&ne;',
+    approx:'&asymp;', times:'&times;', div:'&divide;', cdot:'&middot;',
+    pm:'&plusmn;', mp:'&#8723;', infty:'&infin;', pi:'&pi;', alpha:'&alpha;',
+    beta:'&beta;', gamma:'&gamma;', theta:'&theta;', lambda:'&lambda;',
+    mu:'&mu;', omega:'&omega;', to:'&rarr;', rightarrow:'&rarr;',
+    Rightarrow:'&rArr;', bmod:'<span class="fn">mod</span>', '%':'%'
+  };
+  var FN = {sin:1,cos:1,tan:1,log:1,ln:1,max:1,min:1,exp:1};
+
+  var s = String(src), i = 0;
+
+  function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function macro(){
+    var m = /^\\([a-zA-Z]+|[\s\S])/.exec(s.slice(i));
+    if(!m){ i++; return ''; }
+    var name = m[1]; i += m[0].length;
+    if(name === 'frac'){
+      var a = arg(), b = arg();
+      return '<span class="fx"><span class="fx-n">'+a+'</span><span class="fx-d">'+b+'</span></span>';
+    }
+    if(name === 'sqrt'){ return '<span class="sq">&radic;<span class="sq-b">'+arg()+'</span></span>'; }
+    if(name === 'text' || name === 'mathrm'){ return '<span class="up">'+esc(rawArg())+'</span>'; }
+    if(HTML[name] !== undefined){
+      return FN[name] ? '<span class="fn">'+name+'</span>' : '<span class="op">'+HTML[name]+'</span>';
+    }
+    if(name === '\\'){ return '<br>'; }
+    return esc(name);
+  }
+
+  function arg(){
+    if(s[i] === '{'){
+      i++;
+      var r = parse();
+      if(s[i] === '}') i++;
+      return r;
+    }
+    if(s[i] === '\\'){
+      var m = /^\\([a-zA-Z]+|[\s\S])/.exec(s.slice(i));
+      var nm = m[1]; i += m[0].length;
+      if(HTML[nm] !== undefined) return FN[nm] ? '<span class="fn">'+nm+'</span>' : '<span class="op">'+HTML[nm]+'</span>';
+      return '<i>'+esc(nm)+'</i>';
+    }
+    var c = s[i]; i++;
+    if(c === undefined) return '';
+    if(/[0-9a-zA-Z]/.test(c)) return '<i>'+c+'</i>';
+    return '<span class="op">'+esc(c)+'</span>';
+  }
+
+  function rawArg(){
+    if(s[i] === '{'){
+      var d = 0, st = i + 1;
+      for(var k = i; k < s.length; k++){
+        if(s[k] === '{') d++;
+        else if(s[k] === '}'){ d--; if(d === 0){ var out = s.slice(st, k); i = k + 1; return out; } }
+      }
+      i = s.length; return s.slice(st);
+    }
+    var c2 = s[i]; i++;
+    return c2 || '';
+  }
+
+  function parse(){
+    var out = '';
+    while(i < s.length){
+      var c = s[i];
+      if(c === '}') break;
+      if(c === '\\'){ out += macro(); continue; }
+      if(c === '^' || c === '_'){
+        i++;
+        var a2 = arg();
+        out += (c === '^') ? '<sup>'+a2+'</sup>' : '<sub>'+a2+'</sub>';
+        continue;
+      }
+      if(c === '{'){ i++; out += parse(); if(s[i] === '}') i++; continue; }
+      if(c === ' '){ i++; out += ' '; continue; }
+      if(c === '-'){ i++; out += '<span class="op">&minus;</span>'; continue; }
+      if(/[0-9.]/.test(c)){
+        var n = /^[0-9.]+/.exec(s.slice(i))[0]; i += n.length;
+        out += '<span class="num">'+n+'</span>'; continue;
+      }
+      if(/[a-zA-Z]/.test(c)){ i++; out += '<i>'+c+'</i>'; continue; }
+      i++;
+      out += '<span class="op">'+esc(c)+'</span>';
+    }
+    return out;
+  }
+
+  return parse();
+}
+
+/* 浏览器端：把文档里 \( ... \) 的文本节点转成 .tex 片段 */
+function texScan(root){
+  if(!root) root = document.body;
+  var it = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+  var nodes = [], n;
+  while((n = it.nextNode())) nodes.push(n);
+  for(var k = 0; k < nodes.length; k++){
+    var node = nodes[k];
+    var t = node.nodeValue;
+    if(t.indexOf('\\(') < 0 || t.indexOf('\\)') < 0) continue;
+    var host = node.parentNode;
+    if(!host || /^(SCRIPT|STYLE|PRE|CODE)$/.test(host.tagName)) continue;
+    var parts = t.split(/(\\\([\s\S]*?\\\))/);
+    if(parts.length < 2) continue;
+    var frag = document.createDocumentFragment();
+    for(var p = 0; p < parts.length; p++){
+      var seg = parts[p];
+      if(!seg) continue;
+      if(seg.slice(0,2) === '\\(' && seg.slice(-2) === '\\)'){
+        var sp = document.createElement('span');
+        sp.className = 'tex';
+        sp.innerHTML = texToHtml(seg.slice(2, -2));
+        frag.appendChild(sp);
+      } else {
+        frag.appendChild(document.createTextNode(seg));
+      }
+    }
+    host.replaceChild(frag, node);
+  }
+}
+
+
+  try { texScan(document.body); } catch(e){ console.warn('texScan', e); }
+})();
+</script>
+
+<script>
+(function(){
+  var stage   = document.getElementById('stage');
+  var slides  = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total   = slides.length;
+  var cur     = 0;
+  var curEl   = document.getElementById('cur');
+  var pageinfo = document.querySelector('.pageinfo');
+  var bar     = document.getElementById('progress');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+  var toc     = document.getElementById('toc');
+  var tocList = document.getElementById('tocList');
+  var keyhint = document.getElementById('keyhint');
+
+  document.getElementById('total').textContent = total;
+
+  // 将每页正文内容包裹进 .fit，便于按高度自动等比缩放，彻底杜绝溢出被裁切
+  slides.forEach(function(slide){
+    var body = slide.querySelector('.s-body');
+    if(!body) return;
+    var fit = document.createElement('div');
+    fit.className = 'fit';
+    while(body.firstChild){ fit.appendChild(body.firstChild); }
+    body.appendChild(fit);
+  });
+
+  // 若正文高度超出可视区，则整体等比缩放至恰好放得下（仅在当前页测量）
+  // 若正文高度超出可视区，则整体等比缩放至恰好放得下（仅在当前页测量）
+  // 补丁（2026-10-27）：缩放时把 .fit 宽度按 1/s 加宽再整体缩回（origin 左上），
+  // 使缩小后仍占满整行宽，避免“内容挤在中间、左右两侧大片留白”。
+  function fitSlide(slide){
+    if(!slide) return;
+    var body = slide.querySelector('.s-body');
+    var fit  = slide.querySelector('.fit');
+    if(!body || !fit) return;
+    fit.style.transform = 'none';
+    fit.style.width = '';
+    var avail = body.clientHeight;
+    var s = 1;
+    for(var i = 0; i < 3; i++){
+      var natural = fit.scrollHeight;
+      if(natural <= avail + 1) break;
+      var s2 = Math.min(1, avail / natural);
+      if(Math.abs(s2 - s) < 0.004) break;
+      s = s2;
+      fit.style.width = (100 / s) + '%';
+    }
+    if(s < 1){
+      fit.style.transform = 'scale(' + s + ')';
+      fit.style.transformOrigin = 'top left';
+    } else {
+      fit.style.width = '';
+    }
+  }
+
+  // 习题揭示：先看题目，点击/→/空格后解析才滑出
+  function hasPendingReveal(){
+    var s = slides[cur];
+    return !!(s && s.querySelector('.reveal:not(.shown)'));
+  }
+  function revealAnswers(){
+    var s = slides[cur];
+    if(!s) return false;
+    var pending = s.querySelectorAll('.reveal:not(.shown)');
+    if(!pending.length) return false;
+    pending.forEach(function(el){ el.classList.add('shown'); });
+    var hint = s.querySelector('.reveal-hint');
+    if(hint) hint.classList.add('gone');
+    fitSlide(s);
+    setTimeout(function(){ fitSlide(s); }, 560);
+    return true;
+  }
+
+  // 目录：按“页面索引 i : 目录文字 t”维护，分组数量任意（CSS 默认 5 列）
+    var tocGroups = [
+    {
+      title: '第5章与引例',
+      items: [
+        { i: 0,  t: '封面' },
+        { i: 1,  t: '例5-1 求平均分' },
+        { i: 2,  t: '求高于平均分人数' },
+        { i: 3,  t: '什么是数组' },
+        { i: 4,  t: '引入数组' },
+        { i: 5,  t: '数组的维数' }
+      ]
+    },
+    {
+      title: '5.2.1 定义',
+      items: [
+        { i: 6,  t: '定义格式' },
+        { i: 7,  t: '内存示意' },
+        { i: 8,  t: '常量表达式' },
+        { i: 9,  t: '定义注意' },
+        { i: 10, t: '可变长数组' },
+        { i: 11, t: '习题 5.2.1' }
+      ]
+    },
+    {
+      title: '5.2.2 初始化',
+      items: [
+        { i: 12, t: '语法格式' },
+        { i: 13, t: '全部初始化' },
+        { i: 14, t: '部分初始化' },
+        { i: 15, t: '定义vs初始化' },
+        { i: 16, t: '习题 5.2.2' }
+      ]
+    },
+    {
+      title: '5.2.3 引用与操作',
+      items: [
+        { i: 17, t: '引用格式' },
+        { i: 18, t: '下标从0' },
+        { i: 19, t: '引用规则' },
+        { i: 20, t: '获取元素值' },
+        { i: 21, t: '例5-2 描述' },
+        { i: 22, t: '例5-2 代码' },
+        { i: 23, t: '循环赋初值' },
+        { i: 24, t: '交互赋初值' },
+        { i: 25, t: '下标越界' },
+        { i: 26, t: '越界分析' }
+      ]
+    },
+    {
+      title: '5.2 示例',
+      items: [
+        { i: 27, t: '例5-3 描述' },
+        { i: 28, t: '例5-3 代码' },
+        { i: 29, t: '例5-4 描述' },
+        { i: 30, t: '例5-4 代码' },
+        { i: 31, t: '例5-5 描述' },
+        { i: 32, t: '例5-5 运行' },
+        { i: 33, t: '例5-5 算法' },
+        { i: 34, t: '例5-5 代码' },
+        { i: 35, t: '例5-5 思考' },
+        { i: 36, t: '例5-6 描述' },
+        { i: 37, t: '例5-6 追踪' },
+        { i: 38, t: '算法1 边找边换' },
+        { i: 39, t: '方法1 代码' },
+        { i: 40, t: '算法2 先找再换' },
+        { i: 41, t: '方法2 代码' },
+        { i: 42, t: '方法3 代码' },
+        { i: 43, t: '例5-7 描述' },
+        { i: 44, t: '例5-7 初始' },
+        { i: 45, t: '例5-7 移位' },
+        { i: 46, t: '例5-7 说明' },
+        { i: 47, t: '例5-7 代码' },
+        { i: 48, t: '2048 习题' },
+        { i: 49, t: '例5-4 函数版' },
+        { i: 50, t: '函数版 主函数' },
+        { i: 51, t: 'countNum 函数' }
+      ]
+    },
+    {
+      title: '收尾',
+      items: [
+        { i: 52, t: '结束页' }
+      ]
+    }
+  ];
+
+  tocGroups.forEach(function(group){
+    var g = document.createElement('div');
+    g.className = 'toc-group';
+    var h = document.createElement('div');
+    h.className = 'toc-group-title';
+    h.textContent = group.title;
+    g.appendChild(h);
+    group.items.forEach(function(item){
+      var a = document.createElement('a');
+      a.textContent = item.t;
+      a.onclick = function(){ go(item.i); closeToc(); };
+      g.appendChild(a);
+    });
+    tocList.appendChild(g);
+  });
+
+  function resize(){
+    var s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+    stage.style.setProperty('--s', s);
+    fitSlide(slides[cur]);
+  }
+  window.addEventListener('resize', resize);
+
+  function go(i){
+    cur = Math.max(0, Math.min(total - 1, i));
+    hideCopyTip();
+    if (window.getSelection) window.getSelection().removeAllRanges();  // 翻页后清掉上一页的选中，避免误复制
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === cur); });
+    resetBits(slides[cur]);   // 进入页面时把位运算面板重置为“空槽”
+    curEl.textContent = cur + 1;
+    // 封面与结束页不显示页码徽标
+    var isCover = slides[cur].classList.contains('cover') || slides[cur].classList.contains('end');
+    pageinfo.style.visibility = isCover ? 'hidden' : 'visible';
+    bar.style.width = ((cur + 1) / total * 100) + '%';
+    btnPrev.disabled = (cur === 0);
+    btnNext.disabled = (cur === total - 1);
+    fitSlide(slides[cur]);
+  }
+
+  btnPrev.onclick = function(){ go(cur - 1); this.blur(); hideHint(); };
+  btnNext.onclick = function(){ if(hasPendingReveal()){ revealAnswers(); this.blur(); hideHint(); return; } go(cur + 1); this.blur(); hideHint(); };
+
+  function openToc(){ toc.classList.add('show'); }
+  function closeToc(){ toc.classList.remove('show'); }
+  document.getElementById('btnToc').onclick = function(){
+    toc.classList.contains('show') ? closeToc() : openToc();
+    this.blur();
+  };
+  document.getElementById('btnTocClose').onclick = function(){
+    closeToc(); this.blur();
+  };
+
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+
+    // 放大镜开启期间屏蔽全部全局快捷键，避免调整滑块（←/↑/PageUp/Backspace）时误翻页
+    if (document.body.classList.contains('loupe-on')) return;
+
+    // Ctrl/Cmd + A：一键选中本页正文（方便整页复制），不翻页
+    if ((e.ctrlKey || e.metaKey) && (k === 'a' || k === 'A')) {
+      e.preventDefault();
+      var bodyEl = slides[cur].querySelector('.s-body');
+      if (bodyEl && window.getSelection) {
+        var rng = document.createRange();
+        rng.selectNodeContents(bodyEl);
+        var sel = window.getSelection();
+        sel.removeAllRanges(); sel.addRange(rng);
+        setTimeout(showCopyTip, 30);
+      }
+      return;
+    }
+
+    if (toc.classList.contains('show')) {
+      if (k === 'Escape' || k === 'o' || k === 'O') { e.preventDefault(); closeToc(); }
+      return;
+    }
+
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' ||
+        k === ' ' || k === 'Enter') {
+      e.preventDefault();
+      if (hasPendingReveal()) { revealAnswers(); hideHint(); return; }
+      go(cur + 1); hideHint();
+    } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' ||
+               k === 'Backspace') {
+      e.preventDefault(); go(cur - 1); hideHint();
+    } else if (k === 'Home') {
+      e.preventDefault(); go(0); hideHint();
+    } else if (k === 'End') {
+      e.preventDefault(); go(total - 1); hideHint();
+    } else if (k === 'o' || k === 'O') {
+      e.preventDefault(); openToc();
+    } else if (k === 'b' || k === 'B' || k === '.') {
+      e.preventDefault();
+      document.body.classList.toggle('blackout');
+    }
+  });
+
+  var wheelLock = false;
+  document.addEventListener('wheel', function(e){
+    // 放大镜开启期间屏蔽滚轮翻页，避免滚轮落在设置面板上时误翻页
+    if (document.body.classList.contains('loupe-on')) return;
+    if (toc.classList.contains('show')) return;
+    if (wheelLock) return;
+    wheelLock = true;
+    setTimeout(function(){ wheelLock = false; }, 420);
+    if (e.deltaY > 0) go(cur + 1); else go(cur - 1);
+    hideHint();
+  }, { passive: true });
+
+  /* ===== 文本选中 / 复制：选中、拖选、长按一律不翻页 ===== */
+  var press = { x: 0, y: 0, t: 0, moved: false, hadSel: false };
+  var copyTip = document.createElement('div');
+  copyTip.id = 'copyTip';
+  copyTip.innerHTML = '<span id="copyTipTx">已选中 0 字</span>'
+    + '<span class="kbd">Ctrl</span><span class="kbd">C</span>'
+    + '<button type="button" id="copyTipBtn">复制</button>';
+  document.body.appendChild(copyTip);
+  var copyTipTx  = document.getElementById('copyTipTx');
+  var copyTipBtn = document.getElementById('copyTipBtn');
+  var copyTimer  = null;
+
+  function selText(){
+    var s = window.getSelection ? window.getSelection() : null;
+    return s ? String(s).replace(/\s+$/, '') : '';
+  }
+  function hideCopyTip(){ clearTimeout(copyTimer); if (copyTip) copyTip.classList.remove('on'); }
+  function showCopyTip(){
+    var t = selText();
+    if (!t || document.body.classList.contains('loupe-on')) { hideCopyTip(); return; }
+    copyTipTx.innerHTML = '已选中 <b>' + t.length + '</b> 字';
+    copyTipBtn.textContent = '复制';
+    copyTip.classList.add('on');
+    clearTimeout(copyTimer);
+    copyTimer = setTimeout(hideCopyTip, 4000);
+  }
+  function copySel(){
+    var t = selText();
+    if (!t) return;
+    var done = function(){
+      copyTipBtn.textContent = '已复制 ✓';
+      clearTimeout(copyTimer);
+      copyTimer = setTimeout(hideCopyTip, 900);
+    };
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      try { if (document.execCommand('copy')) done(); } catch (err) {}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(t).then(done, fallback);
+    } else {
+      fallback();
+    }
+  }
+  copyTipBtn.addEventListener('mousedown', function(e){ e.preventDefault(); e.stopPropagation(); });
+  copyTipBtn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); copySel(); });
+  copyTip.addEventListener('click', function(e){ e.stopPropagation(); });
+
+  document.addEventListener('mousedown', function(e){
+    if (e.button !== 0) return;
+    if (copyTip.contains(e.target)) return;   // 点"复制"按钮：不当作翻页动作
+    press.x = e.clientX; press.y = e.clientY; press.t = Date.now();
+    press.moved = false;
+    press.hadSel = !!selText();          // 按下前已有选中内容 → 这一下是"取消选中"，不是翻页
+    hideCopyTip();
+  });
+  document.addEventListener('mousemove', function(e){
+    if (!press.t || press.moved) return;
+    if (Math.abs(e.clientX - press.x) > 6 || Math.abs(e.clientY - press.y) > 6) press.moved = true;
+  });
+  document.addEventListener('mouseup', function(e){
+    if (e.button !== 0) return;
+    if (!copyTip.contains(e.target)) setTimeout(showCopyTip, 30);
+  });
+
+  /* ===== 位运算逐位揭示：点一下出结果的下一位，出全后再点一次重置 ===== */
+  function revealStep(w){
+    var result = w.querySelector('.bits-result');
+    if (!result) return;
+    var cells = result.querySelectorAll('.bit-cell');
+    var shown = result.querySelectorAll('.bit-cell.show').length;
+    if (shown < cells.length) cells[shown].classList.add('show');   // 从左到右揭一位
+    else cells.forEach(function(c){ c.classList.remove('show'); }); // 揭全了再点 = 重置
+  }
+  function resetBits(slideEl){
+    if (!slideEl) return;
+    slideEl.querySelectorAll('.bits-wrap .bits-result .bit-cell').forEach(function(c){
+      c.classList.remove('show');
+    });
+  }
+
+  document.addEventListener('click', function(e){
+    // 放大镜开启期间屏蔽点击翻页，避免点击设置面板（滑块）时误翻页
+    if (document.body.classList.contains('loupe-on')) return;
+    if (e.button !== 0) return;                       // 右键 / 中键不翻页，保留原生菜单（右键可复制）
+    // 可折叠区块：点击标题开合，不触发翻页
+    var hd = e.target.closest('.coll-hd');
+    if (hd) {
+      var box = hd.parentElement;
+      box.classList.toggle('open');
+      fitSlide(slides[cur]);
+      setTimeout(function(){ fitSlide(slides[cur]); }, 520);
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    if (toc.classList.contains('show')) return;
+    if (e.target.closest('.nav')) return;
+    if (e.target.closest('.toc')) return;
+    if (e.target.closest('a')) return;
+    if (e.target.closest('#copyTip')) return;
+    if (e.target.closest('.code, .out, pre, table, .reveal, .coll')) return;
+    if (selText()) { hideHint(); return; }             // ① 当前有选中文字：只算选中，不翻页
+    if (press.hadSel) { press.hadSel = false; return; } // ② 按下前有选中：这一下只取消选中，不翻页
+    if (press.moved) return;                           // ③ 拖动过（拖选）：不翻页
+    if (press.t && Date.now() - press.t > 600) { press.t = 0; return; } // ④ 长按（触屏取词）：不翻页
+    var bw = e.target.closest('.bits-wrap');
+    if (bw) { revealStep(bw); hideHint(); return; }    // ⑤ 位运算面板：点一下出下一位，不翻页
+    if (hasPendingReveal()) { revealAnswers(); hideHint(); return; }
+    if (e.clientX > window.innerWidth / 2) go(cur + 1);
+    else go(cur - 1);
+    hideHint();
+  });
+
+  var tx = 0, ty = 0;
+  document.addEventListener('touchstart', function(e){
+    if (copyTip.contains(e.target)) return;   // 落在复制提示条上：保持提示条可见
+    tx = e.changedTouches[0].clientX;
+    ty = e.changedTouches[0].clientY;
+    press.x = tx; press.y = ty; press.t = Date.now();
+    press.moved = false;
+    press.hadSel = !!selText();
+    hideCopyTip();
+  }, { passive: true });
+  document.addEventListener('touchmove', function(e){
+    if (!press.t || press.moved) return;
+    if (Math.abs(e.changedTouches[0].clientX - press.x) > 6 ||
+        Math.abs(e.changedTouches[0].clientY - press.y) > 6) press.moved = true;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    if (copyTip.contains(e.target)) return;
+    var dx = e.changedTouches[0].clientX - tx;
+    var dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+      if (hasPendingReveal()) { revealAnswers(); hideHint(); return; }
+      go(dx < 0 ? cur + 1 : cur - 1);
+      hideHint();
+      return;
+    }
+    setTimeout(showCopyTip, 60);   // 长按取词 / 点选后给出"复制"提示
+  }, { passive: true });
+
+  var hintTimer = null;
+  function hideHint(){
+    if (keyhint.classList.contains('hide')) return;
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 500);
+  }
+  hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 6000);
+
+  resize();
+  go(0);
+})();
+</script>
+<script>
+
+(function(){
+  var stage=document.getElementById('stage'); if(!stage) return;
+  var L=320, Z=2.5, on=false, lens=null, tip=null, panel=null, clone=null, btn=null;
+  var last=[innerWidth/2, innerHeight/2];
+  var lock=false;
+
+  btn=document.createElement('button'); btn.id='btnLoupe';
+  btn.title='放大镜：移动鼠标查看细节，Esc 退出'; btn.textContent='\uD83D\uDD0D';
+  document.body.appendChild(btn);
+
+  tip=document.createElement('div'); tip.id='loupeTip';
+  tip.textContent='\uD83D\uDD0D 放大镜：鼠标移到哪儿，就以那儿为中心放大 · 单击锁定位置 · 滚轮调倍数 · Esc 退出';
+  document.body.appendChild(tip);
+
+  lens=document.createElement('div'); lens.id='loupe'; document.body.appendChild(lens);
+
+  panel=document.createElement('div'); panel.id='loupePanel';
+  panel.innerHTML='<div class="ttl">\uD83D\uDD0D 放大镜设置</div>'
+    +'<div class="row"><label>缩放</label><input id="lpZoom" type="range" min="1.5" max="8" step="0.1" value="2.5"><span class="val" id="lpZoomV">2.5×</span></div>'
+    +'<div class="row"><label>尺寸</label><input id="lpSize" type="range" min="180" max="520" step="10" value="320"><span class="val" id="lpSizeV">320</span></div>';
+  document.body.appendChild(panel);
+  var lpZoom=panel.querySelector('#lpZoom'), lpZoomV=panel.querySelector('#lpZoomV');
+  var lpSize=panel.querySelector('#lpSize'), lpSizeV=panel.querySelector('#lpSizeV');
+
+  function build(){
+    clone=stage.cloneNode(true); clone.removeAttribute('id');
+    var ids=clone.querySelectorAll('[id]'); for(var i=0;i<ids.length;i++) ids[i].removeAttribute('id');
+    clone.style.transform=''; clone.style.width=''; clone.style.height='';
+    clone.style.position='absolute'; clone.classList.add('lens-stage');
+    lens.innerHTML=''; lens.appendChild(clone);
+  }
+  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+  function refreshTip(){
+    tip.textContent = lock
+      ? '🔒 已锁定该位置 · 单击任意处解除锁定 · Esc 退出'
+      : '🔍 放大镜：鼠标移到哪儿，就以那儿为中心放大 · 单击锁定位置 · 滚轮调倍数 · Esc 退出';
+  }
+
+  // 把光标处的幻灯片内容放到透镜中心，并按 Z 放大（translate+scale，origin 0 0，避免 border 偏移）
+  function update(cx,cy){
+    var r=stage.getBoundingClientRect();
+    var iw=stage.offsetWidth, ih=stage.offsetHeight;
+    // 克隆体去掉了 #stage 的 id，需显式给定固有尺寸，否则 .slide(inset:0) 会塌成 0
+    clone.style.width=iw+'px'; clone.style.height=ih+'px';
+    var s=parseFloat(getComputedStyle(stage).getPropertyValue('--s'))||1;
+    var fx=clamp((cx-r.left)/r.width,0,1), fy=clamp((cy-r.top)/r.height,0,1);
+    var k=s*Z;
+    var px=fx*iw, py=fy*ih;
+    var q=position(cx,cy), ox=q[0], oy=q[1];
+    clone.style.transformOrigin='0 0';
+    // 点 (px,py) 经 scale(k) 后到 (k*px,k*py)，再 translate 让它落在透镜内的光标位置
+    clone.style.transform='translate('+(ox - k*px)+'px,'+(oy - k*py)+'px) scale('+k+')';
+  }
+  // 透镜定位：以鼠标所在点为中心；靠近视口边缘时贴边，光标处内容仍精确对齐
+  function position(cx,cy){
+    var lx=clamp(cx-L/2, 8, Math.max(8, innerWidth-L-8));
+    var ly=clamp(cy-L/2, 8, Math.max(8, innerHeight-L-8));
+    lens.style.left=lx+'px'; lens.style.top=ly+'px';
+    return [cx-lx, cy-ly];   // 光标在透镜内的局部坐标（未贴边时就是 L/2）
+  }
+  // 常驻记录鼠标位置：进入放大镜时直接从当前光标处开始，不再从屏幕中心跳一下
+  var pt=[innerWidth/2, innerHeight/2];
+  document.addEventListener('mousemove',function(e){ pt=[e.clientX,e.clientY]; },true);
+  // 起点：就在光标处；但若是刚点了放大镜按钮（光标压在按钮上），改用页面中心，免得一开就盖住按钮
+  function startPt(){
+    var b=btn.getBoundingClientRect();
+    if(pt[0]>b.left-60 && pt[0]<b.right+60 && pt[1]>b.top-60 && pt[1]<b.bottom+60) return [innerWidth/2, innerHeight/2];
+    return [pt[0],pt[1]];
+  }
+  function enter(){
+    if(on) return; on=true; lock=false; btn.classList.add('on'); document.body.classList.add('loupe-on');
+    build(); lens.style.display='block'; tip.style.display='block'; panel.style.display='block';
+    lens.classList.remove('lock'); refreshTip();
+    last=startPt(); update(last[0],last[1]);
+    document.addEventListener('mousemove',onMove,true); addI();
+  }
+  function exit(){
+    if(!on) return; on=false; lock=false; btn.classList.remove('on'); document.body.classList.remove('loupe-on');
+    lens.classList.remove('lock');
+    lens.style.display='none'; tip.style.display='none'; panel.style.display='none';
+    document.removeEventListener('mousemove',onMove,true); remI();
+    lens.innerHTML=''; clone=null;
+  }
+  function onMove(e){ if(!on) return; last=[e.clientX,e.clientY]; if(lock) return; update(e.clientX,e.clientY); }
+  function setZ(z){ Z=clamp(z,1.5,8); lpZoom.value=Z; lpZoomV.textContent=Z.toFixed(1)+'×'; update(last[0],last[1]); }
+  function setL(l){ L=clamp(l,180,520); lpSize.value=L; lpSizeV.textContent=L; lens.style.width=L+'px'; lens.style.height=L+'px'; update(last[0],last[1]); }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); on?exit():enter(); });
+  lpZoom.addEventListener('input',function(){ setZ(parseFloat(this.value)); });
+  lpSize.addEventListener('input',function(){ setL(parseFloat(this.value)); });
+
+  function inCtrl(e){ return e.target===btn||btn.contains(e.target)||panel.contains(e.target); }
+  var inter=[
+    ['wheel',function(e){ if(inCtrl(e)) return; if(!on) return; e.stopImmediatePropagation(); e.preventDefault(); setZ(Z+(e.deltaY<0?0.3:-0.3)); },true],
+    ['click',function(e){ if(inCtrl(e)) return; if(!on) return; e.stopImmediatePropagation(); e.preventDefault();
+      lock=!lock; lens.classList.toggle('lock',lock); if(!lock) update(last[0],last[1]); refreshTip(); },true],
+    ['contextmenu',function(e){ if(inCtrl(e)) return; if(!on) return; e.stopImmediatePropagation(); e.preventDefault(); },true],
+    ['keydown',function(e){ if(!on) return; if(e.key==='Escape'){ exit(); return; } if(inCtrl(e)){ e.stopPropagation(); return; } e.stopImmediatePropagation(); e.preventDefault(); },true],
+    ['touchstart',function(e){ if(inCtrl(e)) return; if(!on) return; e.stopImmediatePropagation(); e.preventDefault(); },true],
+    ['touchend',function(e){ if(inCtrl(e)) return; if(!on) return; e.stopImmediatePropagation(); e.preventDefault(); },true]
+  ];
+  function addI(){ for(var i=0;i<inter.length;i++) document.addEventListener(inter[i][0],inter[i][1],true); }
+  function remI(){ for(var i=0;i<inter.length;i++) document.removeEventListener(inter[i][0],inter[i][1],true); }
+  window.__loupe={enter:enter,exit:exit,setZ:setZ,setL:setL,getZ:function(){return Z;},getL:function(){return L;},isOn:function(){return on;},isLock:function(){return lock;}};
+})();
+
+  </script>
+  </body>
+</html>
