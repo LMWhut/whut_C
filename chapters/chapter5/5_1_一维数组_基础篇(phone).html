@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 5 章（一）一维数组（基础篇） · 手机版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Source Han Sans SC",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.55;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 页脚 ================= */
+  .footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:24px 16px 40px;
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 移动端布局微调 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+
+
+/* ===== 窄屏约束：禁止内容把 layout viewport 撑宽 ===== */
+html,body{max-width:100%;overflow-x:hidden;}
+.topbar{width:100vw;}
+.content,.section{overflow-x:hidden;}
+.table-wrap table.tb{min-width:300px;width:100%;table-layout:fixed;}
+.table-wrap table.tb th,.table-wrap table.tb td{white-space:normal;word-break:break-word;padding:8px 10px;}
+code.inline{word-break:break-word;}
+
+/* 定义的三个要素：内存结构图改为窄屏横排五格 */
+.ar.mem5{zoom:1!important;}
+.ar-row.mem5-row{grid-template-columns:repeat(5,1fr)!important;gap:4px!important;width:100%;}
+.ar.mem5 .ac{height:56px;font-size:24px;}
+.ar.mem5 .ar-tag{font-size:17px;}
+
+/* ===== 分步演示：沿用投影版，压缩到窄屏 ===== */
+.demo{
+  background:#fff;border:1px solid var(--line);border-top:6px solid var(--purple);
+  border-radius:0 0 14px 14px;padding:10px 12px;margin:10px 0;
+  box-shadow:0 3px 10px rgba(18,79,131,.08);
+}
+.demo-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.demo-title{font-size:17px;font-weight:700;color:var(--purple);}
+.demo-prog{font-size:13px;color:#5a7a9a;font-family:Consolas,monospace;white-space:nowrap;}
+.demo-note{margin-top:8px;font-size:15px;line-height:1.5;color:#41627c;min-height:56px;}
+.demo-ctl{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.demo-btn{
+  font-size:15px;line-height:1.2;padding:10px 16px;min-height:44px;
+  border-radius:9px;border:none;background:#1a6fb5;color:#fff;
+  cursor:pointer;font-family:inherit;font-weight:600;
+}
+.demo-btn.ghost{background:#e8f1f9;color:#124f83;border:2px solid #b9d3e8;}
+.ar{display:flex;flex-direction:column;gap:5px;zoom:.45;transform-origin:top left;}
+.ar-row{display:grid;gap:5px;justify-content:start;}
+.ac{
+  height:76px;border:3px solid #b9d3e8;border-radius:9px;background:#f4f9fd;
+  display:flex;align-items:center;justify-content:center;
+  font-family:Consolas,"Courier New",monospace;font-size:34px;font-weight:700;color:#124f83;
+}
+.ac.on{background:#e8f2fb;border-color:#4a97d4;}
+.ac.cur{border-color:#e8720c;background:#fdf1e4;color:#a9601a;box-shadow:0 0 0 4px rgba(232,114,12,.16);}
+.ac.new{border-color:#2e8b57;background:#eaf7ef;color:#1e6b42;box-shadow:0 0 0 4px rgba(46,139,87,.16);}
+.ac.oob{border-color:#c0392b;background:#fdeceb;color:#c0392b;border-style:dashed;}
+.ac.invalid{border-color:#9aa7b3;background:#f4f6f8;color:#7b8794;border-style:dashed;box-shadow:none;}
+.ac.q{color:#b9d3e8;}
+.ar-tag{font-family:Consolas,"Courier New",monospace;font-size:24px;color:#4d6376;text-align:center;white-space:nowrap;}
+.ar-tag.cur{color:#a9601a;font-weight:700;}
+.ar-tag.invalid{color:#7b8794;font-weight:700;}
+.ar-off{font-family:Consolas,"Courier New",monospace;font-size:26px;color:#8aa2b6;text-align:center;white-space:nowrap;}
+.ar-mark{display:grid;gap:5px;align-items:center;justify-items:center;font-size:24px;font-weight:700;}
+.ar-mark > div{display:flex;align-items:center;justify-content:center;gap:4px;height:30px;white-space:nowrap;}
+
+/* ===== 随堂问答：原生折叠 ===== */
+.qa{
+  border:1px solid var(--line);border-radius:10px;background:#fff;
+  margin:10px 0;padding:10px 14px;
+}
+.qa summary{
+  font-size:15px;font-weight:700;color:var(--purple);
+  cursor:pointer;list-style:none;
+}
+.qa summary::-webkit-details-marker{display:none;}
+.qa summary::before{content:"▸ ";color:var(--orange);}
+.qa[open] summary::before{content:"▾ ";}
+.qa[open] summary{margin-bottom:8px;}
+.qa p{font-size:15px;margin:6px 0;}
+.qa-link{
+  display:inline-block;margin-top:8px;font-size:14px;
+  color:var(--purple);font-weight:600;
+}
+
+/* 比较法排序：窄屏下代码不裁切，数组格横向排布 */
+.section#sec45 .ar,.section#sec46 .ar{zoom:.75!important;}
+.section#sec45 .demo-title,.section#sec46 .demo-title{font-size:15px;}
+.section#sec46 pre.code{font-size:15px!important;line-height:1.25!important;white-space:pre-wrap!important;}
+.section#sec51 .ar,.section#sec52 .ar{zoom:.75!important;}
+.section#sec52 .mk{font-size:14px;}
+.section#sec52 .ar-mark > div{height:34px;flex-wrap:wrap;gap:1px;white-space:normal;}
+.section#sec52 .demo-title{font-size:14px;}
+.section#sec46 .round-bar,.section#sec48 .round-bar{font-size:15px;color:#a9601a;font-weight:700;text-align:center;margin-top:4px;}
+.section#sec46 .demo-title,.section#sec48 .demo-title{font-size:14px;}
+.section#sec47 .ar,.section#sec48 .ar{zoom:.75!important;}
+
+/* 比较/冒泡演示的下标标记与比较高亮 */
+.mk{display:inline-block;padding:1px 5px;border-radius:6px;font-size:22px;line-height:1.2;white-space:nowrap;}
+/* ar 区域整体 zoom:.45，标记字号需放大抵消缩放，确保窄屏可读 */
+.ar-mark .mk{font-size:26px;padding:1px 4px;}
+.mk.mid{color:#a9601a;background:#fdf1e4;border:1px solid #f0cba6;}
+.mk.high{color:#1e6b42;background:#eaf7ef;border:1px solid #b6dcc6;}
+.mk.j1{color:#124f83;background:#e8f2fb;border:1px solid #b9d3e8;}
+.mk.low{color:#124f83;background:#e8f2fb;border:1px solid #b9d3e8;}
+.mk.del{color:#c0392b;background:#fdecea;border:1px solid #f0b7b2;}
+.ac.cmp{box-shadow:0 0 0 3px rgba(74,151,212,.22);}
+
+/* 应用篇重新编号：原 sec45/46/47/48/51/52 对应 sec15/16/17/18/21/22 */
+.section#sec15 .ar,.section#sec16 .ar{zoom:.75!important;}
+.section#sec16 pre.code{font-size:15px!important;line-height:1.25!important;white-space:pre-wrap!important;}
+.section#sec21 .ar,.section#sec22 .ar{zoom:.75!important;}
+.section#sec21 .mk{font-size:14px;}
+.section#sec21 .ar-mark > div{height:34px;flex-wrap:wrap;gap:1px;white-space:normal;}
+.section#sec21 .demo-title{font-size:14px;}
+.section#sec16 .round-bar,.section#sec18 .round-bar{font-size:15px;color:#a9601a;font-weight:700;text-align:center;margin-top:4px;}
+.section#sec16 .demo-title,.section#sec18 .demo-title{font-size:14px;}
+.section#sec17 .ar,.section#sec18 .ar{zoom:.75!important;}
+</style>
+</head>
+<body><div class="topbar"><h1>第 5 章（一）一维数组（基础篇）</h1><button class="btn-toc" id="btnToc">目录 <span class="arrow">▼</span></button></div><div class="toc-panel" id="tocPanel"><div class="toc-group open"><div class="toc-group-title">开场 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec1">基础篇路线</a><a href="#sec2">前序回顾</a></div></div><div class="toc-group"><div class="toc-group-title">一、数组基础 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec3">引例：求高于平均分的人数</a><a href="#sec4">定义的三个要素</a><a href="#sec5">数组长度的两种写法</a><a href="#sec6">连续的存储单元</a><a href="#sec7">下标从 0 到 n-1</a><a href="#sec8">四种初始化写法</a><a href="#sec9">越界不报错</a><a href="#sec10">检测（一）</a></div></div><div class="toc-group"><div class="toc-group-title">二、遍历与统计 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec11">遍历的固定骨架</a><a href="#sec12">求和与最值</a><a href="#sec13">应用：把最高分换到第一位</a><a href="#sec14">逆序：首尾交换</a><a href="#sec15">遍历统计：四步模板</a><a href="#sec16">检测（二）</a></div></div><div class="toc-group"><div class="toc-group-title">三、插入与删除 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec17">有序表的维护</a><a href="#sec18">插入：从后往前</a><a href="#sec19">插入过程演示</a><a href="#sec20">插入的代码</a><a href="#sec21">插入的三种边界</a><a href="#sec22">插入函数完整版</a><a href="#sec23">删除：从前往后</a><a href="#sec24">删除过程演示</a><a href="#sec25">按位置删除元素的函数</a><a href="#sec26">删除函数完整版</a><a href="#sec27">按值删除元素的函数</a><a href="#sec28">按值删除：n-- 逐个删</a><a href="#sec29">案例：PTA 无函数版</a><a href="#sec30">案例：PTA 有函数版</a><a href="#sec31">检测（三）</a></div></div><div class="toc-group"><div class="toc-group-title">收尾 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec32">基础篇小结</a></div></div></div>
+<div class="content"><div class="section" id="sec1"><style>
+.section#sec1 .steps-vertical{display:flex;flex-direction:column;gap:12px;height:auto!important;justify-content:flex-start!important;}
+.section#sec1 .step{position:relative;padding:12px 14px 12px 62px;background:#fff;border:1px solid var(--line);border-left:6px solid var(--purple);border-radius:12px;min-height:66px;}
+.section#sec1 .step.orange{border-left-color:#e8720c;}
+.section#sec1 .step.green{border-left-color:#2e8b57;}
+.section#sec1 .step-head{display:block;}
+.section#sec1 .step-head .n{position:absolute;left:12px;top:14px;width:38px;height:38px;border-radius:50%;background:var(--purple);color:#fff;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.section#sec1 .step.orange .n{background:#e8720c;}
+.section#sec1 .step.green .n{background:#2e8b57;}
+.section#sec1 .step-head .n::before{content:"0";}
+.section#sec1 .step-head .t{display:block;font-size:16px;font-weight:700;color:#124f83;line-height:1.35;}
+.section#sec1 .step .d{display:block;margin-top:5px;font-size:14px;line-height:1.5;color:#4d6376;}
+</style><div class="section-title">基础篇的知识主线</div><div class="steps-vertical" style="height:94%;justify-content:center;gap:34px;">
+<div class="step">
+<div class="step-head"><span class="n">1</span><span class="t">定义与存储：长度、初始化、下标</span></div>
+<div class="d">解决“五十个成绩没有地方放”的问题，并确定下标的合法范围。</div>
+</div>
+<div class="step orange">
+<div class="step-head"><span class="n">2</span><span class="t">遍历与处理：累加、最值、计数与逆序</span></div>
+<div class="d">用同一个循环骨架，完成求和、平均、最值、计数与逆序。</div>
+</div>
+<div class="step green">
+<div class="step-head"><span class="n">3</span><span class="t">插入与删除：元素移动与长度维护</span></div>
+<div class="d">插入从右往左腾位，删除从左往右补位；长度 n 始终同步更新。</div>
+</div>
+</div></div><div class="section" id="sec2"><div class="section-title">已经学过的知识点</div><ul class="feat">
+<li><span class="k">变量与类型</span><span class="v">一个名字存放一个值，如 <code class="inline">int x = 72;</code></span></li>
+<li><span class="k">输入与输出</span><span class="v"><code class="inline">scanf</code> 取地址读入，<code class="inline">printf</code> 按格式输出</span></li>
+<li><span class="k">分支与循环</span><span class="v"><code class="inline">if</code> 决定走哪条路，<code class="inline">for</code> 决定重复多少次</span></li>
+<li><span class="k">函数</span><span class="v">可以定义、可以调用、可以带回一个返回值</span></li>
+</ul><div class="box warn tight" style="margin-top:16px;">
+<span class="label">共同的局限</span>
+        这些工具都在处理<strong>单个</strong>数据。五十个成绩就要五十个变量，而变量名无法用循环生成：循环变量 <code class="inline">i</code> 取不到 <code class="inline">s1</code>、<code class="inline">s2</code> 这样的名字。
+      </div><div class="box tight">
+<span class="label">由此提出的要求</span>
+        需要一种“<strong>一次声明、批量存放、按下标统一处理</strong>”的构造。这就是数组。
+      </div></div><div class="section" id="sec3"><div class="section-title">引例：求高于平均分的人数</div><style> .slide[data-t="引例：求高于平均分的人数"] pre.code{line-height:1.28;} </style><div style="display:flex;flex-direction:column;justify-content:space-between;">
+<div style="display:flex;flex-direction:column;justify-content:space-around;flex:1;">
+<div class="s-sub">任务与步骤</div>
+<div class="box tight" style="margin-top:0;">
+<span class="label">读入</span>五十名学生的成绩（0 至 100 的整数）
+            </div>
+<div class="box tight">
+<span class="label">先求</span>五十个成绩的<strong>平均分</strong>
+</div>
+<div class="box tight">
+<span class="label">再数</span><strong>高于平均分</strong>的人数，并输出
+            </div>
+</div>
+<div class="box key tight" style="margin-top:14px;">
+<span class="label">这是本章的出发点</span>
+            程序的规模一旦超过“几个数”，就必须有<strong>批量存放、统一处理</strong>的手段。
+          </div>
+</div><div>
+<div class="s-sub blue">先求平均分并不难</div>
+<pre class="code"><span class="kw">int</span> s, sum = <span class="num">0</span>, i;
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">50</span>; i++) {
+    scanf(<span class="str">"%d"</span>, &amp;s);
+    sum += s;  <span class="cmt">/* 只累加，不保存 */</span>
+}
+<span class="kw">double</span> avg = (<span class="kw">double</span>)sum / <span class="num">50</span>;</pre>
+<div class="box red tight">
+<span class="label">接着就卡住了</span>
+            要数“高于平均分的人数”，必须把这五十个数<strong>再逐个比较一遍</strong>。但它们读入后没有保存，只剩一个 sum；变量名是标识符，也无法在循环中按下标生成。
+          </div>
+</div></div><div class="section" id="sec4"><div class="section-title">定义的三个要素</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">5</span>];</pre><div class="grid c3" style="margin-top:6px;">
+<div class="card">
+<h4><span class="ico">1</span>元素类型</h4>
+<p><code class="inline">int</code>：每个元素都是一个 int，占用同样大小的空间。</p>
+</div>
+<div class="card orange">
+<h4><span class="ico">2</span>数组名</h4>
+<p><code class="inline">a</code>：代表这一整组。它是整组数据的名字，不是某一个元素的名字。</p>
+</div>
+<div class="card green">
+<h4><span class="ico">3</span>元素个数</h4>
+<p><code class="inline">5</code>：方括号内的常量表达式，表示可以放五个元素。</p>
+</div>
+</div><div class="ar mem5" style="margin-top:16px;align-items:center;">
+<div class="ar-row mem5-row">
+<div class="ac on">—</div><div class="ac on">—</div><div class="ac on">—</div><div class="ac on">—</div><div class="ac on">—</div>
+</div>
+<div class="ar-row mem5-row">
+<div class="ar-tag">a[0]</div><div class="ar-tag">a[1]</div><div class="ar-tag">a[2]</div><div class="ar-tag">a[3]</div><div class="ar-tag">a[4]</div>
+</div>
+</div><div class="box tight" style="margin-top:10px;">
+<span class="label">术语</span>
+        方括号中的数字称为<strong>下标</strong>（或索引）。数组元素指其中某一格，数组长度指格子的总数。
+      </div></div><div class="section" id="sec5"><div class="section-title">数组长度：编译期常量与运行期变量</div><style> .slide[data-t="数组长度的两种写法"] pre.code{line-height:1.16;padding-top:5px;padding-bottom:5px;font-size:29px;} .slide[data-t="数组长度的两种写法"] .box{line-height:1.2;padding-top:4px;padding-bottom:4px;margin-top:4px;} .slide[data-t="数组长度的两种写法"] .two{grid-template-columns:0.8fr 1.2fr;} .slide[data-t="数组长度的两种写法"] .s-sub{margin-bottom:4px;} </style><div>
+<div class="s-sub">写法一：编译期确定长度</div>
+<pre class="code" style="margin-top:0;"><span class="kw">#define</span> N <span class="num">5</span>
+<span class="kw">int</span> a[N];          <span class="cmt">/* 符号常量 */</span>
+<span class="kw">int</span> b[<span class="num">5</span>];          <span class="cmt">/* 字面常量 */</span></pre>
+<div class="box tight" style="margin-top:8px;">
+<code class="inline">#define</code> 与字面常量给出编译期常量，数组长度在编译期确定；<code class="inline">int a[5]</code> 是本讲最常用的写法。
+          </div>
+</div><div>
+<div class="s-sub blue">写法二：运行期确定长度（VLA）</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> n;
+<span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">int</span> a[n];        <span class="cmt">/* 长度运行时确定 */</span>
+
+<span class="kw">const int</span> M = <span class="num">5</span>;
+<span class="kw">int</span> d[M];        <span class="cmt">/* 也是 VLA */</span></pre>
+<div class="box tip tight" style="margin-top:8px;">
+<span class="label">① 变长数组的用法</span>
+            先读入 <code class="inline">n</code>，再写 <code class="inline">int a[n]</code>：长度在运行时确定，这就是变长数组（VLA）。C99 起纳入标准，gcc 可用；C11 起列为可选特性，MSVC 不支持。<strong>PTA 中很常见</strong>，要能读懂。
+            <div style="margin-top:4px;"><span class="label">② const 的用法</span>
+            C 中 <code class="inline">const int M = 5;</code> 声明的是只读变量，不是常量表达式。块作用域中的 <code class="inline">int d[M]</code> 同样属于 VLA，长度也在运行时确定。</div>
+</div>
+</div><div class="box key tight" style="margin-top:10px;">
+<span class="label">工程口径</span>
+        在线评测按题目要求使用 VLA 没有问题；工程上更常用<strong>固定容量 + 实际个数</strong>：先声明足够大的数组（如 <code class="inline">int a[100];</code>），另设变量 <code class="inline">n</code> 记录当前实际元素个数。VLA 长度由输入决定，输入过大可能栈溢出。本讲统一以 <code class="inline">int a[5] = {72,78,85,90,96}, n = 5;</code> 为例，容量与个数分离。
+      </div></div><div class="section" id="sec6"><div class="section-title">连续的存储单元</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">5</span>] = {<span class="num">72</span>, <span class="num">78</span>, <span class="num">85</span>, <span class="num">90</span>, <span class="num">96</span>}, n = <span class="num">5</span>;</pre><div class="ar" style="margin-top:6px;">
+<div class="ar-row" style="grid-template-columns:repeat(5,120px);gap:10px;justify-content:center;">
+<div class="cellwrap"><div class="ca">0x61FE30</div><div class="ac">72</div><div class="cn">a[0]</div></div>
+<div class="cellwrap"><div class="ca">0x61FE34</div><div class="ac">78</div><div class="cn">a[1]</div></div>
+<div class="cellwrap"><div class="ca">0x61FE38</div><div class="ac">85</div><div class="cn">a[2]</div></div>
+<div class="cellwrap"><div class="ca">0x61FE3C</div><div class="ac">90</div><div class="cn">a[3]</div></div>
+<div class="cellwrap"><div class="ca">0x61FE40</div><div class="ac">96</div><div class="cn">a[4]</div></div>
+</div>
+</div><div>
+<div class="box tight" style="margin-top:0;">
+<span class="label">连续</span>
+            五个元素占据一段<strong>不间断</strong>的内存，中间没有空隙。
+          </div>
+<div class="box tight">
+<span class="label">等距</span>
+            每个 <code class="inline">int</code> 通常占 4 字节，相邻地址相差 4。地址由系统运行时分配，具体数值每次可能不同，此处取某次实际运行的结果。
+          </div>
+</div><div>
+<div class="box tip tight" style="margin-top:0;">
+<span class="label">可计算</span>
+            已知首地址与下标即可算出：<code class="inline">地址(a[i]) = 首地址 + i × 4</code>
+</div>
+<div class="box key tight">
+<span class="label">伏笔</span>
+            地址可计算，因此<strong>函数只拿到首地址就能访问整组元素</strong>，第四部分将以此为核心。
+          </div>
+</div><div class="box tip tight" style="margin-top:12px;">
+<span class="label">与独立变量的根本差别</span>
+<code class="inline">i</code> 是变量，可随循环变化；写 <code class="inline">s25</code> 时名字写死。因此五十个成绩能用同一段循环逐个处理。访问 <code class="inline">a[0]</code> 与 <code class="inline">a[4]</code> 也只需一次地址计算，耗时相同。
+      </div></div><div class="section" id="sec7"><div class="section-title">下标从 0 到 n−1</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">5</span>] = {<span class="num">72</span>, <span class="num">78</span>, <span class="num">85</span>, <span class="num">90</span>, <span class="num">96</span>}, n = <span class="num">5</span>;</pre><div>
+<div class="box tight" style="margin-top:0;">
+<span class="label">第一个</span>是 <code class="inline">a[0]</code>
+</div>
+<div class="box tight">
+<span class="label">最后一个</span>是 <code class="inline">a[4]</code>
+</div>
+<div class="box warn tight">
+<span class="label">合法范围</span>
+<code class="inline">0 ≤ i ≤ n−1</code><br/>共 n 个下标。
+          </div>
+</div><div>
+<div class="table-wrap"><table class="tb" style="margin-top:0;">
+<thead><tr><th>写法</th><th>所指</th><th>是否合法</th></tr></thead>
+<tbody>
+<tr><td><code class="inline">a[0]</code></td><td>第 1 个元素</td><td class="c-green">合法</td></tr>
+<tr><td><code class="inline">a[4]</code></td><td>第 5 个元素</td><td class="c-green">合法</td></tr>
+<tr><td><code class="inline">a[5]</code></td><td>第 6 个元素，不存在</td><td class="c-red">越界</td></tr>
+<tr><td><code class="inline">a[−1]</code></td><td>第 0 个元素之前</td><td class="c-red">越界</td></tr>
+</tbody>
+</table></div>
+</div><div class="box key tight" style="margin-top:14px;">
+<span class="label">关键认识</span>
+<code class="inline">a[i]</code> 是一个<strong>普通变量</strong>：可以读、可以写、可以参与运算、可以作函数实参，用法与 <code class="inline">int</code> 变量完全相同。区别只在于它的名字由“数组名 + 下标”构成。
+      </div></div><div class="section" id="sec8"><div class="section-title">初始化的四种写法</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">5</span>] = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>};   <span class="cmt">/* ① 全部给出 */</span>
+<span class="kw">int</span> b[<span class="num">5</span>] = {<span class="num">1</span>, <span class="num">2</span>};            <span class="cmt">/* ② 其余补 0 */</span>
+<span class="kw">int</span> c[]  = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>};         <span class="cmt">/* ③ 长度为 3 */</span>
+<span class="kw">int</span> d[<span class="num">5</span>];                     <span class="cmt">/* ④ 元素值不确定 */</span></pre><div class="table-wrap"><table class="tb" style="margin-top:8px;">
+<tbody>
+<tr><th>①</th><td>五个元素依次赋值为 1 至 5。</td></tr>
+<tr><th>②</th><td>前两个为 1、2，<strong>其余三个自动补 0</strong>。</td></tr>
+<tr><th>③</th><td>方括号内留空，长度<strong>由初值个数决定</strong>，此处为 3。</td></tr>
+<tr><th>④</th><td>未给出初始化列表，局部变量的元素内容<strong>不确定</strong>，可能是任意值。</td></tr>
+</tbody>
+</table></div><div class="box warn tight" style="margin-top:10px;">
+<span class="label">补零的适用条件</span>
+        只有在<strong>给出了初始化列表</strong>时，未写出的元素才补 0。写法 ④ 没有列表，因此不补。
+      </div><div class="box red tight">
+<span class="label">初值个数不可超过长度</span>
+<code class="inline">int a[3] = {1, 2, 3, 4};</code> 编译即报错。这是数组少数能在编译期被发现的问题，其余多数要等到运行才暴露。
+      </div></div><div class="section" id="sec9"><div class="section-title">越界不报错</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">5</span>] = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>};
+a[<span class="num">5</span>] = <span class="num">10</span>;        <span class="cmt">/* 编译通过，运行时不作检查 */</span></pre><div class="grid c3" style="margin-top:8px;">
+<div class="card orange">
+<h4>读到无关数据</h4>
+<p>取得的字节与本数组无关，输出的数值异常，但程序继续运行。</p>
+</div>
+<div class="card purple">
+<h4>覆盖相邻变量</h4>
+<p>写入落到别的变量所占的单元上，该变量被悄悄改掉，错误出现在别处。</p>
+</div>
+<div class="card red">
+<h4>触发段错误</h4>
+<p>偏移过大，访问到无权访问的区域，操作系统终止该进程。</p>
+</div>
+</div><div class="box red tight" style="margin-top:14px;">
+<span class="label">性质</span>
+        越界访问属于<strong>未定义行为</strong>。标准不对其后果作任何规定，同一段代码在不同环境下可能表现不同，因此<strong>不能依赖任何观察到的结果</strong>。
+      </div><div class="box tight">
+<span class="label">防范</span>
+        编译器不作检查，只能由程序员保证。关键是把循环上界与最大合法下标对齐：从 0 开始遍历时，写 <code class="inline">i &lt; n</code> 或 <code class="inline">i &lt;= n − 1</code> 都可以；写成 <code class="inline">i &lt;= n</code> 才会访问 <code class="inline">a[n]</code> 而越界。
+      </div></div><div class="section" id="sec10"><div class="section-title">随堂检测（一）</div><div class="grid c3" style="min-height:330px;">
+<div class="card">
+<h4><span class="ico">1</span>未写出的元素</h4>
+<p><code class="inline">int a[5] = {1, 2};</code>　<br/><code class="inline">a[3]</code> 的值是多少？</p>
+<a class="qa-link" href="#qa-qa1">看解析</a>
+</div>
+<div class="card green">
+<h4><span class="ico">2</span>长度由谁决定</h4>
+<p><code class="inline">int a[] = {1, 2, 3, 4};</code>　数组长度是多少？</p>
+<a class="qa-link" href="#qa-qa2">看解析</a>
+</div>
+<div class="card red">
+<h4><span class="ico">3</span>循环上界</h4>
+<p>数组 <code class="inline">int a[5]</code> 有 5 个元素。<br/>循环上界写作 <code class="inline">i &lt;= 5</code>，错在哪里？</p>
+<a class="qa-link" href="#qa-qa3">看解析</a>
+</div>
+</div><div class="box tip tight" style="margin-top:18px;">
+<span class="label">三题的共同点</span>
+        第 1、2 题考<strong>初始化规则</strong>，第 3 题考<strong>下标范围</strong>。这两处是数组定义阶段出错最集中的地方，且编译器都不作提示。
+      </div><details class="qa" id="qa-qa1"><summary>第 1 题　a[3] 的值</summary>
+
+<p>结果为 <b>0</b>。给出了初始化列表，未写出的 <code class="inline">a[2]</code> 至 <code class="inline">a[4]</code> 全部自动补 0。</p>
+<p style="margin-top:10px;">对比：<code class="inline">int a[5];</code> 没有初始化列表，<code class="inline">a[3]</code> 的值不确定。两者的差别仅在于大括号的有无。</p>
+</details><details class="qa" id="qa-qa2"><summary>第 2 题　数组长度</summary>
+
+<p>长度为 <b>4</b>。方括号留空时，编译器按初值个数确定长度。</p>
+<p style="margin-top:10px;">这种写法的好处是增删初值不必同步修改长度；代价是长度<strong>不再显式可见</strong>，阅读代码时需要数一遍。</p>
+</details><details class="qa" id="qa-qa3"><summary>第 3 题　循环上界</summary>
+
+<p>数组定义为 <code class="inline">int a[5] = {1,2,3,4,5}</code>，合法下标只有 0 至 4。<code class="inline">i &lt;= 5</code> 使循环在 <code class="inline">i = 5</code> 时仍执行一次，写入 <code class="inline">a[5]</code>，越过了数组末尾。</p>
+<pre class="code">for (i = <span class="num">0</span>; i &lt; <span class="num">5</span>; i++)      <span class="cmt">/* 访问 a[0] 至 a[4] */</span>
+for (i = <span class="num">0</span>; i &lt;= <span class="num">4</span>; i++)     <span class="cmt">/* 等价写法 */</span></pre>
+<p style="margin-top:8px;">该错误编译时无提示，运行时通常也不报错，因此必须靠书写时核对。</p>
+</details></div><div class="section" id="sec11"><div class="section-title">遍历的固定骨架</div><style> .slide[data-t="遍历的固定骨架"] .card p{font-size:28px;line-height:1.4;} .slide[data-t="遍历的固定骨架"] .card{padding:12px 18px;} .slide[data-t="遍历的固定骨架"] .box.tight{margin-top:8px;line-height:1.35;} </style><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">10</span>] = {<span class="num">72</span>, <span class="num">78</span>, <span class="num">85</span>, <span class="num">90</span>, <span class="num">96</span>}, n = <span class="num">5</span>;   <span class="cmt">/* 容量 10，实际 5 个 */</span>
+<span class="kw">int</span> i;
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="cmt">/* 处理当前元素 a[i] */</span>;</pre><div class="grid c3" style="margin-top:6px;">
+<div class="card">
+<h4><span class="ico">1</span>起点</h4>
+<p><code class="inline">i = 0</code>　从第一个元素开始，不是从 1 开始。</p>
+</div>
+<div class="card orange">
+<h4><span class="ico">2</span>条件</h4>
+<p><code class="inline">i &lt; n</code>　与 <code class="inline">i &lt;= n−1</code> 等价；写成 <code class="inline">i &lt;= n</code> 会越界访问 a[n]。</p>
+</div>
+<div class="card green">
+<h4><span class="ico">3</span>步长</h4>
+<p><code class="inline">i++</code>　逐个前进，不跳格。</p>
+</div>
+</div><div class="box key tight" style="margin-top:14px;">
+<span class="label">本讲的其余内容都建立在这一段之上</span>
+        求和的差别只在循环体多一句 <code class="inline">sum += a[i];</code>；求最值的差别只在循环体多一个 <code class="inline">if</code>。<strong>骨架不变，变的是循环体。</strong>
+</div><div class="box warn tight">
+<span class="label">长度 n 与容量分开</span>
+        上面 <code class="inline">a[10]</code> 是容量，<code class="inline">n = 5</code> 是当前实际存放的个数，循环只遍历前 5 格。若由输入读入，读入时同步计数。
+      </div></div><div class="section" id="sec12"><div class="section-title">求和与最值：同一骨架</div><div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">5</span>] = {<span class="num">72</span>, <span class="num">78</span>, <span class="num">85</span>, <span class="num">90</span>, <span class="num">96</span>}, n = <span class="num">5</span>;
+<span class="kw">int</span> i, sum = <span class="num">0</span>;
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++) {
+    sum += a[i];
+}
+<span class="kw">double</span> avg = (<span class="kw">double</span>)sum / n;</pre>
+<div class="out" style="margin-top:8px;">总和 = 421
+平均 = 84.20</div>
+<pre class="code" style="margin-top:8px;"><span class="kw">int</span> max = a[<span class="num">0</span>];
+<span class="kw">for</span> (i = <span class="num">1</span>; i &lt; n; i++)
+    <span class="kw">if</span> (a[i] &gt; max) max = a[i];</pre>
+</div><div class="demo" data-demo="max" data-hint="点击“下一步”，观察 max 何时被替换。" style="margin-top:0;">
+<div class="demo-head">
+<div class="demo-title">最值：逐格比较</div>
+<div class="demo-prog"></div>
+</div>
+<div class="ar" style="transform-origin:top left">
+<div class="ar-mark" style="grid-template-columns:repeat(5,86px);justify-content:start;gap:5px">
+<div></div><div></div><div></div><div></div><div></div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(5,86px);justify-content:start;gap:5px">
+<div class="ac">72</div><div class="ac">78</div><div class="ac">85</div><div class="ac">90</div><div class="ac">96</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(5,86px);justify-content:start;gap:5px">
+<div class="ar-tag">a[0]</div><div class="ar-tag">a[1]</div><div class="ar-tag">a[2]</div><div class="ar-tag">a[3]</div><div class="ar-tag">a[4]</div>
+</div>
+</div>
+<div class="demo-note" style="min-height:76px;"></div>
+<div class="demo-ctl">
+<button class="demo-btn" data-act="next">下一步</button>
+<button class="demo-btn ghost" data-act="reset">重置</button>
+</div>
+</div><div class="box warn tight" style="margin-top:0;">
+<span class="label">两处初值</span>
+          sum 从 0 起累加；max 必须取真实元素 <code class="inline">a[0]</code>，若写成 0，全为负数时结果恒为 0。
+        </div><div class="box tip tight" style="margin-top:0;">
+<span class="label">两处细节</span>
+<code class="inline">sum / n</code> 是整数除法，求平均须先转 <code class="inline">double</code>；max 从 <code class="inline">i = 1</code> 起比，省一次自比。
+        </div></div><div class="section" id="sec13"><div class="section-title">应用：把最高分换到第一位</div><style> .slide[data-t="应用：把最高分换到第一位"] pre.code{line-height:1.12;padding-top:3px;padding-bottom:3px;} .slide[data-t="应用：把最高分换到第一位"] .box{padding-top:5px;padding-bottom:5px;margin-top:5px;} </style><div class="box key tight" style="margin-top:0;">
+<span class="label">应用场景</span>
+        给定 <code class="inline">a[5]={72,78,85,90,96}</code>，要求把<strong>最高分换到第一位</strong>：先找出最高分的<strong>位置</strong> <code class="inline">pos</code>，再交换 <code class="inline">a[0]</code> 与 <code class="inline">a[pos]</code>。这个场景需要的是位置，不是分数——其实有了下标，也就可以得到值。
+      </div><div>
+<div class="s-sub">写法一：值与位置一起记</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> i, max = a[<span class="num">0</span>], pos = <span class="num">0</span>;
+<span class="kw">for</span> (i = <span class="num">1</span>; i &lt; n; i++)
+    <span class="kw">if</span> (a[i] &gt; max) {
+        max = a[i];
+        pos = i;
+    }
+<span class="cmt">/* 交换 a[0] 与 a[pos] */</span></pre>
+<div class="box tight" style="margin-top:8px;">
+            两个量必须<strong>同时更新</strong>：只改 <code class="inline">max</code> 不改 <code class="inline">pos</code>，交换时用的是旧位次。
+          </div>
+</div><div>
+<div class="s-sub blue">写法二：只记位置</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> i, pos = <span class="num">0</span>;
+<span class="kw">for</span> (i = <span class="num">1</span>; i &lt; n; i++)
+    <span class="kw">if</span> (a[i] &gt; a[pos]) pos = i;
+
+<span class="cmt">/* 交换 a[0] 与 a[pos] */</span></pre>
+<div class="box tight" style="margin-top:8px;">
+            本场景只要 <code class="inline">pos</code> 就能完成交换，不必另存分数。
+          </div>
+</div></div><div class="section" id="sec14"><div class="section-title">逆序：首尾交换</div><div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">5</span>] = {<span class="num">72</span>, <span class="num">78</span>, <span class="num">85</span>, <span class="num">90</span>, <span class="num">96</span>}, n = <span class="num">5</span>, i;
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n / <span class="num">2</span>; i++) {
+    <span class="kw">int</span> t = a[i];
+    a[i] = a[n - <span class="num">1</span> - i];
+    a[n - <span class="num">1</span> - i] = t;
+}</pre>
+<div class="box warn tight" style="margin-top:8px;">
+<span class="label">循环到 n/2 为止</span>
+            写成 <code class="inline">i &lt; n</code> 会把每对元素交换两次，数组恢复原状。中间元素无需处理。
+          </div>
+</div><div>
+<div class="ar" style="margin-top:0;">
+<div class="ar-row" style="grid-template-columns:repeat(5,86px);gap:6px;justify-content:center;">
+<div class="cellwrap"><div class="ac new">96</div><div class="cn">a[0]</div></div>
+<div class="cellwrap"><div class="ac cur">90</div><div class="cn">a[1]</div></div>
+<div class="cellwrap"><div class="ac on">85</div><div class="cn">a[2]</div></div>
+<div class="cellwrap"><div class="ac cur">78</div><div class="cn">a[3]</div></div>
+<div class="cellwrap"><div class="ac new">72</div><div class="cn">a[4]</div></div>
+</div>
+</div>
+<div class="box tight" style="margin-top:10px;">
+<span class="label">配对关系</span>
+<code class="inline">a[0]</code> 与 <code class="inline">a[4]</code>、<code class="inline">a[1]</code> 与 <code class="inline">a[3]</code> 互换；<code class="inline">a[2]</code> 原地不动。
+          </div>
+</div><div class="box key tight" style="margin-top:10px;">
+<span class="label">与下一部分的联系</span>
+        逆序是“在数组内部调整元素位置”的最简形式。插入与删除做的是同一件事，只是移动方向不同、移动的是一段而不是一对。
+      </div></div><div class="section" id="sec15"><div class="section-title">遍历统计：四步模板</div><div class="table-wrap"><table class="tb sep2" style="margin-top:0;">
+<thead><tr><th>步骤</th><th>要做的事</th><th>常见错误</th></tr></thead>
+<tbody>
+<tr><th>1 定长度</th><td>明确 n 是元素个数，不是容量</td><td>把 <code class="inline">MAX</code> 当作 n 使用，遍历到未使用的格子</td></tr>
+<tr><th>2 建循环</th><td><code class="inline">for (i = 0; i &lt; n; i++)</code></td><td>写成 <code class="inline">i &lt;= n</code>，越界一格</td></tr>
+<tr><th>3 设初值</th><td>累加用 0，最值用 <code class="inline">a[0]</code>，计数用 0</td><td>最值初始化为 0，全负数时结果错误</td></tr>
+<tr><th>4 写循环体</th><td>只做一件事：读 <code class="inline">a[i]</code>，更新一个结果</td><td>在循环体内修改 <code class="inline">i</code>，破坏遍历</td></tr>
+</tbody>
+</table></div><div class="box key tight" style="margin-top:14px;">
+<span class="label">适用范围与顺序</span>
+        这四步针对<strong>遍历统计</strong>：逐个读 <code class="inline">a[i]</code>，汇总出一个结果（和、最值、个数、位置）；插入与删除要<strong>搬动元素</strong>，用的是另一套思路。顺序不可颠倒：先定范围，再写循环，最后填循环体；其中初值由任务决定，最需理解。
+      </div><div class="box tip tight">
+<span class="label">检查方法</span>
+        用最小的例子手算一遍：n = 1 时循环执行几次？n = 0 时会不会访问 <code class="inline">a[0]</code>？这两个边界能暴露绝大多数错误。
+      </div></div><div class="section" id="sec16"><div class="section-title">随堂检测（二）</div><div class="grid c3" style="min-height:330px;">
+<div class="card orange">
+<h4><span class="ico">1</span>初值的选择</h4>
+<p>求最大值时写 <code class="inline">int max = 0;</code>，什么情况下结果错误？</p>
+<a class="qa-link" href="#qa-qb1">看解析</a>
+</div>
+<div class="card purple">
+<h4><span class="ico">2</span>逆序的上界</h4>
+<p>逆序循环写成 <code class="inline">i &lt; n</code>，结果是什么？</p>
+<a class="qa-link" href="#qa-qb2">看解析</a>
+</div>
+<div class="card red">
+<h4><span class="ico">3</span>漏掉的初值</h4>
+<p>设 <code class="inline">int a[5]</code>；写 <code class="inline">int sum;</code> 后直接 <code class="inline">sum += a[i];</code>，会得到什么？</p>
+<a class="qa-link" href="#qa-qb3">看解析</a>
+</div>
+</div><div class="box tip tight" style="margin-top:18px;">
+<span class="label">三题指向同一件事</span>
+        第 1、3 题考<strong>初值</strong>，第 2 题考<strong>边界</strong>。遍历类算法的错误几乎全部落在这两处，而不在循环体本身。
+      </div><details class="qa" id="qa-qb1"><summary>第 1 题　max 的初值</summary>
+
+<p>当<strong>全部元素都为负数</strong>时结果错误。例如 <code class="inline">{-5, -3, -8}</code>，真实最大值为 −3，而 <code class="inline">max = 0</code> 从未被替换，输出 0。</p>
+<p style="margin-top:10px;">正确写法是 <code class="inline">max = a[0]</code>，并让循环从 <code class="inline">i = 1</code> 开始，因为第一个元素已经作为初值参与过比较，不必再比一次。</p>
+</details><details class="qa" id="qa-qb2"><summary>第 2 题　逆序循环的上界</summary>
+
+<p>数组<strong>恢复原状</strong>。以 <code class="inline">{1, 2, 3, 4}</code> 为例：</p>
+<pre class="code">i=0: 交换 a[0] a[3] → 4 2 3 1
+i=1: 交换 a[1] a[2] → 4 3 2 1
+i=2: 交换 a[2] a[1] → 4 2 3 1
+i=3: 交换 a[3] a[0] → 1 2 3 4   <span class="cmt">/* 回到原样 */</span></pre>
+<p style="margin-top:8px;">每一对元素被交换两次，等于没有交换。上界应为 <code class="inline">n / 2</code>。</p>
+</details><details class="qa" id="qa-qb3"><summary>第 3 题　未初始化的累加器</summary>
+
+<p>结果<strong>不确定</strong>。<code class="inline">sum</code> 的初始内容是内存中的残留值，累加等于在一个任意数上继续加。</p>
+<p style="margin-top:10px;">这类错误的特点是：可能偶尔得到看似正确的答案，换一台机器或换一次编译就变了。<strong>“有时对”是未初始化变量最典型的症状。</strong></p>
+</details></div><div class="section" id="sec17"><div class="section-title">有序表的维护</div><div>
+<div class="s-sub">场景</div>
+<div class="box tight" style="margin-top:0;">
+            成绩表按分数<strong>升序</strong>存放。此时录入一名新学生，数据必须<b>插入</b>到中间某处；<b>删除</b>一条记录，后面的数据必须移位。
+          </div>
+<div class="box tight">
+<span class="label">难点与前提</span>
+            数组长度在声明时固定，元素之间没有空隙。<strong>插入的前提是还有空余位置</strong>（容量大于当前个数 n）：先把后面的元素逐个右移腾出位置，再写入新值。删除则是抹掉一个位置后左移补齐。
+          </div>
+</div><div>
+<div class="table-wrap"><table class="tb" style="margin-top:0;">
+<thead><tr><th>操作</th><th>元素如何移动</th><th>起点</th></tr></thead>
+<tbody>
+<tr><th>插入</th><td>从插入点起<strong>整体右移</strong>一位</td><td>末尾</td></tr>
+<tr><th>删除</th><td>从删除点起<strong>整体左移</strong>一位</td><td>删除点</td></tr>
+</tbody>
+</table></div>
+<div class="box warn tight" style="margin-top:10px;">
+<span class="label">方向为什么相反</span>
+            右移必须<strong>自后向前</strong>，否则先写会覆盖尚未移动的数据；左移必须<strong>自前向后</strong>，理由相同。
+          </div>
+</div><div class="box key tight" style="margin-top:12px;">
+<span class="label">本部分的两个函数</span>
+<code class="inline">insert</code> 与 <code class="inline">removeAt</code>。<strong>两者都不改变数组的容量</strong>，只改变其中有效元素的个数 n，并把这个新长度返回给调用方。
+      </div></div><div class="section" id="sec18"><div class="section-title">插入：从后往前移动</div><style> .slide[data-t="插入：从后往前"] .box{padding-top:6px;padding-bottom:6px;margin-top:6px;} </style><div class="ar" style="margin-top:0;">
+<div class="ar-row" style="grid-template-columns:repeat(6,104px);gap:8px;justify-content:center;">
+<div class="cellwrap"><div class="ac">10</div><div class="cn">a[0]</div></div>
+<div class="cellwrap"><div class="ac">20</div><div class="cn">a[1]</div></div>
+<div class="cellwrap"><div class="ac cur">30</div><div class="cn">a[2]</div></div>
+<div class="cellwrap"><div class="ac">40</div><div class="cn">a[3]</div></div>
+<div class="cellwrap"><div class="ac q">—</div><div class="cn">a[4]</div></div>
+<div class="cellwrap"><div class="ac q">—</div><div class="cn">a[5]</div></div>
+</div>
+</div><div class="box tight" style="margin-top:8px;text-align:center;">
+        在 <b>10 20 30 40</b> 中插入 <b>25</b>，插入后仍须有序：目标为 <b>10 20 25 30 40</b>
+</div><div class="steps" style="margin-top:10px;">
+<div class="step">
+<div class="t">① 定位</div>
+<div class="d">从末位开始，找到第一个不大于 25 的元素</div>
+</div>
+<div class="step orange">
+<div class="t">② 后移</div>
+<div class="d">比 25 大的元素，依次向后移动一位</div>
+</div>
+<div class="step green">
+<div class="t">③ 写入</div>
+<div class="d">把 25 放到空出的位置，长度加 1</div>
+</div>
+</div><div class="box tip tight" style="margin-top:10px;">
+<span class="label">若从前往后找插入点</span>
+        从 <code class="inline">a[0]</code> 向右扫，第一个大于 25 的元素（30，<code class="inline">a[2]</code>）即插入点，结果相同。<strong>但定位后仍须从后往前移动</strong>：查找方向可选，移动方向不能改。
+      </div><div class="box warn tight" style="margin-top:12px;">
+<span class="label">顺序不可颠倒</span>
+        必须先移动、后写入。若先执行 <code class="inline">a[2] = 25</code>，原来的 30 已被覆盖，再也无法后移。
+      </div><div class="box tip tight">
+<span class="label">代价</span>
+        最坏情况（插在首位）需要移动全部 n 个元素，与 n 成正比。这是数组“连续存放”换来的代价。
+      </div></div><div class="section" id="sec19"><div class="section-title">插入过程演示</div><div class="demo" data-demo="insert" data-hint="点击“下一步”，共六步。注意 40 与 30 的后移顺序。" style="margin-top:0;min-height:452px;justify-content:space-between;">
+<div class="demo-head">
+<div class="demo-title">将 25 插入有序表</div>
+<div class="demo-prog"></div>
+</div>
+<div class="ar" style="transform-origin:top left">
+<div class="ar-mark" style="grid-template-columns:repeat(6,110px);justify-content:start;gap:5px">
+<div></div><div></div><div></div><div></div><div></div><div></div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(6,110px);justify-content:start;gap:5px">
+<div class="ac" style="height:104px;font-size:44px;">10</div><div class="ac" style="height:104px;font-size:44px;">20</div><div class="ac" style="height:104px;font-size:44px;">30</div><div class="ac" style="height:104px;font-size:44px;">40</div><div class="ac q" style="height:104px;font-size:44px;">—</div><div class="ac q" style="height:104px;font-size:44px;">—</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(6,110px);justify-content:start;gap:5px">
+<div class="ar-tag">a[0]</div><div class="ar-tag">a[1]</div><div class="ar-tag">a[2]</div><div class="ar-tag">a[3]</div><div class="ar-tag">a[4]</div><div class="ar-tag">a[5]</div>
+</div>
+</div>
+<div class="demo-note"></div>
+<div class="demo-ctl">
+<button class="demo-btn" data-act="prev">上一步</button>
+<button class="demo-btn" data-act="next">下一步</button>
+<button class="demo-btn ghost" data-act="reset">重置</button>
+</div>
+</div><div class="box key tight" style="margin-top:12px;">
+<span class="label">观察三点</span>
+        一是 <code class="inline">i</code> 从 3 递减到 1；二是每次都把 <code class="inline">a[i]</code> 搬进<strong>已经腾空的</strong> <code class="inline">a[i+1]</code>，若从前往后搬，会覆盖尚未搬走的数据；三是循环停止时 <code class="inline">i + 1</code> 才是 25 的位置。
+      </div></div><div class="section" id="sec20"><div class="section-title">插入的代码：下标怎么变</div><style> .slide[data-t="插入的代码"] .box{padding-top:5px;padding-bottom:5px;margin-top:5px;} </style><div>
+<div class="s-sub" style="margin-top:0;">写法一：while，条件不成立才停</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> i = n - <span class="num">1</span>;
+<span class="kw">while</span> (i &gt;= <span class="num">0</span> &amp;&amp; a[i] &gt; x) {
+    a[i + <span class="num">1</span>] = a[i];
+    i--;
+}
+a[i + <span class="num">1</span>] = x;
+n++;</pre>
+<div class="s-sub blue" style="margin-top:8px;">写法二：for + break，提前退出</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> i;
+<span class="kw">for</span> (i = n - <span class="num">1</span>; i &gt;= <span class="num">0</span>; i--) {
+    <span class="kw">if</span> (a[i] &lt;= x) <span class="kw">break</span>;
+    a[i + <span class="num">1</span>] = a[i];
+}
+a[i + <span class="num">1</span>] = x;
+n++;</pre>
+</div><div>
+<div class="demo" data-demo="insertCode" data-hint="点击“下一步”，看 i 与 i+1 如何变化。" style="margin-top:0;">
+<div class="demo-head">
+<div class="demo-title">把 25 插入 10 20 30 40</div>
+<div class="demo-prog"></div>
+</div>
+<div class="ar" style="transform-origin:top left">
+<div class="ar-mark" style="min-height:34px;;grid-template-columns:repeat(6,88px);justify-content:start;gap:5px">
+<div></div><div></div><div></div><div></div><div></div><div></div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(6,88px);justify-content:start;gap:5px">
+<div class="ac" style="height:70px;font-size:36px;">10</div>
+<div class="ac" style="height:70px;font-size:36px;">20</div>
+<div class="ac" style="height:70px;font-size:36px;">30</div>
+<div class="ac" style="height:70px;font-size:36px;">40</div>
+<div class="ac q" style="height:70px;font-size:36px;">—</div>
+<div class="ac q" style="height:70px;font-size:36px;">—</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(6,88px);justify-content:start;gap:5px">
+<div class="ar-tag">a[0]</div><div class="ar-tag">a[1]</div><div class="ar-tag">a[2]</div><div class="ar-tag">a[3]</div><div class="ar-tag">a[4]</div><div class="ar-tag">a[5]</div>
+</div>
+</div>
+<div class="demo-note" style="min-height:56px;"></div>
+<div class="demo-ctl">
+<button class="demo-btn" data-act="prev">上一步</button>
+<button class="demo-btn" data-act="next">下一步</button>
+<button class="demo-btn ghost" data-act="reset">重置</button>
+</div>
+</div>
+<div class="box warn tight" style="margin-top:10px;">
+<span class="label">条件顺序</span>
+<code class="inline">i &gt;= 0</code> 必须在前，否则 <code class="inline">i = −1</code> 时会先访问 <code class="inline">a[−1]</code>。
+          </div>
+<div class="box key tight" style="margin-top:8px;">
+<span class="label">插入点</span>
+            每步执行 <code class="inline">a[i+1]=a[i]</code>。结束时插入点是 <code class="inline">i+1</code>：本例 <code class="inline">i=1</code> 写入 <code class="inline">a[2]</code>；<code class="inline">i=−1</code> 时写入 <code class="inline">a[0]</code>。
+          </div>
+</div></div><div class="section" id="sec21"><div class="section-title">插入的三种边界</div><div class="table-wrap"><table class="tb sep2" style="margin-top:0;">
+<thead><tr><th>情形</th><th>移动情况</th><th>结果</th></tr></thead>
+<tbody>
+<tr><th>插最小值 5</th><td>全部 4 个元素各后移一位，<code class="inline">i</code> 减到 −1</td><td><b>5 10 20 30 40</b>，插入位置 <code class="inline">a[0]</code></td></tr>
+<tr><th>插中间值 25</th><td>40、30 后移，20 不动</td><td><b>10 20 25 30 40</b>，插入位置 <code class="inline">a[2]</code></td></tr>
+<tr><th>插最大值 99</th><td>不移动，<code class="inline">i</code> 停在 3</td><td><b>10 20 30 40 99</b>，插入位置 <code class="inline">a[4]</code></td></tr>
+</tbody>
+</table></div><div class="box warn tight" style="margin-top:12px;">
+<span class="label">第四种情形：表已满</span>
+        容量 <code class="inline">MAX</code> 是格子总数，<code class="inline">n</code> 是已存个数。<code class="inline">n == MAX</code> 时没有空位，不能插入：保持数组与 <code class="inline">n</code> 不变，并给出提示。
+<pre class="code" style="margin:8px 0 0;"><span class="kw">if</span> (n &gt;= MAX) <span class="kw">printf</span>(<span class="str">"表已满，不能插入\n"</span>);
+<span class="kw">else</span> { <span class="cmt">/* 后移、插入，再 n++ */</span> }</pre>
+</div><div class="box key tight">
+<span class="label">下一页做什么</span>
+        把这四种情形写进一个函数：传入数组、当前个数与待插值，返回新的个数。这页先把边界想清楚，函数写法见下一页。
+      </div></div><div class="section" id="sec22"><div class="section-title">插入函数与 main 调用</div><div>
+<div class="s-sub" style="margin-top:0;">函数定义：先查容量，再插入</div>
+<pre class="code" style="margin-top:0;"><span class="kw">#define</span> MAX <span class="num">10</span>
+<span class="kw">int</span> insert(<span class="kw">int</span> a[], <span class="kw">int</span> n, <span class="kw">int</span> x) {
+    <span class="kw">int</span> i;
+    <span class="kw">if</span> (n &gt;= MAX) <span class="kw">return</span> n;  <span class="cmt">/* 已满 */</span>
+    i = n - <span class="num">1</span>;
+    <span class="kw">while</span> (i &gt;= <span class="num">0</span> &amp;&amp; a[i] &gt; x) {
+        a[i + <span class="num">1</span>] = a[i];
+        i--;
+    }
+    a[i + <span class="num">1</span>] = x;
+    n++;
+    <span class="kw">return</span> n;
+}</pre>
+</div><div>
+<div class="s-sub blue" style="margin-top:0;">main 中调用</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> main(<span class="kw">void</span>) {
+    <span class="kw">int</span> a[MAX] = {<span class="num">10</span>,<span class="num">20</span>,<span class="num">30</span>,<span class="num">40</span>};
+    <span class="kw">int</span> n = <span class="num">4</span>, i;
+    n = insert(a, n, <span class="num">25</span>); <span class="cmt">/* 插入更新 n */</span>
+    <span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+        <span class="kw">printf</span>(<span class="str">"%d "</span>, a[i]);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+<div class="box key tight" style="margin-top:8px;">
+<span class="label">运行结果</span>
+            输出 <code class="inline">10 20 25 30 40</code>，<code class="inline">n</code> 由 4 变为 5。
+          </div>
+</div><div class="box tip tight" style="margin-top:10px;">
+<span class="label">为什么必须返回新长度</span>
+        数组传进去后，函数内对元素的改动在 <code class="inline">main</code> 中可见；但 <code class="inline">n</code> 是普通变量，按值传递，函数里的 <code class="inline">n++</code> 不会影响调用方。所以要写 <code class="inline">n = insert(a, n, 25);</code>。
+      </div></div><div class="section" id="sec23"><div class="section-title">删除：从前往后填补</div><div class="ar" style="margin-top:0;">
+<div class="ar-row" style="grid-template-columns:120px 120px 178px 120px 120px;gap:18px;justify-content:center;">
+<div class="cellwrap"><div class="ac">10</div><div class="cn">a[0]</div></div>
+<div class="cellwrap"><div class="ac">20</div><div class="cn">a[1]</div></div>
+<div class="cellwrap"><div class="ac oob">30</div><div class="cn">a[2] ← k</div></div>
+<div class="cellwrap"><div class="ac">40</div><div class="cn">a[3]</div></div>
+<div class="cellwrap"><div class="ac">50</div><div class="cn">a[4]</div></div>
+</div>
+</div><div class="box tight" style="margin-top:8px;text-align:center;">
+        删除下标 <b>k = 2</b> 的元素（30），其后元素依次左移，长度减 1
+      </div><div class="steps" style="margin-top:10px;">
+<div class="step">
+<div class="t">① 覆盖</div>
+<div class="d"><code class="inline">a[k] = a[k+1]</code>，后一个元素前移一位</div>
+</div>
+<div class="step orange">
+<div class="t">② 推进</div>
+<div class="d">下标递增，把后续元素逐个前移，直到末尾</div>
+</div>
+<div class="step green">
+<div class="t">③ 缩短</div>
+<div class="d">长度减 1，最后一位不再属于有效数据</div>
+</div>
+</div><div class="box warn tight" style="margin-top:12px;">
+<span class="label">方向与插入相反</span>
+        删除必须<strong>自前向后</strong>：先 <code class="inline">a[2]=a[3]</code>，再 <code class="inline">a[3]=a[4]</code>。若反过来，先写 <code class="inline">a[3]=a[4]</code> 会把 40 覆盖成 50；再写 <code class="inline">a[2]=a[3]</code> 时读到的已是新值 50，于是 50 被重复写入，30 和 40 都丢失。
+      </div><div class="box tip tight">
+<span class="label">最后一位怎么办</span>
+        无需清理。长度减 1 之后，那一格的内容不再参与任何运算，保留原值不影响结果。
+      </div></div><div class="section" id="sec24"><div class="section-title">删除过程演示</div><div class="demo" data-demo="del" data-hint="点击“下一步”，共八步：先看循环条件，再看覆盖与 i 的推进，最后看 n 减 1 后的无效位。" style="margin-top:0;min-height:452px;justify-content:space-between;">
+<div class="demo-head">
+<div class="demo-title">删除下标 2 的元素</div>
+<div class="demo-prog"></div>
+</div>
+<div class="ar" style="transform-origin:top left">
+<div class="ar-mark" style="grid-template-columns:repeat(5,132px);justify-content:start;gap:5px">
+<div></div><div></div><div></div><div></div><div></div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(5,132px);justify-content:start;gap:5px">
+<div class="ac" style="height:104px;font-size:44px;">10</div><div class="ac" style="height:104px;font-size:44px;">20</div><div class="ac" style="height:104px;font-size:44px;">30</div><div class="ac" style="height:104px;font-size:44px;">40</div><div class="ac" style="height:104px;font-size:44px;">50</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(5,132px);justify-content:start;gap:5px">
+<div class="ar-tag">a[0]</div><div class="ar-tag">a[1]</div><div class="ar-tag">a[2]</div><div class="ar-tag">a[3]</div><div class="ar-tag">a[4]</div>
+</div>
+</div>
+<div class="demo-note"></div>
+<div class="demo-ctl">
+<button class="demo-btn" data-act="prev">上一步</button>
+<button class="demo-btn" data-act="next">下一步</button>
+<button class="demo-btn ghost" data-act="reset">重置</button>
+</div>
+</div><div class="box key tight" style="margin-top:12px;">
+<span class="label">观察两点</span>
+        一是 <code class="inline">a[2]</code> 原来的 30 被 40 覆盖，<code class="inline">a[3]</code> 又被 50 覆盖；二是 <code class="inline">n</code> 减为 4 后，末位 50 仍留在内存框里，只是不再属于有效数据。
+      </div></div><div class="section" id="sec25"><div class="section-title">按位置删除元素的函数</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> removeAt(<span class="kw">int</span> a[], <span class="kw">int</span> n, <span class="kw">int</span> k){
+    <span class="kw">int</span> i;
+    <span class="kw">if</span> (k &lt; <span class="num">0</span> || k &gt;= n)
+        <span class="kw">return</span> n;          <span class="cmt">/* k 不是合法下标，原样返回 */</span>
+    <span class="kw">for</span> (i = k; i &lt; n - <span class="num">1</span>; i++)  <span class="cmt">/* 从位置 k 起，后面的元素依次左移 */</span>
+        a[i] = a[i + <span class="num">1</span>];
+    <span class="kw">return</span> n - <span class="num">1</span>;          <span class="cmt">/* 只删除一个元素，长度减 1 */</span>
+}</pre><div>
+<div class="box tight" style="margin-top:0;height:100%;">
+<span class="label">循环上界</span>
+<code class="inline">i &lt; n - 1</code>。循环体访问 <code class="inline">a[i+1]</code>，当 <code class="inline">i = n−1</code> 时会读到 <code class="inline">a[n]</code>，越界。
+          </div>
+</div><div>
+<div class="box warn tight" style="margin-top:0;height:100%;">
+<span class="label">位置合法性必须自行检查</span>
+<code class="inline">k</code> 是<strong>下标</strong>，须满足 <code class="inline">0 ≤ k &lt; n</code>，编译器不检查。删首元素 <code class="inline">k=0</code> 时移动量最大；删末元素 <code class="inline">k=n−1</code> 时循环体一次也不执行，仅长度减 1。
+          </div>
+</div><div class="out" style="margin-top:8px;">删除前：10 20 30 40 50　n = 5，删除位置 k = 2（元素 30）
+删除后：10 20 40 50　　　n = 4</div></div><div class="section" id="sec26"><div class="section-title">删除函数与 main 调用</div><div>
+<div class="s-sub" style="margin-top:0;">函数定义：非法位置原样返回</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> removeAt(<span class="kw">int</span> a[], <span class="kw">int</span> n, <span class="kw">int</span> k) {
+    <span class="kw">int</span> i;
+    <span class="kw">if</span> (k &lt; <span class="num">0</span> || k &gt;= n) <span class="kw">return</span> n;
+    <span class="kw">for</span> (i = k; i &lt; n - <span class="num">1</span>; i++)
+        a[i] = a[i + <span class="num">1</span>];
+    <span class="kw">return</span> n - <span class="num">1</span>;
+}</pre>
+</div><div>
+<div class="s-sub blue" style="margin-top:0;">main 中调用</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> main(<span class="kw">void</span>) {
+    <span class="kw">int</span> a[] = {<span class="num">10</span>,<span class="num">20</span>,<span class="num">30</span>,<span class="num">40</span>,<span class="num">50</span>};
+    <span class="kw">int</span> n = <span class="num">5</span>, i;
+    n = removeAt(a, n, <span class="num">2</span>);
+    <span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+        <span class="kw">printf</span>(<span class="str">"%d "</span>, a[i]);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+<div class="box key tight" style="margin-top:8px;">
+<span class="label">运行结果</span>
+            输出 <code class="inline">10 20 40 50</code>，<code class="inline">n</code> 由 5 变为 4。
+          </div>
+</div><div class="box tip tight" style="margin-top:10px;">
+<span class="label">与插入对照</span>
+        两个函数都返回<strong>新长度</strong>，调用处都要写 <code class="inline">n = 函数名(...)</code>。数组元素的改动可见，长度的改动不可见——这是数组传参最需要记住的一条。
+      </div></div><div class="section" id="sec27"><div class="section-title">按值删除元素的函数</div><div>
+<div class="s-sub" style="margin-top:0;">任务：删除所有等于 x 的元素（x=25）</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> removeValue(<span class="kw">int</span> a[], <span class="kw">int</span> n, <span class="kw">int</span> x){
+    <span class="kw">int</span> i, j = <span class="num">0</span>;
+    <span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+        <span class="kw">if</span> (a[i] != x)
+            a[j++] = a[i];
+    <span class="kw">return</span> j;    <span class="cmt">/* 新长度 */</span>
+}</pre>
+<div class="out" style="margin-top:10px;">删除前：10 25 30 25 50　x = 25
+删除后：10 30 50　　　　　n = 3</div>
+</div><div>
+<div class="demo" data-demo="removeJ" data-hint="点击“下一步”，共十二步：每格先看、后决定写或不写。" style="margin-top:0;">
+<div class="demo-head">
+<div class="demo-title">i 读 j 写：只搬保留的元素</div>
+<div class="demo-prog"></div>
+</div>
+<div class="ar" style="transform-origin:top left">
+<div class="ar-mark" style="min-height:32px;;grid-template-columns:repeat(5,88px);justify-content:start;gap:5px">
+<div></div><div></div><div></div><div></div><div></div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(5,88px);justify-content:start;gap:5px">
+<div class="ac" style="height:60px;font-size:30px;">10</div>
+<div class="ac" style="height:60px;font-size:30px;">25</div>
+<div class="ac" style="height:60px;font-size:30px;">30</div>
+<div class="ac" style="height:60px;font-size:30px;">25</div>
+<div class="ac" style="height:60px;font-size:30px;">50</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(5,88px);justify-content:start;gap:5px">
+<div class="ar-tag">a[0]</div><div class="ar-tag">a[1]</div><div class="ar-tag">a[2]</div><div class="ar-tag">a[3]</div><div class="ar-tag">a[4]</div>
+</div>
+</div>
+<div class="demo-note" style="min-height:84px;"></div>
+<div class="demo-ctl">
+<button class="demo-btn" data-act="prev">上一步</button>
+<button class="demo-btn" data-act="next">下一步</button>
+<button class="demo-btn ghost" data-act="reset">重置</button>
+</div>
+</div>
+<div class="box key tight" style="margin-top:10px;">
+<span class="label">为什么用 j</span>
+<code class="inline">i</code> 是<strong>读位置</strong>，逐个扫过原数组；<code class="inline">j</code> 是<strong>写位置</strong>，只在 <code class="inline">a[i] != x</code> 时递增。要删的元素不写入，就被后面保留的元素覆盖。扫描结束 <code class="inline">j</code> 正好是保留下来的个数，直接作新长度返回——不必事先知道删几个。
+          </div>
+</div></div><div class="section" id="sec28"><div class="section-title">按值删除：n-- 逐个删</div><style> .slide[data-t="按值删除：n-- 逐个删"] pre.code{line-height:1.16;padding-top:2px;padding-bottom:2px;} .slide[data-t="按值删除：n-- 逐个删"] .demo-note{min-height:64px;font-size:26px;line-height:1.32;} </style><div>
+<div class="s-sub" style="margin-top:0;">每删一个：左移 + n--，i 原地复查（x = 5）</div>
+<pre class="code" style="margin-top:0;"><span class="cmt">/* del：已删个数 */</span>
+<span class="kw">int</span> del = <span class="num">0</span>;
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n - del; ) {
+    <span class="kw">if</span> (a[i] != x) {
+        i++;  <span class="kw">continue</span>;
+    }
+    <span class="cmt">/* 后面元素左移一位 */</span>
+    <span class="kw">for</span> (j = i; j &lt; n - del - <span class="num">1</span>; j++)
+        a[j] = a[j + <span class="num">1</span>];
+    n--;  del++;
+    <span class="cmt">/* i 不动，原地复查 */</span>
+}</pre>
+<div class="out" style="margin-top:10px;">a = {1,2,3,4,5,5,7,8,9,10}　x = 5
+删除后：1 2 3 4 7 8 9 10　　n = 8，del = 2</div>
+</div><div>
+<div class="demo" data-demo="removeN" data-hint="点击“下一步”，共六步。注意连续两个 5 是怎么被逐个删掉的。" style="margin-top:0;">
+<div class="demo-head">
+<div class="demo-title">n-- 逐个删：连续 5 5</div>
+<div class="demo-prog"></div>
+</div>
+<div class="ar" style="transform-origin:top left">
+<div class="ar-mark" style="min-height:30px;;grid-template-columns:repeat(10,56px);justify-content:start;gap:5px">
+<div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(10,56px);justify-content:start;gap:5px">
+<div class="ac" style="height:56px;font-size:24px;">1</div>
+<div class="ac" style="height:56px;font-size:24px;">2</div>
+<div class="ac" style="height:56px;font-size:24px;">3</div>
+<div class="ac" style="height:56px;font-size:24px;">4</div>
+<div class="ac" style="height:56px;font-size:24px;">5</div>
+<div class="ac" style="height:56px;font-size:24px;">5</div>
+<div class="ac" style="height:56px;font-size:24px;">7</div>
+<div class="ac" style="height:56px;font-size:24px;">8</div>
+<div class="ac" style="height:56px;font-size:24px;">9</div>
+<div class="ac" style="height:56px;font-size:24px;">10</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(10,56px);justify-content:start;gap:5px">
+<div class="ar-tag" style="font-size:20px;">0</div><div class="ar-tag" style="font-size:20px;">1</div><div class="ar-tag" style="font-size:20px;">2</div><div class="ar-tag" style="font-size:20px;">3</div><div class="ar-tag" style="font-size:20px;">4</div><div class="ar-tag" style="font-size:20px;">5</div><div class="ar-tag" style="font-size:20px;">6</div><div class="ar-tag" style="font-size:20px;">7</div><div class="ar-tag" style="font-size:20px;">8</div><div class="ar-tag" style="font-size:20px;">9</div>
+</div>
+</div>
+<div class="demo-note"></div>
+<div class="demo-ctl">
+<button class="demo-btn" data-act="prev">上一步</button>
+<button class="demo-btn" data-act="next">下一步</button>
+<button class="demo-btn ghost" data-act="reset">重置</button>
+</div>
+</div>
+<div class="box warn tight" style="margin-top:10px;">
+<span class="label">为什么删完 i 不递增</span>
+            左移后 <code class="inline">a[i]</code> 已被后一个元素顶替。若 <code class="inline">i++</code>，就跳过刚搬来的元素，连续两个 5 只删掉一个。<strong>原地复查</strong>才能处理连续相同的数据。每删一个都要搬一段，代价高于上一页的 j 写法，但能随时知道删了几个。
+          </div>
+</div></div><div class="section" id="sec29"><div class="section-title">案例：PTA 7-3 删除指定数据（无函数版）</div><style> .slide[data-t="案例：PTA 无函数版"] pre.code{line-height:1.06;padding-top:3px;padding-bottom:3px;font-size:27px;} .slide[data-t="案例：PTA 无函数版"] .demo-note{min-height:50px;font-size:24px;line-height:1.28;margin-top:8px;} .slide[data-t="案例：PTA 无函数版"] .box{padding-top:2px;padding-bottom:2px;} .slide[data-t="案例：PTA 无函数版"] .demo{padding:12px 18px;} </style><div class="box tight" style="margin-top:0;">
+<span class="label">题目</span>
+        删除指定值，输出每次删除后的数列；无匹配输出原数列。　<strong>输入</strong>：n（≤1000）、n 个整数、m；<strong>输出</strong>：每删一次一行。
+      </div><div>
+<div class="s-sub" style="margin-top:0;">写法一：全部写在 main 里</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">1000</span>], n, m, i, j, del = <span class="num">0</span>;
+<span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;n);     <span class="cmt" style="font-size:21px;">/* 实际个数 */</span>
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[i]);
+<span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;m);     <span class="cmt" style="font-size:21px;">/* 待删值 */</span>
+i = <span class="num">0</span>;                 <span class="cmt" style="font-size:21px;">/* 从头复查 */</span>
+<span class="kw">while</span> (i &lt; n) {
+    <span class="kw">if</span> (a[i] != m) { i++; <span class="kw">continue</span>; }
+    <span class="kw">for</span> (j = i; j &lt; n - <span class="num">1</span>; j++)
+        a[j] = a[j + <span class="num">1</span>];
+    n--;  del++;        <span class="cmt" style="font-size:21px;">/* 删一个，长度减一 */</span>
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; n; j++)
+        <span class="kw">printf</span>(<span class="str">"%d "</span>, a[j]);
+    <span class="kw">printf</span>(<span class="str">"\n"</span>);
+}
+<span class="kw">if</span> (del == <span class="num">0</span>)            <span class="cmt" style="font-size:21px;">/* 无匹配 */</span>
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; n; j++)
+        <span class="kw">printf</span>(<span class="str">"%d "</span>, a[j]);</pre>
+</div><div>
+<div class="demo" data-demo="removePTA" data-hint="点击“下一步”，共七步，看连续两个 7 如何逐个删除。" style="margin-top:0;">
+<div class="demo-head">
+<div class="demo-title">样例：删去所有的 7</div>
+<div class="demo-prog"></div>
+</div>
+<div class="ar" style="transform-origin:top left">
+<div class="ar-mark" style="min-height:26px;;grid-template-columns:repeat(10,46px);justify-content:start;gap:5px">
+<div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(10,46px);justify-content:start;gap:5px">
+<div class="ac" style="height:44px;font-size:20px;">5</div>
+<div class="ac" style="height:44px;font-size:20px;">8</div>
+<div class="ac" style="height:44px;font-size:20px;">7</div>
+<div class="ac" style="height:44px;font-size:20px;">12</div>
+<div class="ac" style="height:44px;font-size:20px;">17</div>
+<div class="ac" style="height:44px;font-size:20px;">15</div>
+<div class="ac" style="height:44px;font-size:20px;">3</div>
+<div class="ac" style="height:44px;font-size:20px;">7</div>
+<div class="ac" style="height:44px;font-size:20px;">7</div>
+<div class="ac" style="height:44px;font-size:20px;">10</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(10,46px);justify-content:start;gap:5px">
+<div class="ar-tag" style="font-size:18px;">0</div><div class="ar-tag" style="font-size:18px;">1</div><div class="ar-tag" style="font-size:18px;">2</div><div class="ar-tag" style="font-size:18px;">3</div><div class="ar-tag" style="font-size:18px;">4</div><div class="ar-tag" style="font-size:18px;">5</div><div class="ar-tag" style="font-size:18px;">6</div><div class="ar-tag" style="font-size:18px;">7</div><div class="ar-tag" style="font-size:18px;">8</div><div class="ar-tag" style="font-size:18px;">9</div>
+</div>
+</div>
+<div class="demo-note"></div>
+<div class="demo-ctl">
+<button class="demo-btn" data-act="prev">上一步</button>
+<button class="demo-btn" data-act="next">下一步</button>
+<button class="demo-btn ghost" data-act="reset">重置</button>
+</div>
+</div>
+<div style="display:flex;gap:14px;justify-content:center;margin-top:6px;">
+<img alt="输入样例 1" src="data:image/png;base64,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" style="width:48%;max-width:300px;border:2px solid #cbd8e6;border-radius:10px;"/>
+<img alt="输出样例 1" src="data:image/png;base64,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" style="width:48%;max-width:300px;border:2px solid #cbd8e6;border-radius:10px;"/>
+</div>
+</div></div><div class="section" id="sec30"><div class="section-title">案例：PTA 7-3 删除指定数据（有函数版）</div><style> .slide[data-t="案例：PTA 有函数版"] pre.code{line-height:1.12;padding-top:1px;padding-bottom:1px;font-size:27px;} .slide[data-t="案例：PTA 有函数版"] .box{padding-top:4px;padding-bottom:4px;} </style><div>
+<div class="s-sub" style="margin-top:0;">写法二：拆出删除函数与输出函数</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> delOne(<span class="kw">int</span> a[], <span class="kw">int</span> n, <span class="kw">int</span> x){
+    <span class="kw">int</span> i, j;      <span class="cmt" style="font-size:20px;">/* 读、写位置 */</span>
+    <span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++){
+        <span class="kw">if</span> (a[i] != x) <span class="kw">continue</span>;
+        <span class="kw">for</span> (j = i; j &lt; n - <span class="num">1</span>; j++)
+            a[j] = a[j + <span class="num">1</span>];
+        <span class="kw">return</span> n - <span class="num">1</span>;  <span class="cmt" style="font-size:20px;">/* 删到一个 */</span>
+    }
+    <span class="kw">return</span> n;
+}
+<span class="kw">void</span> printArr(<span class="kw">int</span> a[], <span class="kw">int</span> n){
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+        <span class="kw">printf</span>(<span class="str">"%d "</span>, a[i]);
+    <span class="kw">printf</span>(<span class="str">"\n"</span>);
+}</pre>
+</div><div>
+<div class="s-sub blue" style="margin-top:0;">main：反复调用直到删完</div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> main(<span class="kw">void</span>){
+    <span class="kw">int</span> a[<span class="num">1000</span>], n, m, i, old, del = <span class="num">0</span>;
+    <span class="cmt" style="font-size:21px;">/* 读入个数、各元素、待删值 */</span>
+    <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;n);
+    <span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[i]);
+    <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;m);
+    old = n;                     <span class="cmt" style="font-size:21px;">/* 删前长度 */</span>
+    <span class="kw">while</span> (<span class="num">1</span>) {
+        n = delOne(a, n, m);     <span class="cmt" style="font-size:21px;">/* 删一个 */</span>
+        <span class="kw">if</span> (n == old) <span class="kw">break</span>;  <span class="cmt" style="font-size:21px;">/* 没删到 */</span>
+        del++;  printArr(a, n);
+        old = n;
+    }
+    <span class="kw">if</span> (del == <span class="num">0</span>)  <span class="cmt" style="font-size:21px;">/* 无匹配 */</span>
+        printArr(a, n);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+</div></div><div class="section" id="sec31"><div class="section-title">随堂检测（三）</div><div class="grid c3" style="min-height:330px;">
+<div class="card orange">
+<h4><span class="ico">1</span>条件的顺序</h4>
+<p><code class="inline">while (a[i] &gt; x &amp;&amp; i &gt;= 0)</code> 会出什么问题？</p>
+<a class="qa-link" href="#qa-qc1">看解析</a>
+</div>
+<div class="card purple">
+<h4><span class="ico">2</span>删除的上界</h4>
+<p>删除循环写成 <code class="inline">i &lt; n</code>，会读到哪个元素？</p>
+<a class="qa-link" href="#qa-qc2">看解析</a>
+</div>
+<div class="card red">
+<h4><span class="ico">3</span>返回值</h4>
+<p>只写 <code class="inline">removeAt(a, n, 2);</code> 而不接收返回值，后果是什么？</p>
+<a class="qa-link" href="#qa-qc3">看解析</a>
+</div>
+</div><div class="box tip tight" style="margin-top:18px;">
+<span class="label">三题的共同点</span>
+        它们都<strong>不会导致编译错误</strong>。前两题是边界问题，第三题是接口使用问题：程序能运行，结果错误。
+      </div><details class="qa" id="qa-qc1"><summary>第 1 题　条件的先后顺序</summary>
+
+<p><code class="inline">&amp;&amp;</code> 从左向右求值。当 <code class="inline">i</code> 减到 −1 时，先算 <code class="inline">a[-1] &gt; x</code>，确实读了数组之前的内存，属于越界读取。</p>
+<p style="margin-top:10px;"><strong>为什么看起来没事：</strong>紧接着的 <code class="inline">i &gt;= 0</code> 为假，循环随即结束，越界读到的值没有参与后续比较，本题结果通常仍然正确。但这仍是未定义行为：那格内存若不可读，程序就可能异常终止。<strong>结果碰巧对，不等于写法对。</strong></p>
+<p style="margin-top:10px;">正确顺序是 <code class="inline">i &gt;= 0 &amp;&amp; a[i] &gt; x</code>：先确认下标合法，再访问元素，靠短路求值避开越界。这个习惯适用于所有“带下标的循环条件”。</p>
+</details><details class="qa" id="qa-qc2"><summary>第 2 题　删除的上界</summary>
+
+<p>会读到 <code class="inline">a[n]</code>，即数组末尾之后的一格，属于越界。</p>
+<pre class="code">for (i = <span class="num">0</span>; i &lt; n; i++)
+    a[i] = a[i + <span class="num">1</span>];   <span class="cmt">/* i = n-1 时读 a[n] */</span></pre>
+<p style="margin-top:8px;">上界应为 <code class="inline">i &lt; n - 1</code>。判断依据很简单：循环体中出现了 <code class="inline">a[i+1]</code>，上界就要相应减 1。</p>
+</details><details class="qa" id="qa-qc3"><summary>第 3 题　未接收的返回值</summary>
+
+<p>数组内容确实改变了，元素已左移；但<strong>调用方的 n 仍是旧值</strong>。此后按旧长度遍历，会把最后那个无效的重复元素当成有效数据输出。</p>
+<pre class="code">n = removeAt(a, n, <span class="num">2</span>);   <span class="cmt">/* 正确：长度同步更新 */</span></pre>
+<p style="margin-top:8px;">函数的返回值是唯一的沟通渠道。这与下一部分“长度为什么必须单独传递”是同一件事的两面。</p>
+</details></div><div class="section" id="sec32"><div class="section-title">基础篇小结：定义与存储、遍历与处理、插入与删除</div><div class="table-wrap"><table class="tb slim" style="margin-top:0;">
+<thead><tr><th>要点</th><th>结论</th></tr></thead>
+<tbody>
+<tr><th>定义</th><td><code class="inline">int a[N];</code>　N 为常量；容量在编译期确定</td></tr>
+<tr><th>下标</th><td>合法范围 0 至 n−1；越界属未定义行为，编译器不检查</td></tr>
+<tr><th>初始化</th><td>给出列表时不足补 0；未给列表时元素值不确定</td></tr>
+<tr><th>遍历</th><td><code class="inline">for (i = 0; i &lt; n; i++)</code>　初值由任务决定</td></tr>
+<tr><th>插入</th><td>从右往左腾位，元素依次右移；空位写入新值，n 加 1 后返回</td></tr>
+<tr><th>删除</th><td>从删除位置起，后面的元素依次左移补位，返回 n−1</td></tr>
+</tbody>
+</table></div><div class="box key tight" style="margin-top:10px;">
+<span class="label">最容易出错的三处</span>
+        循环上界写成 <code class="inline">&lt;=</code>；最值初值写成 0；插入删除后丢弃新的 <code class="inline">n</code>。<strong>三处均不报编译错误。</strong>
+</div></div><div class="footer">C 程序设计基础 · 第 5 章（一）一维数组（基础篇）<br>手机复习版 · 武汉理工大学 人工智能学院</div></div>
+<button class="backtop" id="backtop" title="回到顶部">↑</button><script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script><script>
+(function () {
+  'use strict';
+
+  /* 通用分步演示驱动：上一步 / 下一步 / 重置，翻到本页时自动复位 */
+  function bind(root, steps, paint) {
+    var note = root.querySelector('.demo-note');
+    var prog = root.querySelector('.demo-prog');
+    var hint = root.getAttribute('data-hint') || '点击“下一步”开始。';
+    var total = steps.length;
+    var idx = -1;
+
+    function render() {
+      var s = idx >= 0 ? steps[idx] : null;
+      paint(s);
+      note.textContent = s ? s.note : hint;
+      prog.textContent = (idx + 1) + ' / ' + total;
+    }
+
+    var bn = root.querySelector('[data-act="next"]');
+    var bp = root.querySelector('[data-act="prev"]');
+    var br = root.querySelector('[data-act="reset"]');
+    if (bn) bn.onclick = function (e) { e.stopPropagation(); if (idx < total - 1) { idx += 1; render(); } };
+    if (bp) bp.onclick = function (e) { e.stopPropagation(); if (idx >= 0) { idx -= 1; render(); } };
+    if (br) br.onclick = function (e) { e.stopPropagation(); idx = -1; render(); };
+
+    root.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    render();
+  }
+
+  /* ---------- 一、最值的逐格比较 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="max"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+
+    var STEPS = [
+      { i: -1, m: 72, b: 0, note: '初始：取 a[0] = 72 作为当前最大值，位置记为 0。' },
+      { i: 1, m: 78, b: 1, note: 'i = 1，a[1] = 78 大于 72，替换：max = 78，位置 1。' },
+      { i: 2, m: 85, b: 2, note: 'i = 2，a[2] = 85 大于 78，替换：max = 85，位置 2。' },
+      { i: 3, m: 90, b: 3, note: 'i = 3，a[3] = 90 大于 85，替换：max = 90，位置 3。' },
+      { i: 4, m: 96, b: 4, note: 'i = 4，a[4] = 96 大于 90，替换：max = 96，位置 4。' },
+      { i: -1, m: 96, b: 4, note: '循环结束，最大值 96 位于下标 4。它在最后一位，因此不遍历完无法确定。' }
+    ];
+
+    bind(root, STEPS, function (s) {
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].classList.remove('cur', 'new', 'on');
+        if (!s) continue;
+        if (i === s.b) cells[i].classList.add('new');
+        if (i === s.i) cells[i].classList.add('cur');
+      }
+      for (var i = 0; i < marks.length; i++) {
+        var txt = '';
+        if (s && s.b === i) txt += '<span class="mk low">max</span>';
+        if (s && s.i === i) txt += '<span class="mk mid">i</span>';
+        marks[i].innerHTML = txt;
+      }
+    });
+  })();
+
+  /* ---------- 二、插入：从后往前移动 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="insert"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+
+    var STEPS = [
+      { v: [10, 20, 30, 40, null, null], cur: -1, moved: [],
+        note: '初始：n = 4，有效元素为 10 20 30 40，待插入 25。' },
+      { v: [10, 20, 30, 40, null, null], cur: 3, moved: [],
+        note: 'i = 3，a[3] = 40 大于 25，需要后移。' },
+      { v: [10, 20, 30, 40, 40, null], cur: 3, moved: [4],
+        note: '执行 a[4] = a[3]：40 后移一位；i 减为 2。' },
+      { v: [10, 20, 30, 30, 40, null], cur: 2, moved: [3],
+        note: 'i = 2，a[2] = 30 大于 25，执行 a[3] = a[2]：30 后移；i 减为 1。' },
+      { v: [10, 20, 30, 30, 40, null], cur: 1, moved: [],
+        note: 'i = 1，a[1] = 20 不大于 25，循环终止。插入位置为 i + 1 = 2。' },
+      { v: [10, 20, 25, 30, 40, null], cur: 2, moved: [2], final: true,
+        note: '执行 a[2] = 25，长度由 4 变为 5。序列 10 20 25 30 40，仍有序。' }
+    ];
+
+    bind(root, STEPS, function (s) {
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].classList.remove('cur', 'new', 'on', 'q');
+        var v = s ? s.v[i] : (i < 4 ? [10, 20, 30, 40][i] : null);
+        if (v === null || v === undefined) {
+          cells[i].textContent = '—';
+          cells[i].classList.add('q');
+        } else {
+          cells[i].textContent = String(v);
+          if (s && s.moved.indexOf(i) >= 0) cells[i].classList.add('new');
+        }
+        if (s && i === s.cur) cells[i].classList.add('cur');
+      }
+      for (var i = 0; i < marks.length; i++) {
+        var txt = '';
+        if (s && !s.final && s.cur === i) txt += '<span class="mk mid">i</span>';
+        if (s && s.moved.indexOf(i) >= 0) txt += '<span class="mk low">i+1</span>';
+        marks[i].innerHTML = txt;
+      }
+    });
+  })();
+
+  /* ---------- 二·补：插入代码页的下标变化 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="insertCode"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+
+    var STEPS = [
+      { v: [10,20,30,40,null,null], i: 3, insert: -1, moved: [],
+        note: 'i = 3，a[3] = 40 大于 25。执行 a[i+1] = a[i]，即 a[4] = a[3]。' },
+      { v: [10,20,30,40,40,null], i: 3, insert: -1, moved: [4],
+        note: '40 后移一位写到 a[4]；随后 i-- 变为 2。' },
+      { v: [10,20,30,30,40,null], i: 2, insert: -1, moved: [3],
+        note: 'i = 2，a[2] = 30 大于 25，执行 a[3] = a[2]，再 i-- 变为 1。' },
+      { v: [10,20,30,30,40,null], i: 1, insert: 2, moved: [],
+        note: 'a[1] = 20 不大于 25，循环停止。插入点是 i + 1 = 2，即 a[2]。' },
+      { v: [10,20,25,30,40,null], i: 1, insert: 2, moved: [2],
+        note: '执行 a[2] = 25，n 由 4 变为 5。序列 10 20 25 30 40，仍有序。' }
+    ];
+
+    bind(root, STEPS, function (s) {
+      for (var k = 0; k < cells.length; k++) {
+        cells[k].className = 'ac';
+        marks[k].innerHTML = '';
+        var v = s ? s.v[k] : (k < 4 ? [10,20,30,40][k] : null);
+        if (v === null || v === undefined) {
+          cells[k].textContent = '—';
+          cells[k].classList.add('q');
+        } else {
+          cells[k].textContent = String(v);
+          if (s && s.moved.indexOf(k) >= 0) cells[k].classList.add('new');
+        }
+        if (s && k === s.i) cells[k].classList.add('cur');
+        if (s) {
+          if (s.i >= 0 && k === s.i) marks[k].innerHTML = '<span class="mk mid">i</span>';
+          if (s.i >= 0 && k === s.i + 1) marks[k].innerHTML += '<span class="mk low">i+1</span>';
+          if (k === s.insert) marks[k].innerHTML = '<span class="mk high">插入点</span>';
+        }
+      }
+    });
+  })();
+
+  /* ---------- 三、删除：从前往后填补 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="del"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var tags = Array.prototype.slice.call(root.querySelectorAll('.ar-tag'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+
+    var STEPS = [
+      { v: [10, 20, 30, 40, 50], k: 2, moved: [],
+        note: '初始：n = 5，k = 2；待删的是 a[2] 中的 30。' },
+      { v: [10, 20, 30, 40, 50], cur: 2, moved: [],
+        note: '先判循环条件：i = 2 < n−1 = 4，进入循环体，准备把 a[3] 写到 a[2]。' },
+      { v: [10, 20, 40, 40, 50], cur: 2, moved: [2],
+        note: '执行 a[2] = a[3]：40 前移一位，覆盖原来的 30。' },
+      { v: [10, 20, 40, 40, 50], cur: 3, moved: [],
+        note: 'i++ 后 i = 3；再判条件：3 < 4 仍成立，继续把 a[4] 写到 a[3]。' },
+      { v: [10, 20, 40, 50, 50], cur: 3, moved: [3],
+        note: '执行 a[3] = a[4]：50 前移一位；旧位置 a[4] 暂时仍保留 50。' },
+      { v: [10, 20, 40, 50, 50], fail: 4, moved: [],
+        note: 'i++ 后 i = 4；再判条件：4 < 4 不成立，循环结束。a[4] 仍在内存框中，值为 50。' },
+      { v: [10, 20, 40, 50, 50], moved: [], invalid: [4], invalidTag: 4,
+        note: '执行 n = n−1，n 由 5 变为 4。有效下标是 0～3；a[4] 只是无效数据，仍保留原值 50。' },
+      { v: [10, 20, 40, 50, 50], moved: [], invalid: [4], invalidTag: 4,
+        note: '最终结果：有效元素 10 20 40 50（n = 4）。a[4] 不参与后续遍历，但内存里的 50 不会消失。' }
+    ];
+
+    bind(root, STEPS, function (s) {
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].classList.remove('cur', 'new', 'on', 'q', 'invalid');
+        var v = s ? s.v[i] : [10, 20, 30, 40, 50][i];
+        if (v === null || v === undefined) {
+          cells[i].textContent = '—';
+          cells[i].classList.add('q');
+        } else {
+          cells[i].textContent = String(v);
+          if (s && s.moved.indexOf(i) >= 0) cells[i].classList.add('new');
+          if (s && s.invalid && s.invalid.indexOf(i) >= 0) cells[i].classList.add('invalid');
+        }
+        if (s && i === s.cur) cells[i].classList.add('cur');
+      }
+      for (var i = 0; i < tags.length; i++) {
+        tags[i].textContent = 'a[' + i + ']';
+        tags[i].classList.remove('invalid');
+        if (s && s.invalidTag === i) {
+          tags[i].textContent = 'a[' + i + ']（无效）';
+          tags[i].classList.add('invalid');
+        }
+      }
+      for (var i = 0; i < marks.length; i++) {
+        var txt = '';
+        if (s && s.k === i) txt += '<span class="mk del">k</span>';
+        if (s && (s.cur === i || s.fail === i)) txt += '<span class="mk mid">i</span>';
+        if (s && s.cur >= 0 && s.cur + 1 === i) txt += '<span class="mk low">i+1</span>';
+        marks[i].innerHTML = txt;
+      }
+    });
+  })();
+
+
+  /* ---------- 三·补一：按值删除 j 写法（i 读 j 写） ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="removeJ"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+    var X = 25;
+    var STEPS = [
+      { v: [10,25,30,25,50], i: -1, j: -1,
+        note: '初始：a = {10,25,30,25,50}，x = 25。橙框是读位置 i，绿框是写位置 j。' },
+      { v: [10,25,30,25,50], i: 0, j: 0, phase: 'read',
+        note: 'i=0：读 a[0]=10，准备与 x=25 比较。' },
+      { v: [10,25,30,25,50], i: 0, j: 0, wrote: 0,
+        note: '10 ≠ 25：保留，写入 a[0]=10；j 增为 1，i 增为 1。' },
+      { v: [10,25,30,25,50], i: 1, j: 1, phase: 'read',
+        note: 'i=1：读 a[1]=25，它等于 x。' },
+      { v: [10,25,30,25,50], i: 1, j: 1, phase: 'skip',
+        note: '25 == 25：要删除，不写入。j 保持 1，i 增为 2。' },
+      { v: [10,25,30,25,50], i: 2, j: 1, phase: 'read',
+        note: 'i=2：读 a[2]=30。' },
+      { v: [10,30,30,25,50], i: 2, j: 1, wrote: 1,
+        note: '30 ≠ 25：写入 a[1]=30，覆盖原来的 25；j 增为 2，i 增为 3。' },
+      { v: [10,30,30,25,50], i: 3, j: 2, phase: 'read',
+        note: 'i=3：读 a[3]=25，也等于 x。' },
+      { v: [10,30,30,25,50], i: 3, j: 2, phase: 'skip',
+        note: '25 == 25：跳过，不写入。j 保持 2，i 增为 4。' },
+      { v: [10,30,30,25,50], i: 4, j: 2, phase: 'read',
+        note: 'i=4：读 a[4]=50。' },
+      { v: [10,30,50,25,50], i: 4, j: 2, wrote: 2,
+        note: '50 ≠ 25：写入 a[2]=50；j 增为 3，i 增为 5，扫描结束。' },
+      { v: [10,30,50,25,50], i: -1, j: -1, valid: 3,
+        note: '返回 j=3。有效元素是 10 30 50；后面两格不属于数组。' }
+    ];
+    bind(root, STEPS, function (s) {
+      var valid = s && s.valid !== undefined ? s.valid : 5;
+      for (var k = 0; k < cells.length; k++) {
+        cells[k].className = 'ac';
+        marks[k].innerHTML = '';
+        var v = s ? s.v[k] : [10,25,30,25,50][k];
+        cells[k].textContent = String(v);
+        if (k >= valid) cells[k].classList.add('q');
+        if (s && s.wrote === k) cells[k].classList.add('new');
+        if (s && s.i === k) { cells[k].classList.add('cur'); marks[k].innerHTML += '<span class="mk mid">i</span>'; }
+        if (s && s.j === k) { marks[k].innerHTML += '<span class="mk high">j</span>'; }
+      }
+    });
+  })();
+
+  /* ---------- 三·补二：n-- 逐个删（连续 5 5） ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="removeN"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+    var INIT = [1,2,3,4,5,5,7,8,9,10];
+    var STEPS = [
+      { v: INIT.slice(), i: -1, n: 10, del: 0,
+        note: '初始：n = 10，x = 5。橙框是 i，红框是要删的元素。' },
+      { v: INIT.slice(), i: 4, n: 10, del: 0,
+        note: 'i 从 0 扫到 3 都不是 5；i=4 时 a[4]=5，找到第一个待删元素。' },
+      { v: [1,2,3,4,5,7,8,9,10,10], i: 4, n: 9, del: 1, moved: [4,5,6,7,8],
+        note: '把 a[5..9] 左移一位，n-- 变 9，del=1。i 不动，仍指向 4。' },
+      { v: [1,2,3,4,5,7,8,9,10,10], i: 4, n: 9, del: 1,
+        note: '原地复查：a[4] 现在是原来 a[5] 的 5。若此时 i++ 就会漏掉它。' },
+      { v: [1,2,3,4,7,8,9,10,10,10], i: 4, n: 8, del: 2, moved: [4,5,6,7],
+        note: '再次左移、n-- 变 8，del=2。连续两个 5 都被删掉了。' },
+      { v: [1,2,3,4,7,8,9,10,10,10], i: -1, n: 8, del: 2, valid: 8,
+        note: 'a[4]=7，i 递增扫到末尾结束。有效元素 1 2 3 4 7 8 9 10。' }
+    ];
+    bind(root, STEPS, function (s) {
+      var valid = s && s.valid !== undefined ? s.valid : 10;
+      for (var k = 0; k < cells.length; k++) {
+        cells[k].className = 'ac';
+        marks[k].innerHTML = '';
+        var v = s ? s.v[k] : INIT[k];
+        cells[k].textContent = String(v);
+        if (k >= valid) cells[k].classList.add('q');
+        if (s && s.moved && s.moved.indexOf(k) >= 0) cells[k].classList.add('new');
+        if (s && s.i === k && s.n > 0) {
+          if (v === 5) cells[k].classList.add('oob');
+          else cells[k].classList.add('cur');
+          marks[k].innerHTML = '<span class="mk mid">i</span>';
+        }
+      }
+    });
+  })();
+
+  /* ---------- 三·补三：PTA 案例（连续 7 7） ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="removePTA"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+    var INIT = [5,8,7,12,17,15,3,7,7,10];
+    var STEPS = [
+      { v: INIT.slice(), i: -1, n: 10, del: 0,
+        note: '样例：n=10，m=7。每删一个输出一行数列。' },
+      { v: INIT.slice(), i: 2, n: 10, del: 0,
+        note: 'i 扫到 2，a[2]=7，找到第一个 7。' },
+      { v: [5,8,12,17,15,3,7,7,10,10], i: 2, n: 9, del: 1, moved: [2,3,4,5,6,7,8],
+        note: '左移一位、n-- 变 9；输出第 1 行。i 不动，复查新搬来的 a[2]。' },
+      { v: [5,8,12,17,15,3,7,7,10,10], i: 6, n: 9, del: 1,
+        note: 'a[2]=12 不是 7，i 前进到 6，a[6]=7，找到第二个 7。' },
+      { v: [5,8,12,17,15,3,7,10,10,10], i: 6, n: 8, del: 2, moved: [6,7,8],
+        note: '左移、n-- 变 8；输出第 2 行。i 不动，复查 a[6]。' },
+      { v: [5,8,12,17,15,3,7,10,10,10], i: 6, n: 8, del: 2,
+        note: 'a[6] 现在是原来 a[7] 的 7，原地复查才能发现它。' },
+      { v: [5,8,12,17,15,3,10,10,10,10], i: 6, n: 7, del: 3, moved: [6,7],
+        note: '再左移、n-- 变 7；输出第 3 行。三个 7 全部删完。' },
+      { v: [5,8,12,17,15,3,10,10,10,10], i: -1, n: 7, del: 3, valid: 7,
+        note: '扫描结束。输出三行，与样例逐字一致。' }
+    ];
+    bind(root, STEPS, function (s) {
+      var valid = s && s.valid !== undefined ? s.valid : 10;
+      for (var k = 0; k < cells.length; k++) {
+        cells[k].className = 'ac';
+        marks[k].innerHTML = '';
+        var v = s ? s.v[k] : INIT[k];
+        cells[k].textContent = String(v);
+        if (k >= valid) cells[k].classList.add('q');
+        if (s && s.moved && s.moved.indexOf(k) >= 0) cells[k].classList.add('new');
+        if (s && s.i === k) {
+          if (v === 7) cells[k].classList.add('oob');
+          else cells[k].classList.add('cur');
+          marks[k].innerHTML = '<span class="mk mid">i</span>';
+        }
+      }
+    });
+  })();
+
+  /* ---------- 四、传参：一份地址副本 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="pass"]');
+    if (!root) return;
+
+    var L = root.querySelector('[data-role="left"]');
+    var R = root.querySelector('[data-role="right"]');
+    var AL = root.querySelector('[data-role="arrL"]');
+    var ALAB = root.querySelector('[data-role="alab"]');
+    var AR = root.querySelector('[data-role="arrR"]');
+    var FLAB = root.querySelector('[data-role="flab"]');
+    var B = root.querySelector('[data-role="banner"]');
+    var PS = root.querySelector('[data-role="pslot"]');
+    var PSV = root.querySelector('[data-role="psval"]');
+    var PSH = root.querySelector('[data-role="pshint"]');
+    var NM2 = root.querySelector('[data-role="nm2"]');
+    var wraps = Array.prototype.slice.call(root.querySelectorAll('.cellwrap'));
+
+    var V0 = [72, 78, 85, 90, 96];
+
+    var STEPS = [
+      { l: 1, r: 0, al: 0, alab: '', ar: 0, flab: '', pst: 'idle', psval: '（未分配）', pshint: 'p 存放的是地址，不是整组数据',
+        v: V0, cur: -1, chg: -1, pidx: 0, b: '一组存储单元，起始地址 0x61FE30',
+        note: 'main 中定义 int a[5]：五个元素占 20 字节，起始地址 0x61FE30。a 的值是这个地址。' },
+      { l: 1, r: 0, al: 1, alab: 'a 的值', ar: 0, flab: '', pst: 'idle', psval: '（未分配）', pshint: 'p 尚未分配',
+        v: V0, cur: -1, chg: -1, pidx: 0, b: '实参 a 的值：0x61FE30',
+        note: '调用 setThird(a, 5)：先求实参 a 的值。它不是整组数据，而是首地址 0x61FE30。' },
+      { l: 1, r: 1, al: 1, alab: '分配 p', ar: 0, flab: '', pst: 'alloc', psval: '（待接收）', pshint: '新的一格，等待接收',
+        v: V0, cur: -1, chg: -1, pidx: 0, b: '调用发生：为形参 p 单独分配一格',
+        note: '进入函数，系统为形参 p 单独分配一个存储单元。注意：p 不是 a 的别名，它有自己独立的一格。' },
+      { l: 1, r: 1, al: 1, alab: '传给 p', ar: 0, flab: '', pst: 'filled', psval: '0x61FE30', pshint: 'p 的值 = 实参 a 的值',
+        v: V0, cur: -1, chg: -1, pidx: 0, b: '把实参的值复制进 p 的单元',
+        note: '参数传递：把实参 a 的值 0x61FE30 复制进 p 的单元。传的仍是一个值，只是这个值恰好是地址。' },
+      { l: 1, r: 1, al: 1, alab: '值副本', ar: 1, flab: 'p + 2×4<br>0x61FE38', pst: 'filled', psval: '0x61FE30', pshint: '按偏移量访问数组元素',
+        v: V0, cur: 2, chg: -1, pidx: 1, b: '用 0x61FE30 + 2×4 = 0x61FE38 定位',
+        note: '执行 p[2] = 99：p 中装着首地址，按偏移量 2×4 算出 0x61FE38，再访问这一格（当前是 85）。' },
+      { l: 1, r: 1, al: 1, alab: '值副本', ar: 1, flab: 'p[2] = 99<br>写入同一格', pst: 'filled', psval: '0x61FE30', pshint: '写入的是 p 偏移定位的单元',
+        v: [72, 78, 99, 90, 96], cur: -1, chg: 2, pidx: 1, b: '写入落在同一处',
+        note: '写入完成，0x61FE38 处由 85 变为 99。main 的 a 与形参 p 的值相同，所以定位到的是同一格。' },
+      { l: 1, r: 0, al: 0, alab: '', ar: 0, flab: '', pst: 'released', psval: '（已释放）', pshint: '函数返回，单元被收回',
+        v: [72, 78, 99, 90, 96], cur: -1, chg: 2, pidx: 0, b: '函数返回，形参 p 的单元释放',
+        note: '函数返回：形参 p 那一格被收回。main 中的 a[2] 已是 99 —— 传过去的是地址副本，改的却是同一处数据。' },
+      { l: 1, r: 0, al: 0, alab: '', ar: 0, flab: '', pst: 'idle', psval: '（未分配）', pshint: 'p 存放的是地址，不是整组数据',
+        v: [72, 78, 99, 90, 96], cur: -1, chg: 2, pidx: 0, b: 'main 中的数组：a[2] = 99',
+        note: '回到 main：只有数组本身留下，a[2] 从 85 变成 99。形参 p 从头到尾只是这串地址的一个副本。' }
+    ];
+
+    bind(root, STEPS, function (s) {
+      var st = s || { l: 1, r: 0, al: 0, alab: '', ar: 0, flab: '', pst: 'idle',
+                      psval: '（未分配）', pshint: 'p 存放的是地址，不是整组数据',
+                      v: V0, cur: -1, chg: -1, pidx: 0, b: '一组存储单元' };
+      L.classList.toggle('off', !st.l);
+      R.classList.toggle('off', !st.r);
+      AL.classList.toggle('on', !!st.al);
+      ALAB.textContent = st.alab || '';
+      AR.classList.toggle('on', !!st.ar);
+      FLAB.innerHTML = st.flab || '';
+      B.textContent = st.b;
+      PS.className = 'pslot' + (st.pst && st.pst !== 'idle' ? ' ' + st.pst : '');
+      PSV.textContent = st.psval || '（未分配）';
+      PSH.textContent = st.pshint || '';
+      NM2.textContent = st.pidx ? 'p[2]' : 'a[2]';
+      for (var i = 0; i < wraps.length; i++) {
+        var ac = wraps[i].querySelector('.ac');
+        ac.textContent = String(st.v[i]);
+        ac.classList.remove('cur', 'new', 'on', 'q');
+        wraps[i].classList.remove('cur');
+        if (i === st.chg) ac.classList.add('new');
+        if (i === st.cur) { ac.classList.add('cur'); wraps[i].classList.add('cur'); }
+      }
+    });
+  })();
+
+  /* ---------- 四·补：普通参数 score 的副本 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="touch"]');
+    if (!root) return;
+    var XW = root.querySelector('[data-role="xwrap"]');
+    var XC = root.querySelector('[data-role="xcell"]');
+    var VC = root.querySelector('[data-role="vcell"]');
+    var ML = root.querySelector('[data-role="markL"]');
+    var MR = root.querySelector('[data-role="markR"]');
+    var STEPS = [
+      { x: 0, xv: '（未分配）', vv: '72', ml: '', mr: '',
+        note: 'main 中 int score = 72：只有一格，里面是 72。' },
+      { x: 0, xv: '（未分配）', vv: '72', ml: '取出 72', mr: '',
+        note: '调用 addBonus(score)：先取出实参 score 的值 72。' },
+      { x: 1, xv: '72', vv: '72', ml: '取出 72', mr: '已复制',
+        note: '为形参 score 分配独立的一格，把 72 复制进去。两格数值相同，但位置不同。' },
+      { x: 1, xv: '77', vv: '72', ml: '', mr: 'score += 5',
+        note: '函数内执行 score += 5：只改形参那一格，77 留在函数里。main 的 score 仍是 72。' },
+      { x: 0, xv: '（已释放）', vv: '72', ml: '', mr: '',
+        note: '函数返回，形参那一格收回。printf 输出 72 —— 想加的分没有加到 main 的变量上。' }
+    ];
+    bind(root, STEPS, function (st0) {
+      var st = st0 || { x: 0, xv: '（未分配）', vv: '72', ml: '', mr: '' };
+      XW.style.opacity = st.x ? '1' : '.25';
+      XC.textContent = st.xv;
+      XC.className = 'ac' + (st.x === 1 && st.xv !== '72' ? ' cur' : '') +
+                     (/未分配|已释放/.test(st.xv) ? ' ph' : '');
+      VC.textContent = st.vv;
+      ML.textContent = st.ml || '';
+      MR.textContent = st.mr || '';
+    });
+  })();
+
+  /* ---------- 四·补：数组参数 a 的地址副本 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="arrPass"]');
+    if (!root) return;
+    var AW = root.querySelector('[data-role="awrap"]');
+    var AC = root.querySelector('[data-role="acell"]');
+    var M1 = root.querySelector('[data-role="pm1"]');
+    var M2 = root.querySelector('[data-role="pm2"]');
+    var SC = [0, 1, 2].map(function (k) {
+      return root.querySelector('[data-role="sc' + k + '"]');
+    });
+    var V0 = [72, 78, 85];
+    var STEPS = [
+      { a: 0, av: '（未分配）', v: V0, m1: '', m2: '',
+        note: 'main 中 int s[3] = {72, 78, 85}：s 的值是首地址 0x61FE30。' },
+      { a: 0, av: '（未分配）', v: V0, m1: '', m2: '取出地址',
+        note: '调用 addBonus(s, 3)：先求实参 s 的值 —— 首地址 0x61FE30。' },
+      { a: 1, av: '0x61FE30', v: V0, m1: 'a ← 0x61FE30', m2: '',
+        note: '为形参 a 单独分配一格，把 0x61FE30 复制进去。a 得到的是地址值，不是三个数。' },
+      { a: 1, av: '0x61FE30', v: [77, 83, 90], m1: '按 a[i] 写入', m2: '同一组单元',
+        note: 'a 与 s 值相同：a[i] 按偏移量定位到 main 的那组元素，三个值都加 5。' },
+      { a: 0, av: '（已释放）', v: [77, 83, 90], m1: '', m2: '',
+        note: '函数返回，a 的单元释放。main 中 s[0..2] 已是 77、83、90 —— 地址副本改到了同一组数据。' }
+    ];
+    bind(root, STEPS, function (st0) {
+      var st = st0 || { a: 0, av: '（未分配）', v: V0, m1: '', m2: '' };
+      AW.style.opacity = st.a ? '1' : '.25';
+      AC.textContent = st.av;
+      AC.className = 'ac addr' + (st.av.indexOf('0x') >= 0 ? ' on' : ' ph');
+      M1.textContent = st.m1 || '';
+      M2.textContent = st.m2 || '';
+      for (var i = 0; i < SC.length; i++) {
+        SC[i].textContent = String(st.v[i]);
+        SC[i].className = 'ac' + (st.m2 ? ' new' : '');
+      }
+    });
+  })();
+
+  /* ---------- 五·补：比较法排序 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="cmpSort"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+    var round = root.querySelector('[data-role="round"]');
+    var STEPS = [
+      { r: 0, v: [78,92,65,88,71], i: 0, j: 1,
+        note: 'i=0：先固定 a[0]=78，j 从 i+1=1 开始，依次拿后面的数与它比。' },
+      { r: 0, v: [78,92,65,88,71], i: 0, j: 1, cmp: 1,
+        note: 'j=1：比较 a[0]=78 与 a[1]=92。78 < 92，次序正确，不交换；j 前进到 2。' },
+      { r: 0, v: [78,92,65,88,71], i: 0, j: 2, cmp: 1,
+        note: 'j=2：比较 a[0]=78 与 a[2]=65。78 > 65，次序不对，准备交换。' },
+      { r: 0, v: [65,92,78,88,71], i: 0, j: 2, swap: [0,2],
+        note: '交换 a[0] 与 a[2]：a[0] 变成 65，原来的 78 挪到 a[2]。j 继续到 3。' },
+      { r: 0, v: [65,92,78,88,71], i: 0, j: 3, cmp: 1,
+        note: 'j=3：比较 a[0]=65 与 a[3]=88。65 < 88，不交换；j 前进到 4。' },
+      { r: 0, v: [65,92,78,88,71], i: 0, j: 4, cmp: 1, done0: 1,
+        note: 'j=4：65 < 71，不交换。i=0 这一趟结束，a[0]=65 已定位。' },
+      { r: 1, v: [65,92,78,88,71], i: 1, j: 2, done0: 1,
+        note: 'i 移到 1，j 从 i+1=2 开始：a[1]=92 先与 a[2]=78 比。' },
+      { r: 1, v: [65,78,92,88,71], i: 1, j: 2, swap: [1,2], done0: 1,
+        note: '92 > 78，交换：a[1]=78，原来的 92 挪到 a[2]。j 前进到 3。' },
+      { r: 1, v: [65,78,92,88,71], i: 1, j: 3, cmp: 1, done0: 1,
+        note: 'j=3：比较 a[1]=78 与 a[3]=88。78 < 88，不交换；j 前进到 4。' },
+      { r: 1, v: [65,78,92,88,71], i: 1, j: 4, cmp: 1, done0: 1,
+        note: 'j=4：比较 a[1]=78 与 a[4]=71。78 > 71，准备交换。' },
+      { r: 1, v: [65,71,92,88,78], i: 1, j: 4, swap: [1,4], done0: 1, done1: 1,
+        note: '交换后 a[1]=71。第二趟结束，前两格 65、71 已定位。' },
+      { r: 2, v: [65,71,92,88,78], i: 2, j: 3, done0: 1, done1: 1,
+        note: 'i 移到 2，j 从 i+1=3 开始。' },
+      { r: 2, v: [65,71,88,92,78], i: 2, j: 3, swap: [2,3], done0: 1, done1: 1,
+        note: '92 > 88，交换；j 前进到 4。' },
+      { r: 2, v: [65,71,78,92,88], i: 2, j: 4, swap: [2,4], done0: 1, done1: 1, done2: 1,
+        note: '88 > 78，交换。第三趟结束，a[2]=78 定位。' },
+      { r: 3, v: [65,71,78,92,88], i: 3, j: 4, done0: 1, done1: 1, done2: 1,
+        note: 'i 移到 3，j=i+1=4，只剩最后一对。' },
+      { r: 3, v: [65,71,78,88,92], i: 3, j: 4, swap: [3,4], done0: 1, done1: 1, done2: 1, done3: 1,
+        note: '92 > 88，交换。前四格排好，末位自然最大。' },
+      { r: -1, v: [65,71,78,88,92], i: -1, j: -1, valid: 5, done0: 1, done1: 1, done2: 1, done3: 1,
+        note: '排序完成：65 71 78 88 92。整组数据从小到大排好。' }
+    ];
+    bind(root, STEPS, function (s) {
+      var st = s || { r: 0, v: [78,92,65,88,71], i: 0, j: 1 };
+      round.textContent = st.r >= 0
+        ? '第 ' + (st.r + 1) + ' 轮：i = ' + st.r + '　j 从 ' + (st.r + 1) + ' 到 4'
+        : '排序完成：整组有序';
+      for (var k = 0; k < cells.length; k++) {
+        var ac = cells[k];
+        ac.className = 'ac';
+        marks[k].innerHTML = '';
+        ac.textContent = String(st.v[k]);
+        if (st.swap && st.swap.indexOf(k) >= 0) ac.classList.add('new');
+        if (k === st.i) { ac.classList.add('cur'); marks[k].innerHTML += '<span class="mk mid">i</span>'; }
+        if (k === st.j) marks[k].innerHTML += '<span class="mk high">j</span>';
+        if (st.cmp && k === st.j) ac.classList.add('cmp');
+        if ((k === 0 && st.done0) || (k === 1 && st.done1) || (k === 2 && st.done2) || (k === 3 && st.done3)) ac.classList.add('on');
+      }
+    });
+  })();
+
+  /* ---------- 五、选择排序 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="sel"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+    var round = root.querySelector('[data-role="round"]');
+
+    var V0 = [78, 92, 65, 88, 71];
+
+    var STEPS = [
+      { r: 0, v: [78, 92, 65, 88, 71], i: 0, k: -1, done: [],
+        note: '初始：n = 5，整组未排。第一轮从下标 0 开始，先假定 a[0] 最小。' },
+      { r: 0, v: [78, 92, 65, 88, 71], i: 0, k: 2, done: [],
+        note: 'j 从 1 扫到 4，a[2] = 65 最小，记 k = 2。a[0] 与 a[2] 待交换。' },
+      { r: 0, v: [65, 92, 78, 88, 71], i: 0, k: 0, done: [0],
+        note: '交换 a[0] 与 a[2]，65 归位。左侧已排部分增加一格。' },
+      { r: 1, v: [65, 92, 78, 88, 71], i: 1, k: 4, done: [0],
+        note: '第二轮：a[1] 暂定最小，扫到 a[4] = 71 更小，记 k = 4。' },
+      { r: 1, v: [65, 71, 78, 88, 92], i: 1, k: 1, done: [0, 1],
+        note: '交换 a[1] 与 a[4]，71 归位。' },
+      { r: 2, v: [65, 71, 78, 88, 92], i: 2, k: 2, done: [0, 1],
+        note: '第三轮：a[2] = 78 就是余下最小者，k 与 i 相同，不交换。' },
+      { r: 3, v: [65, 71, 78, 88, 92], i: 3, k: 3, done: [0, 1, 2],
+        note: '第四轮：a[3] = 88 也是余下最小者，同样不交换。' },
+      { r: -1, v: [65, 71, 78, 88, 92], i: -1, k: -1, done: [0, 1, 2, 3, 4],
+        note: '外层结束，末位 92 无需再比。整组有序：65 71 78 88 92。' }
+    ];
+
+    bind(root, STEPS, function (s) {
+      var r = s ? s.r : 0;
+      round.textContent = r >= 0
+        ? '第 ' + (r + 1) + ' 轮：i = ' + r + '　j 从 ' + (r + 1) + ' 到 4，k 记最小下标'
+        : '排序完成：整组有序';
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].classList.remove('cur', 'new', 'on');
+        if (marks[i]) marks[i].innerHTML = '';
+        if (!s) { cells[i].textContent = String(V0[i]); continue; }
+        cells[i].textContent = String(s.v[i]);
+        if (s.done.indexOf(i) >= 0) cells[i].classList.add('on');
+      }
+      if (!s) return;
+      if (s.i >= 0) {
+        cells[s.i].classList.add('cur');
+        if (marks[s.i]) marks[s.i].innerHTML = '<span class="mk mid">i</span>';
+      }
+      if (s.k >= 0 && s.k !== s.i) {
+        cells[s.k].classList.add('new');
+        if (marks[s.k]) marks[s.k].innerHTML = '<span class="mk high">k</span>';
+      }
+    });
+  })();
+
+  /* ---------- 六、冒泡排序 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="bub"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+
+    var V0 = [78, 92, 65, 88, 71];
+
+    var STEPS = [
+      { r: 0, v: [78,92,65,88,71], ip: 4, j: 0, cmp: 1, done: [],
+        note: '第 1 轮（i=0）：未排序区间 a[0]~a[4]，j=0 比较 a[0]=78 与 a[1]=92。' },
+      { r: 0, v: [78,92,65,88,71], ip: 4, j: 0, done: [],
+        note: '78 < 92，次序正确，不交换；j 前进到 1。' },
+      { r: 0, v: [78,92,65,88,71], ip: 4, j: 1, cmp: 1, done: [],
+        note: 'j=1：比较 a[1]=92 与 a[2]=65，92 > 65，准备交换。' },
+      { r: 0, v: [78,65,92,88,71], ip: 4, j: 1, swapTo: 2, done: [],
+        note: '交换：92 右移到 a[2]。j 前进到 2。' },
+      { r: 0, v: [78,65,92,88,71], ip: 4, j: 2, cmp: 1, done: [],
+        note: 'j=2：比较 a[2]=92 与 a[3]=88，92 > 88，准备交换。' },
+      { r: 0, v: [78,65,88,92,71], ip: 4, j: 2, swapTo: 3, done: [],
+        note: '交换：92 继续右移到 a[3]。j 前进到 3。' },
+      { r: 0, v: [78,65,88,92,71], ip: 4, j: 3, cmp: 1, done: [],
+        note: 'j=3：比较 a[3]=92 与 a[4]=71，92 > 71，准备交换。' },
+      { r: 0, v: [78,65,88,71,92], ip: 4, j: 3, swapTo: 4, done: [4],
+        note: '交换：92 到达 a[4]。第 1 轮结束，最大值归位。' },
+      { r: 1, v: [78,65,88,71,92], ip: 3, j: -1, done: [4],
+        note: 'i 增到 1：未排序区间缩为 a[0]~a[3]，末位 92 不再参与比较。' },
+      { r: 1, v: [78,65,88,71,92], ip: 3, j: 0, cmp: 1, done: [4],
+        note: '第 2 轮 j=0：比较 a[0]=78 与 a[1]=65，78 > 65，准备交换。' },
+      { r: 1, v: [65,78,88,71,92], ip: 3, j: 0, swapTo: 1, done: [4],
+        note: '交换：65 左移、78 右移。j 前进到 1。' },
+      { r: 1, v: [65,78,88,71,92], ip: 3, j: 1, cmp: 1, done: [4],
+        note: 'j=1：78 < 88，不交换；j 前进到 2。' },
+      { r: 1, v: [65,78,88,71,92], ip: 3, j: 2, cmp: 1, done: [4],
+        note: 'j=2：比较 a[2]=88 与 a[3]=71，88 > 71，准备交换。' },
+      { r: 1, v: [65,78,71,88,92], ip: 3, j: 2, swapTo: 3, done: [3,4],
+        note: '交换：88 右移到 a[3]。第 2 轮结束，88 归位。' },
+      { r: 2, v: [65,78,71,88,92], ip: 2, j: -1, done: [3,4],
+        note: 'i 增到 2：未排序区间缩为 a[0]~a[2]。' },
+      { r: 2, v: [65,78,71,88,92], ip: 2, j: 0, cmp: 1, done: [3,4],
+        note: '第 3 轮 j=0：65 < 78，不交换；j 前进到 1。' },
+      { r: 2, v: [65,78,71,88,92], ip: 2, j: 1, cmp: 1, done: [3,4],
+        note: 'j=1：比较 a[1]=78 与 a[2]=71，78 > 71，准备交换。' },
+      { r: 2, v: [65,71,78,88,92], ip: 2, j: 1, swapTo: 2, done: [2,3,4],
+        note: '交换：78 右移到 a[2]。第 3 轮结束，78 归位。' },
+      { r: 3, v: [65,71,78,88,92], ip: 1, j: -1, done: [2,3,4],
+        note: 'i 增到 3：只剩 a[0]~a[1] 待比较。' },
+      { r: 3, v: [65,71,78,88,92], ip: 1, j: 0, cmp: 1, done: [2,3,4],
+        note: '第 4 轮 j=0：65 < 71，不交换。本轮无交换，flag=0，提前结束。' },
+      { r: -1, v: [65,71,78,88,92], ip: -1, j: -1, done: [1,2,3,4],
+        note: '排序完成：65 71 78 88 92。前 n−1 格归位后，末位自然最大。' }
+    ];
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+    var round = root.querySelector('[data-role="round"]');
+    bind(root, STEPS, function (s) {
+      var st = s || { r: 0, v: V0, ip: 4, j: 0, done: [] };
+      round.textContent = st.r >= 0
+        ? '第 ' + (st.r + 1) + ' 轮：i = ' + st.r + '　j 从 0 到 ' + (3 - st.r)
+        : '排序完成：整组有序';
+      for (var k = 0; k < cells.length; k++) {
+        var ac = cells[k];
+        ac.className = 'ac';
+        marks[k].innerHTML = '';
+        ac.textContent = String(st.v[k]);
+        if (st.done && st.done.indexOf(k) >= 0) ac.classList.add('on');
+        if (st.cmp && (k === st.j || k === st.j + 1)) ac.classList.add('cmp');
+        if (st.swapTo === k) ac.classList.add('new');
+        if (st.ip >= 0 && k === st.ip) marks[k].innerHTML += '<span class="mk mid">n−1−i</span>';
+        if (st.j >= 0 && k === st.j) marks[k].innerHTML += '<span class="mk high">j</span>';
+        if (st.j >= 0 && k === st.j + 1) marks[k].innerHTML += '<span class="mk j1">j+1</span>';
+      }
+    });
+  })();
+
+  /* ---------- 七、二分查找 ---------- */
+  /* ---------- 五、二分查找：10 个数查 96 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="bin"]');
+    if (!root) return;
+    var cells = Array.prototype.slice.call(root.querySelectorAll('.ac'));
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.ar-mark > div'));
+
+    var STEPS = [
+      { low: 0, high: 9, mid: -1,
+        note: '初始：low = 0，high = 9，区间 [0,9] 覆盖全部 10 个数。' },
+      { low: 0, high: 9, mid: 4,
+        note: 'mid = (0 + 9) / 2 = 4，a[4] = 88。88 小于 96，目标在右半。' },
+      { low: 5, high: 9, mid: -1,
+        note: 'low = mid + 1 = 5，区间缩到 [5,9]，左边五格排除。' },
+      { low: 5, high: 9, mid: 7,
+        note: 'mid = (5 + 9) / 2 = 7，a[7] = 98。98 大于 96，目标在左半。' },
+      { low: 5, high: 6, mid: -1,
+        note: 'high = mid − 1 = 6，区间缩到 [5,6]，只剩两格。' },
+      { low: 5, high: 6, mid: 5,
+        note: 'mid = (5 + 6) / 2 = 5，a[5] = 92。92 小于 96，low = 6。' },
+      { low: 6, high: 6, mid: 6, hit: 1,
+        note: 'mid = 6，a[6] = 96，命中！返回下标 6。区间从 10 格缩到 1 格。' }
+    ];
+
+    bind(root, STEPS, function (s) {
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].classList.remove('cur', 'new', 'on', 'dim');
+        if (marks[i]) marks[i].innerHTML = '';
+        if (!s) continue;
+        if (i < s.low || i > s.high) cells[i].classList.add('dim');
+      }
+      if (!s) return;
+      if (s.mid >= 0) cells[s.mid].classList.add(s.hit ? 'new' : 'cur');
+      for (var k = 0; k < marks.length; k++) {
+        var html = '';
+        if (s.low <= s.high && k === s.low) html += '<span class="mk low">low</span>';
+        if (k === s.mid) html += '<span class="mk mid">mid</span>';
+        if (s.low <= s.high && k === s.high) html += '<span class="mk high">high</span>';
+        if (html) marks[k].innerHTML = html;
+      }
+    });
+  })();
+
+})();
+
+</script></body>
+</html>
