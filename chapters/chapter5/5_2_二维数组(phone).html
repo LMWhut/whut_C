@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>C 程序设计基础 · 第 5 章（二）二维数组 · 手机版</title>
+<style>
+  :root{
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Source Han Sans SC",sans-serif;
+    background:#f4faff;
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+
+  /* ================= 顶部固定栏 ================= */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 3px 12px rgba(10,61,99,.25);
+  }
+  .topbar h1{
+    font-size:17px;font-weight:700;letter-spacing:.5px;
+    margin:0;
+  }
+  .topbar .btn-toc{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4);
+    color:#fff;font-size:15px;font-weight:600;
+    padding:6px 14px;border-radius:20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topbar .btn-toc:active{background:rgba(255,255,255,.3);}
+  .topbar .btn-toc .arrow{
+    display:inline-block;transition:transform .25s ease;
+    font-size:12px;
+  }
+  .topbar .btn-toc.open .arrow{transform:rotate(180deg);}
+
+  /* ================= 目录浮层 ================= */
+  .toc-panel{
+    position:fixed;
+    top:56px;left:0;right:0;bottom:0;
+    z-index:99;
+    background:#f4faff;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;
+    display:none;
+  }
+  .toc-panel.show{display:block;}
+
+  .toc-group{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .toc-group-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    font-size:16px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toc-group-title:active{background:linear-gradient(135deg,#155a92,#0d416b);}
+  .toc-group-title .arrow{
+    font-size:12px;
+    transition:transform .25s ease;
+  }
+  .toc-group.open .toc-group-title .arrow{transform:rotate(180deg);}
+
+  .toc-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .toc-group.open .toc-items{max-height:900px;}
+
+  .toc-items a{
+    display:block;
+    padding:12px 22px;
+    font-size:15px;
+    color:var(--blue-700);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .toc-items a:last-child{border-bottom:none;}
+  .toc-items a:active{background:var(--blue-100);color:var(--orange);}
+
+  /* ================= 内容区 ================= */
+  .content{
+    padding:72px 14px 40px;
+  }
+
+  .section{
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:16px;
+    padding:20px 18px;
+    box-shadow:0 2px 10px rgba(10,61,99,.06);
+    border:1px solid var(--line);
+    scroll-margin-top:70px;
+  }
+
+  .section-title{
+    font-size:19px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:14px;
+    padding-left:12px;
+    border-left:5px solid var(--orange);
+    line-height:1.35;
+  }
+
+  .section-sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin:16px 0 8px;
+    padding-left:10px;
+    border-left:4px solid var(--blue-600);
+  }
+
+  p{margin:8px 0;}
+  ul,ol{padding-left:1.4em;margin:8px 0;}
+  li{margin:6px 0;}
+  b,strong{color:var(--blue-700);}
+
+  /* ================= 提示框 ================= */
+  .box{
+    border-left:5px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:10px 0;
+    font-size:15.5px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:6px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+
+  /* ================= 代码块 ================= */
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:4px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.55;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:pre;
+    box-shadow:0 4px 12px rgba(13,43,69,.18);
+  }
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 6px;font-size:15px;border-radius:4px;
+    word-break:break-all;
+  }
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:4px solid var(--blue-400);
+    border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;line-height:1.5;
+    overflow-x:auto;
+    white-space:pre;
+  }
+
+  /* ================= 表格 ================= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.tb{
+    width:100%;
+    min-width:340px;
+    border-collapse:collapse;
+    font-size:14px;
+    line-height:1.5;
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;
+    padding:9px 12px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:9px 12px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+
+  /* ================= 卡片 ================= */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:5px solid var(--blue-600);
+    border-radius:0 0 12px 12px;
+    padding:14px 16px;
+    margin:10px 0;
+    box-shadow:0 2px 8px rgba(10,61,99,.05);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:16px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:15px;color:var(--muted);margin:0;line-height:1.65;}
+
+  /* ================= 特性列表 ================= */
+  .feat{list-style:none;padding:0;margin:0;}
+  .feat li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:5px solid var(--blue-600);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{
+    flex:0 0 auto;
+    font-size:15.5px;font-weight:700;
+    color:var(--blue-700);
+    min-width:90px;
+  }
+  .feat .v{
+    font-size:15px;color:var(--muted);line-height:1.55;
+  }
+
+  /* ================= 页脚 ================= */
+  .footer{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:24px 16px 40px;
+  }
+
+  /* ================= 回到顶部 ================= */
+  .backtop{
+    position:fixed;
+    right:16px;bottom:24px;
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(10,61,99,.3);
+    border:none;
+    cursor:pointer;
+    z-index:98;
+    opacity:0;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .backtop.show{opacity:1;}
+  .backtop:active{background:linear-gradient(135deg,#e8720c,#c55807);}
+
+  /* ================= 移动端布局微调 ================= */
+  @media (min-width:600px){
+    body{font-size:16px;}
+    .content{max-width:720px;margin:0 auto;}
+    .topbar h1{font-size:18px;}
+    .toc-panel{padding:16px 24px;}
+    .toc-panel .toc-group{max-width:720px;margin:0 auto 12px;}
+  }
+
+
+/* ===== 窄屏约束：禁止内容把 layout viewport 撑宽 ===== */
+html,body{max-width:100%;overflow-x:hidden;}
+.topbar{width:100vw;}
+.content,.section{overflow-x:hidden;}
+.table-wrap table.tb{min-width:300px;width:100%;table-layout:fixed;}
+.table-wrap table.tb th,.table-wrap table.tb td{white-space:normal;word-break:break-word;padding:8px 10px;}
+code.inline{word-break:break-word;}
+
+/* 定义的三个要素：内存结构图改为窄屏横排五格 */
+.ar.mem5{zoom:1!important;}
+.ar-row.mem5-row{grid-template-columns:repeat(5,1fr)!important;gap:4px!important;width:100%;}
+.ar.mem5 .ac{height:56px;font-size:24px;}
+.ar.mem5 .ar-tag{font-size:17px;}
+
+/* ===== 分步演示：沿用投影版，压缩到窄屏 ===== */
+.demo{
+  background:#fff;border:1px solid var(--line);border-top:6px solid var(--purple);
+  border-radius:0 0 14px 14px;padding:10px 12px;margin:10px 0;
+  box-shadow:0 3px 10px rgba(18,79,131,.08);
+}
+.demo-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.demo-title{font-size:17px;font-weight:700;color:var(--purple);}
+.demo-prog{font-size:13px;color:#5a7a9a;font-family:Consolas,monospace;white-space:nowrap;}
+.demo-note{margin-top:8px;font-size:15px;line-height:1.5;color:#41627c;min-height:56px;}
+.demo-ctl{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.demo-btn{
+  font-size:15px;line-height:1.2;padding:10px 16px;min-height:44px;
+  border-radius:9px;border:none;background:#1a6fb5;color:#fff;
+  cursor:pointer;font-family:inherit;font-weight:600;
+}
+.demo-btn.ghost{background:#e8f1f9;color:#124f83;border:2px solid #b9d3e8;}
+.ar{display:flex;flex-direction:column;gap:5px;zoom:.45;transform-origin:top left;}
+.ar-row{display:grid;gap:5px;justify-content:start;}
+.ac{
+  height:76px;border:3px solid #b9d3e8;border-radius:9px;background:#f4f9fd;
+  display:flex;align-items:center;justify-content:center;
+  font-family:Consolas,"Courier New",monospace;font-size:34px;font-weight:700;color:#124f83;
+}
+.ac.on{background:#e8f2fb;border-color:#4a97d4;}
+.ac.cur{border-color:#e8720c;background:#fdf1e4;color:#a9601a;box-shadow:0 0 0 4px rgba(232,114,12,.16);}
+.ac.new{border-color:#2e8b57;background:#eaf7ef;color:#1e6b42;box-shadow:0 0 0 4px rgba(46,139,87,.16);}
+.ac.oob{border-color:#c0392b;background:#fdeceb;color:#c0392b;border-style:dashed;}
+.ac.invalid{border-color:#9aa7b3;background:#f4f6f8;color:#7b8794;border-style:dashed;box-shadow:none;}
+.ac.q{color:#b9d3e8;}
+.ar-tag{font-family:Consolas,"Courier New",monospace;font-size:24px;color:#4d6376;text-align:center;white-space:nowrap;}
+.ar-tag.cur{color:#a9601a;font-weight:700;}
+.ar-tag.invalid{color:#7b8794;font-weight:700;}
+.ar-off{font-family:Consolas,"Courier New",monospace;font-size:26px;color:#8aa2b6;text-align:center;white-space:nowrap;}
+.ar-mark{display:grid;gap:5px;align-items:center;justify-items:center;font-size:24px;font-weight:700;}
+.ar-mark > div{display:flex;align-items:center;justify-content:center;gap:4px;height:30px;white-space:nowrap;}
+
+/* ===== 随堂问答：原生折叠 ===== */
+.qa{
+  border:1px solid var(--line);border-radius:10px;background:#fff;
+  margin:10px 0;padding:10px 14px;
+}
+.qa summary{
+  font-size:15px;font-weight:700;color:var(--purple);
+  cursor:pointer;list-style:none;
+}
+.qa summary::-webkit-details-marker{display:none;}
+.qa summary::before{content:"▸ ";color:var(--orange);}
+.qa[open] summary::before{content:"▾ ";}
+.qa[open] summary{margin-bottom:8px;}
+.qa p{font-size:15px;margin:6px 0;}
+.qa-link{
+  display:inline-block;margin-top:8px;font-size:14px;
+  color:var(--purple);font-weight:600;
+}
+
+/* 比较法排序：窄屏下代码不裁切，数组格横向排布 */
+.section#sec45 .ar,.section#sec46 .ar{zoom:.75!important;}
+.section#sec45 .demo-title,.section#sec46 .demo-title{font-size:15px;}
+.section#sec46 pre.code{font-size:15px!important;line-height:1.25!important;white-space:pre-wrap!important;}
+.section#sec51 .ar,.section#sec52 .ar{zoom:.75!important;}
+.section#sec52 .mk{font-size:14px;}
+.section#sec52 .ar-mark > div{height:34px;flex-wrap:wrap;gap:1px;white-space:normal;}
+.section#sec52 .demo-title{font-size:14px;}
+.section#sec46 .round-bar,.section#sec48 .round-bar{font-size:15px;color:#a9601a;font-weight:700;text-align:center;margin-top:4px;}
+.section#sec46 .demo-title,.section#sec48 .demo-title{font-size:14px;}
+.section#sec47 .ar,.section#sec48 .ar{zoom:.75!important;}
+
+/* 比较/冒泡演示的下标标记与比较高亮 */
+.mk{display:inline-block;padding:1px 5px;border-radius:6px;font-size:22px;line-height:1.2;white-space:nowrap;}
+/* ar 区域整体 zoom:.45，标记字号需放大抵消缩放，确保窄屏可读 */
+.ar-mark .mk{font-size:26px;padding:1px 4px;}
+.mk.mid{color:#a9601a;background:#fdf1e4;border:1px solid #f0cba6;}
+.mk.high{color:#1e6b42;background:#eaf7ef;border:1px solid #b6dcc6;}
+.mk.j1{color:#124f83;background:#e8f2fb;border:1px solid #b9d3e8;}
+.mk.low{color:#124f83;background:#e8f2fb;border:1px solid #b9d3e8;}
+.mk.del{color:#c0392b;background:#fdecea;border:1px solid #f0b7b2;}
+.ac.cmp{box-shadow:0 0 0 3px rgba(74,151,212,.22);}
+
+/* 应用篇重新编号：原 sec45/46/47/48/51/52 对应 sec15/16/17/18/21/22 */
+.section#sec15 .ar,.section#sec16 .ar{zoom:.75!important;}
+.section#sec16 pre.code{font-size:15px!important;line-height:1.25!important;white-space:pre-wrap!important;}
+.section#sec21 .ar,.section#sec22 .ar{zoom:.75!important;}
+.section#sec21 .mk{font-size:14px;}
+.section#sec21 .ar-mark > div{height:34px;flex-wrap:wrap;gap:1px;white-space:normal;}
+.section#sec21 .demo-title{font-size:14px;}
+.section#sec16 .round-bar,.section#sec18 .round-bar{font-size:15px;color:#a9601a;font-weight:700;text-align:center;margin-top:4px;}
+.section#sec16 .demo-title,.section#sec18 .demo-title{font-size:14px;}
+.section#sec17 .ar,.section#sec18 .ar{zoom:.75!important;}
+</style>
+</head>
+<body><div class="topbar"><h1>第 5 章（二）二维数组</h1><button class="btn-toc" id="btnToc">目录 <span class="arrow">▼</span></button></div><div class="toc-panel" id="tocPanel"><div class="toc-group open"><div class="toc-group-title">开场 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec1">本讲内容</a></div></div><div class="toc-group"><div class="toc-group-title">一、定义与存储 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec2">引例：一张成绩表</a><a href="#sec3">二维数组的定义</a><a href="#sec4">按行连续存放</a><a href="#sec5">数组名、行名与元素地址</a><a href="#sec6">下标到偏移的映射</a></div></div><div class="toc-group"><div class="toc-group-title">二、初始化与遍历 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec7">三种初始化方式</a><a href="#sec8">行可省，列不可省</a><a href="#sec9">用 sizeof 求行列</a><a href="#sec10">二重循环遍历</a><a href="#sec11">三种引用的写法</a></div></div><div class="toc-group"><div class="toc-group-title">三、成绩表与转置 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec12">成绩表：按行填入</a><a href="#sec13">成绩表：完整程序</a><a href="#sec14">转置：思路演示</a><a href="#sec15">矩阵转置：完整函数</a></div></div><div class="toc-group"><div class="toc-group-title">四、函数传参 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec16">二维数组作形参</a><a href="#sec17">列数为什么不能省</a><a href="#sec18">选学：鞍点</a></div></div><div class="toc-group"><div class="toc-group-title">收尾 <span class="arrow">▼</span></div><div class="toc-items"><a href="#sec19">随堂检测</a><a href="#sec20">本讲小结</a></div></div></div>
+<div class="content"><div class="section" id="sec1"><style>
+.section#sec1 .steps-vertical{display:flex;flex-direction:column;gap:12px;height:auto!important;justify-content:flex-start!important;}
+.section#sec1 .step{position:relative;padding:12px 14px 12px 62px;background:#fff;border:1px solid var(--line);border-left:6px solid var(--purple);border-radius:12px;min-height:66px;}
+.section#sec1 .step.orange{border-left-color:#e8720c;}
+.section#sec1 .step.green{border-left-color:#2e8b57;}
+.section#sec1 .step-head{display:block;}
+.section#sec1 .step-head .n{position:absolute;left:12px;top:14px;width:38px;height:38px;border-radius:50%;background:var(--purple);color:#fff;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.section#sec1 .step.orange .n{background:#e8720c;}
+.section#sec1 .step.green .n{background:#2e8b57;}
+.section#sec1 .step-head .n::before{content:"0";}
+.section#sec1 .step-head .t{display:block;font-size:16px;font-weight:700;color:#124f83;line-height:1.35;}
+.section#sec1 .step .d{display:block;margin-top:5px;font-size:14px;line-height:1.5;color:#4d6376;}
+</style><div class="section-title">本讲内容</div><div class="steps-vertical tight">
+<div class="step">
+<div class="step-head"><span class="n">1</span><span class="t">定义与存储</span></div>
+<div class="d">由四组并列的一维数组归并为一张二维表，明确行下标与列下标的含义。</div>
+</div>
+<div class="step orange">
+<div class="step-head"><span class="n">2</span><span class="t">遍历与转置</span></div>
+<div class="d">外层控行、内层控列；只在主对角线一侧交换，每对元素恰好交换一次。</div>
+</div>
+<div class="step green">
+<div class="step-head"><span class="n">3</span><span class="t">数组作函数形参</span></div>
+<div class="d">列数必须写明并与实参一致；行数另设参数传入。</div>
+</div>
+</div><div class="box tip tight">
+<span class="label">贯穿例子</span>
+        本讲以 <code class="inline">int a[2][3]</code> 讲存储，以 <code class="inline">int score[30][5]</code> 讲应用；鞍点一节标为选学，不作为考核内容。
+      </div></div><div class="section" id="sec2"><div class="section-title">引例：三十个学生，三门课程</div><p>某班 30 名学生，每人有学号和 C 语言、高数、英语三门成绩。需要按编号输出每人的四列数据。</p><pre class="code" style="margin-top:0;"><span class="cmt">/* 四组并列的一维数组 */</span>
+<span class="kw">int</span> id[<span class="num">30</span>], c[<span class="num">30</span>], math[<span class="num">30</span>], eng[<span class="num">30</span>];
+
+<span class="cmt">/* 一张二维表：30 行，4 列 */</span>
+<span class="kw">int</span> score[<span class="num">30</span>][<span class="num">4</span>];</pre><div class="box warn tight">
+<span class="label">改用二维数组的原因</span>
+        四组一维数组彼此独立，遍历时要同时维护四个下标，也难以保证四组数据属于同一名学生。写成 <code class="inline">score[i][j]</code> 后，行下标 <code class="inline">i</code> 表示学生，列下标 <code class="inline">j</code> 表示课程，同一名学生的记录落在同一行上。
+      </div><div class="box tip tight">
+<span class="label">适用场合</span>
+        行数与列数都固定的数据适合用二维数组组织。本讲后续统一以二行三列的小表演示，便于在一页内完整呈现。
+      </div></div><div class="section" id="sec3"><div class="section-title">二维数组的定义</div><pre class="code" style="margin-top:0;">类型说明符　数组名[整型常量表达式1][整型常量表达式2];
+<span class="kw">int</span> a[<span class="num">2</span>][<span class="num">3</span>];</pre><div class="table-wrap"><table class="tb" style="margin-top:8px;">
+<tbody>
+<tr><th>第一维</th><td>行数，此处为 2，行下标取 0、1。</td></tr>
+<tr><th>第二维</th><td>列数，此处为 3，列下标取 0、1、2。</td></tr>
+<tr><th>元素总数</th><td>2 × 3 = 6 个 <code class="inline">int</code>，共 24 字节。</td></tr>
+</tbody>
+</table></div><div class="ar defsmall" style="margin-top:10px;">
+<div class="ar-row" style="grid-template-columns:repeat(3,110px);gap:8px;justify-content:center;">
+<div class="ac">a[0][0]</div><div class="ac">a[0][1]</div><div class="ac">a[0][2]</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(3,110px);gap:8px;justify-content:center;">
+<div class="ac">a[1][0]</div><div class="ac">a[1][1]</div><div class="ac">a[1][2]</div>
+</div>
+</div><div class="box key tight">
+<span class="label">读法</span>
+<code class="inline">a[2][3]</code> 读作「2 行 3 列」。写下标时先写行、后写列，顺序与定义一致。二维数组常被叫作矩阵，但它在内存中仍是一段连续空间。
+      </div></div><div class="section" id="sec4"><div class="section-title">按行连续存放</div><p>设 <code class="inline">int a[2][3] = {{1,2,3},{4,5,6}};</code>，六个元素在内存中的排列如下。</p><div class="ar">
+<div class="ar-row" style="grid-template-columns:repeat(3,150px);gap:8px;justify-content:center;">
+<div class="cellwrap"><div class="ca">0x61FE20</div><div class="ac">1</div><div class="cn">a[0][0]</div></div>
+<div class="cellwrap"><div class="ca">0x61FE24</div><div class="ac">2</div><div class="cn">a[0][1]</div></div>
+<div class="cellwrap"><div class="ca">0x61FE28</div><div class="ac">3</div><div class="cn">a[0][2]</div></div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(3,150px);gap:8px;justify-content:center;margin-top:6px;">
+<div class="cellwrap"><div class="ca">0x61FE2C</div><div class="ac">4</div><div class="cn">a[1][0]</div></div>
+<div class="cellwrap"><div class="ca">0x61FE30</div><div class="ac">5</div><div class="cn">a[1][1]</div></div>
+<div class="cellwrap"><div class="ca">0x61FE34</div><div class="ac">6</div><div class="cn">a[1][2]</div></div>
+</div>
+</div><div class="box warn tight">
+<span class="label">地址以实际运行为准</span>
+        每个 <code class="inline">int</code> 占 4 字节，相邻元素地址相差 4。第 0 行末尾 <code class="inline">0x61FE28</code> 与第 1 行开头 <code class="inline">0x61FE2C</code> 仍然相邻，中间没有空隙。地址由系统运行时分配，具体数值每次可能不同，此处取某次实际运行的结果。
+      </div></div><div class="section" id="sec5"><div class="section-title">数组名、行名与元素地址</div><div class="table-wrap"><table class="tb">
+<thead><tr><th>写法</th><th>地址值</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td><code class="inline">a</code></td><td>0x61FE20</td><td>整个二维数组的首地址，也就是第 0 行的首地址。</td></tr>
+<tr><td><code class="inline">a[0]</code></td><td>0x61FE20</td><td>第 0 行的名字，代表这一行首元素的地址。</td></tr>
+<tr><td><code class="inline">&amp;a[0][0]</code></td><td>0x61FE20</td><td>第 0 行第 0 列元素的地址。</td></tr>
+<tr><td><code class="inline">a[1]</code></td><td>0x61FE2C</td><td>第 1 行的名字，代表第 1 行首元素的地址。</td></tr>
+</tbody>
+</table></div><div class="box key tight">
+<span class="label">数值相同，含义不同</span>
+        前三行地址值都是 <code class="inline">0x61FE20</code>，但 <code class="inline">a</code> 指整张表，<code class="inline">a[0]</code> 指一行，<code class="inline">&amp;a[0][0]</code> 指一个元素。跨过一行要加 12 字节，跨过一个元素只加 4 字节。
+      </div><div class="box tip tight">
+<span class="label">与一维数组的联系</span>
+<code class="inline">a[i]</code> 是二维数组第 <code class="inline">i</code> 行的名字，用法与一维数组名一致；<code class="inline">a[i][j]</code> 才是该行中的第 <code class="inline">j</code> 个元素。
+      </div></div><div class="section" id="sec6"><div class="section-title">下标到偏移的映射</div><pre class="code" style="margin-top:0;">a[i][j]　等价于　a[0][列数 * i + j]
+本例列数为 3：a[1][2]　等价于　a[0][3 * 1 + 2]，即 a[0][5]</pre><div class="table-wrap"><table class="tb" style="margin-top:8px;">
+<tbody>
+<tr><th>要定位的元素</th><td><code class="inline">a[1][2]</code>，值 6。</td></tr>
+<tr><th>换算</th><td>先跳过第 0 行的 3 个元素，再在本行走到第 2 个，偏移为 5。</td></tr>
+<tr><th>地址</th><td>0x61FE20 + 5 × 4 = 0x61FE34，与表中第六格一致。</td></tr>
+</tbody>
+</table></div><div class="box key tight">
+<span class="label">结论</span>
+        编译器按此公式定位元素，其中<strong>列数决定每行的步长</strong>；这也是函数形参必须写明第二维的原因。
+      </div></div><div class="section" id="sec7"><div class="section-title">初始化的三种方式</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">2</span>][<span class="num">3</span>] = {{<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>}, {<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>}};  <span class="cmt">/* 按行 */</span>
+<span class="kw">int</span> b[<span class="num">2</span>][<span class="num">3</span>] = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>};       <span class="cmt">/* 按存放顺序 */</span>
+<span class="kw">int</span> c[<span class="num">2</span>][<span class="num">3</span>] = {{<span class="num">1</span>}, {<span class="num">4</span>, <span class="num">5</span>}};             <span class="cmt">/* 部分赋初值 */</span></pre><div class="table-wrap"><table class="tb" style="margin-top:8px;">
+<tbody>
+<tr><th>a</th><td>每对内层大括号对应一行，共两行。</td></tr>
+<tr><th>b</th><td>不写内层括号，按内存排列顺序依次填入。</td></tr>
+<tr><th>c</th><td>第一行为 1、0、0，第二行为 4、5、0；未写出的元素补 0。</td></tr>
+</tbody>
+</table></div><div class="box warn tight">
+<span class="label">补零的条件</span>
+        只要给出了初始化列表，未写出的元素就自动补 0。若写成 <code class="inline">int d[2][3];</code> 而不给列表，局部变量的元素内容不确定。
+      </div></div><div class="section" id="sec8"><div class="section-title">行可省，列不可省</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[][<span class="num">3</span>] = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>};   <span class="cmt">/* 合法 */</span>
+<span class="kw">int</span> b[<span class="num">2</span>][] = {{<span class="num">1</span>, <span class="num">2</span>}, {<span class="num">3</span>, <span class="num">4</span>}};   <span class="cmt">/* 错误 */</span></pre><div class="box key tight">
+<span class="label">原因</span>
+        编译器必须知道<strong>第二维</strong>才能计算 <code class="inline">a[i][j]</code> 的偏移。第一维可以由初值个数推得：本例 6 个初值除以每行 3 个，得 2 行。
+      </div><div class="box tip tight">
+<span class="label">与一维数组对照</span>
+        一维数组 <code class="inline">int x[] = {1,2,3};</code> 省略的是唯一的一维，编译器直接数出长度；二维数组只能省行数，不能省列数。
+      </div></div><div class="section" id="sec9"><div class="section-title">用 sizeof 求行数和列数</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[][<span class="num">3</span>] = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>};
+<span class="kw">int</span> rows = <span class="kw">sizeof</span>(a) / <span class="kw">sizeof</span>(a[<span class="num">0</span>]);      <span class="cmt">/* 2 */</span>
+<span class="kw">int</span> cols = <span class="kw">sizeof</span>(a[<span class="num">0</span>]) / <span class="kw">sizeof</span>(<span class="kw">int</span>);    <span class="cmt">/* 3 */</span></pre><div class="table-wrap"><table class="tb" style="margin-top:8px;">
+<thead><tr><th>表达式</th><th>结果</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td><code class="inline">sizeof(a)</code></td><td>24</td><td>整张表占用的字节数。</td></tr>
+<tr><td><code class="inline">sizeof(a[0])</code></td><td>12</td><td>一行占用的字节数。</td></tr>
+<tr><td><code class="inline">sizeof(a[0][0])</code></td><td>4</td><td>一个元素占用的字节数。</td></tr>
+</tbody>
+</table></div><div class="box warn tight">
+<span class="label">适用场合</span>
+<code class="inline">sizeof</code> 只在数组定义仍可见的范围内有效。数组作函数形参后，它退化为地址，<code class="inline">sizeof</code> 不再给出整表长度，因此行列数要另外传参。
+      </div></div><div class="section" id="sec10"><div class="section-title">二重循环遍历</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">2</span>][<span class="num">3</span>], i, j;
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">2</span>; i++) {
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[i][j]);
+}
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">2</span>; i++) {
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">printf</span>(<span class="str">"%4d"</span>, a[i][j]);
+    <span class="kw">printf</span>(<span class="str">"\n"</span>);
+}</pre><div class="box key tight">
+<span class="label">循环的分工</span>
+        外层变量 <code class="inline">i</code> 控制行，内层变量 <code class="inline">j</code> 控制列。固定一行后走完该行所有列，再进入下一行。输出时内层结束后打印一个换行，才能排成矩阵。
+      </div></div><div class="section" id="sec11"><div class="section-title">三种引用写法</div><pre class="code" style="margin-top:0;"><span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">2</span>; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[i][j]);          <span class="cmt">/* 按行列位置 */</span>
+
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">2</span>; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[<span class="num">0</span>][<span class="num">3</span> * i + j]);  <span class="cmt">/* 按偏移量 */</span>
+
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">6</span>; i++)
+    <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[<span class="num">0</span>][i]);             <span class="cmt">/* 一层循环 */</span></pre><div class="box key tight">
+<span class="label">三种写法等价</span>
+        第二种把二维下标换算成一维偏移，第三种直接用一层循环走完六个连续单元。它们访问的是同一段内存，顺序与按行存放一致。
+      </div><div class="box tip tight">
+<span class="label">选择依据</span>
+        需要区分行列时用 <code class="inline">a[i][j]</code>，例如求每行的和；只按存放顺序处理全部元素时用一层循环，代码更短。若第二维改变，第二种的常数 3 必须同步修改。
+      </div></div><div class="section" id="sec12"><div class="section-title">成绩表：按行读入并累计总分</div><div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> score[<span class="num">3</span>][<span class="num">5</span>], i, j;
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {
+    score[i][<span class="num">0</span>] = i + <span class="num">1</span>;      <span class="cmt">/* 学号 */</span>
+    score[i][<span class="num">4</span>] = <span class="num">0</span>;         <span class="cmt">/* 总分清零 */</span>
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">3</span>; j++) {
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;score[i][j]);
+        score[i][<span class="num">4</span>] += score[i][j];
+    }
+}</pre>
+<div class="box warn tight" style="margin-top:8px;">
+<span class="label">列的含义</span>
+            第 0 列放学号，第 1 至 3 列放三门成绩，第 4 列放总分。<code class="inline">score[i][4]</code> 在读入前必须清零。
+          </div>
+</div><div class="demo" data-demo="score" data-hint="点击“下一步”，逐行填入成绩表。" style="margin-top:0;">
+<div class="demo-head">
+<div class="demo-title">三行四列：逐行填入</div>
+<div class="demo-prog"></div>
+</div>
+<div class="ar">
+<div class="ar-row" style="grid-template-columns:repeat(5,88px);gap:6px;justify-content:center;">
+<div class="ar-tag">学号</div><div class="ar-tag">C语言</div><div class="ar-tag">高数</div><div class="ar-tag">英语</div><div class="ar-tag">总分</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(5,88px);gap:6px;justify-content:center;margin-top:4px;">
+<div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(5,88px);gap:6px;justify-content:center;margin-top:4px;">
+<div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div>
+</div>
+<div class="ar-row" style="grid-template-columns:repeat(5,88px);gap:6px;justify-content:center;margin-top:4px;">
+<div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div>
+</div>
+</div>
+<div class="demo-note" style="min-height:70px;"></div>
+<div class="demo-ctl">
+<button class="demo-btn" data-act="next">下一步</button>
+<button class="demo-btn ghost" data-act="reset">重置</button>
+</div>
+</div></div><div class="section" id="sec13"><div class="section-title">成绩表：输入、计算、输出</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> score[<span class="num">30</span>][<span class="num">5</span>], i, j, m, n = <span class="num">3</span>;
+<span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;m);
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; m; i++) {
+    score[i][<span class="num">0</span>] = i + <span class="num">1</span>;  score[i][<span class="num">4</span>] = <span class="num">0</span>;
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= n; j++) {
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;score[i][j]);  score[i][<span class="num">4</span>] += score[i][j];
+    }
+}
+<span class="kw">printf</span>(<span class="str">"学号\tC语言\t高数\t英语\t总分\n"</span>);
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; m; i++) {
+    <span class="kw">printf</span>(<span class="str">"%d\t"</span>, score[i][<span class="num">0</span>]);
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= n; j++) <span class="kw">printf</span>(<span class="str">"%d\t"</span>, score[i][j]);
+    <span class="kw">printf</span>(<span class="str">"%d\n"</span>, score[i][<span class="num">4</span>]);
+}</pre><div class="box tip tight">
+<span class="label">容量与实际个数分离</span>
+        数组按 30 人声明，实际人数 <code class="inline">m</code> 由键盘输入，所有循环边界用 <code class="inline">m</code> 而非 30。这与一维数组的做法一致。
+      </div></div><div class="section" id="sec14"><div class="section-title">矩阵转置：只走上三角</div><div>
+<pre class="code" style="margin-top:0;"><span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; i; j++) {
+        t = a[i][j];
+        a[i][j] = a[j][i];
+        a[j][i] = t;
+    }</pre>
+<div class="box warn tight" style="margin-top:8px;">
+<span class="label">为什么 j 小于 i</span>
+<code class="inline">a[i][j]</code> 与 <code class="inline">a[j][i]</code> 成对交换。若内层从 0 走到 n−1，每对会交换两次，矩阵回到原样。只走上三角，每对恰好交换一次；主对角线不用动。
+          </div>
+</div><div class="demo" data-demo="transpose" data-hint="点击“下一步”，观察每一对对称元素如何交换。" style="margin-top:0;">
+<div class="demo-head">
+<div class="demo-title">四阶矩阵的六次交换</div>
+<div class="demo-prog"></div>
+</div>
+<div class="ar" style="margin-top:4px;">
+<div class="ar-row" style="grid-template-columns:repeat(4,74px);gap:6px;justify-content:center;"><div class="ac">1</div><div class="ac">2</div><div class="ac">3</div><div class="ac">4</div></div>
+<div class="ar-row" style="grid-template-columns:repeat(4,74px);gap:6px;justify-content:center;margin-top:4px;"><div class="ac">5</div><div class="ac">6</div><div class="ac">7</div><div class="ac">8</div></div>
+<div class="ar-row" style="grid-template-columns:repeat(4,74px);gap:6px;justify-content:center;margin-top:4px;"><div class="ac">9</div><div class="ac">10</div><div class="ac">11</div><div class="ac">12</div></div>
+<div class="ar-row" style="grid-template-columns:repeat(4,74px);gap:6px;justify-content:center;margin-top:4px;"><div class="ac">13</div><div class="ac">14</div><div class="ac">15</div><div class="ac">16</div></div>
+</div>
+<div class="demo-note" style="min-height:70px;"></div>
+<div class="demo-ctl">
+<button class="demo-btn" data-act="next">下一步</button>
+<button class="demo-btn ghost" data-act="reset">重置</button>
+</div>
+</div></div><div class="section" id="sec15"><div class="section-title">矩阵转置：完整程序</div><pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">10</span>][<span class="num">10</span>], n, i, j, t;
+<span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; n; j++) <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[i][j]);
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; i; j++) {
+        t = a[i][j];
+        a[i][j] = a[j][i];
+        a[j][i] = t;
+    }
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++) {
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; n; j++)
+        <span class="kw">printf</span>(<span class="str">"%5d"</span>, a[i][j]);
+    <span class="kw">printf</span>(<span class="str">"\n"</span>);
+}</pre><div class="box tip tight">
+<span class="label">对齐输出</span>
+<code class="inline">%5d</code> 让每个元素占 5 列，不足时补空格，各列才能对齐，与一维数组用制表符是同一目的。
+      </div></div><div class="section" id="sec16"><div class="section-title">二维数组作函数形参：成绩表拆分</div><div>
+<pre class="code" style="margin-top:0;"><span class="cmt">/* 函数原型：第二维必须写明 */</span>
+<span class="kw">void</span> readScore(<span class="kw">int</span> s[][<span class="num">5</span>], <span class="kw">int</span> m);
+<span class="kw">void</span> output(<span class="kw">int</span> s[][<span class="num">5</span>], <span class="kw">int</span> m);
+
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> score[<span class="num">30</span>][<span class="num">5</span>], m;
+    <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;m);
+    readScore(score, m);
+    output(score, m);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+</div><div>
+<pre class="code" style="margin-top:0;"><span class="kw">void</span> readScore(<span class="kw">int</span> s[][<span class="num">5</span>], <span class="kw">int</span> m)
+{
+    <span class="kw">int</span> i, j;
+    <span class="kw">for</span> (i = <span class="num">0</span>; i &lt; m; i++) {
+        s[i][<span class="num">0</span>] = i + <span class="num">1</span>;
+        s[i][<span class="num">4</span>] = <span class="num">0</span>;
+        <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">3</span>; j++) {
+            <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;s[i][j]);
+            s[i][<span class="num">4</span>] += s[i][j];
+        }
+    }
+}</pre>
+</div><div class="box key tight" style="margin-top:10px;">
+<span class="label">形参与实参</span>
+        第二维 <code class="inline">5</code> 不可省，编译器据此计算每行步长，且须与实参 <code class="inline">score[30][5]</code> 一致；第一维可省，行数由 <code class="inline">m</code> 传入。<code class="inline">s</code> 收到的是 <code class="inline">score</code> 的首地址，函数内对 <code class="inline">s[i][j]</code> 的改动会写回实参数组。<code class="inline">output</code> 的实现与第 14 页的输出循环相同，只需把 <code class="inline">score</code> 换成形参 <code class="inline">s</code>。
+      </div></div><div class="section" id="sec17"><div class="section-title">列数为什么不能省</div><pre class="code" style="margin-top:0;">地址(a[i][j]) = 首地址 + i × 列数 × sizeof(int) + j × sizeof(int)
+实参：int m[4][4]　形参：int a[][3]　　<span class="cmt">/* 列数不一致 */</span></pre><div class="box red tight">
+<span class="label">实际后果</span>
+        本机编译给出 <code class="inline">incompatible pointer type</code> 警告。函数仍按每行 3 个元素计算偏移，第 1 行才读入 4 个整数就被当作跨行，转置结果出现一个随机值。
+      </div><div class="box warn tight">
+<span class="label">两条规则</span>
+        其一，形参第二维必须是编译期确定的常量；其二，实参数组的第二维必须与它相同。写成 <code class="inline">void f(int a[][3])</code> 就只能接收第二维为 3 的数组。
+      </div><div class="box tip tight">
+<span class="label">可选路径</span>
+        C99 起可用可变长数组作形参，写作 <code class="inline">void f(int n, int a[][n])</code>，要求 <code class="inline">n</code> 在数组参数之前声明。这一写法留待指针一章展开，本讲不采用。
+      </div></div><div class="section" id="sec18"><div class="section-title">选学：找出矩阵的鞍点</div><p>鞍点指某个元素既是所在行的最大值，又是所在列的最小值。矩阵可以没有鞍点。</p><pre class="code" style="margin-top:0;"><span class="kw">int</span> x[<span class="num">4</span>][<span class="num">3</span>] = {{<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>},{<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>},{<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>},{<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>}};
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">4</span>; i++) {
+    max = x[i][<span class="num">0</span>];
+    row = i;
+    column = <span class="num">0</span>;
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">if</span> (x[i][j] &gt; max) { max = x[i][j]; column = j; }
+    <span class="kw">for</span> (k = <span class="num">0</span>; k &lt; <span class="num">4</span>; k++)
+        <span class="kw">if</span> (x[k][column] &lt; max) { row = column = -<span class="num">1</span>; <span class="kw">break</span>; }
+    <span class="kw">if</span> (row &gt; -<span class="num">1</span>) <span class="kw">printf</span>(<span class="str">"鞍点 x[%d][%d]=%d\n"</span>, row, column, max);
+}</pre><div class="box tip tight">
+<span class="label">本例结果</span>
+        鞍点为 <code class="inline">x[3][2] = 1</code>：第 3 行最大值是 1，第 2 列最小值也是 1。求行最大值与列最小值各用一层循环，外层仍是遍历行的循环。此页不作为考核要求。
+      </div></div><div class="section" id="sec19"><div class="section-title">随堂检测</div><div class="grid c3" style="min-height:330px;">
+<div class="card">
+<h4><span class="ico">1</span>行列与个数</h4>
+<p><code class="inline">int a[3][4];</code> 有多少个元素？最大合法下标是什么？</p>
+<a class="qa-link" href="#qa-db1">看解析</a>
+</div>
+<div class="card green">
+<h4><span class="ico">2</span>省略第一维</h4>
+<p><code class="inline">int a[][3] = {1,2,3,4,5,6};</code> 有几行？</p>
+<a class="qa-link" href="#qa-db2">看解析</a>
+</div>
+<div class="card red">
+<h4><span class="ico">3</span>形参写法</h4>
+<p><code class="inline">void f(int a[][])</code> 为什么不能通过编译？</p>
+<a class="qa-link" href="#qa-db3">看解析</a>
+</div>
+</div><div class="box tip tight" style="margin-top:18px;">
+<span class="label">考点分布</span>
+        第 1 题考下标范围，第 2 题考初始化推断，第 3 题考地址步长；三题都依据按行连续存放的规则。
+      </div><details class="qa" id="qa-db1"><summary>第 1 题　元素个数</summary>
+
+<p>3 × 4 = <b>12</b> 个元素。行下标范围 0 至 2，列下标范围 0 至 3，最后一个元素是 <code class="inline">a[2][3]</code>。</p>
+<p style="margin-top:10px;">写成 <code class="inline">a[3][4]</code> 会越过整张表的末尾，编译时没有提示。</p>
+</details><details class="qa" id="qa-db2"><summary>第 2 题　行数推断</summary>
+
+<p><b>2</b> 行。6 个初值，每行 3 个，编译器据此推得第一维为 2。</p>
+<pre class="code">int rows = sizeof(a) / sizeof(a[0]);   <span class="cmt">/* 2 */</span></pre>
+</details><details class="qa" id="qa-db3"><summary>第 3 题　形参的第二维</summary>
+
+<p>编译器计算 <code class="inline">a[i][j]</code> 的地址时必须知道列数，否则无法求出每行的步长。第二维不可省略，应写成 <code class="inline">void f(int a[][4])</code>，并保证实参数组的列数也是 4。</p>
+</details></div><div class="section" id="sec20"><div class="section-title">本讲小结</div><div class="table-wrap"><table class="tb">
+<thead><tr><th>要点</th><th>结论</th></tr></thead>
+<tbody>
+<tr><td>逻辑结构</td><td><code class="inline">a[i][j]</code>，先行后列，下标均从 0 起。</td></tr>
+<tr><td>存储结构</td><td>按行连续存放，相邻元素相差 4 字节，行与行之间没有空隙。</td></tr>
+<tr><td>初始化</td><td>可省第一维，不可省第二维；部分赋初值时其余元素补 0。</td></tr>
+<tr><td>遍历</td><td>外层控行、内层控列；一层循环按偏移量访问同样有效。</td></tr>
+<tr><td>函数形参</td><td>第一维可省，第二维必须写明且与实参一致。</td></tr>
+</tbody>
+</table></div><div class="box key tight">
+<span class="label">总述</span>
+        二维数组在逻辑上是矩阵，在内存中仍是一段连续空间；列数决定每行的长度，二维下标据此换算成一维偏移。
+      </div></div><div class="footer">C 程序设计基础 · 第 5 章（二）二维数组<br>手机复习版 · 武汉理工大学 人工智能学院</div></div>
+<button class="backtop" id="backtop" title="回到顶部">↑</button><script>
+(function(){
+  /* ============== 目录收起/展开 ============== */
+  var btnToc  = document.getElementById('btnToc');
+  var tocPanel = document.getElementById('tocPanel');
+
+  btnToc.addEventListener('click', function(){
+    var open = tocPanel.classList.toggle('show');
+    btnToc.classList.toggle('open', open);
+  });
+
+  /* 每组标题点击折叠 */
+  document.querySelectorAll('.toc-group').forEach(function(g){
+    var title = g.querySelector('.toc-group-title');
+    title.addEventListener('click', function(){
+      g.classList.toggle('open');
+    });
+  });
+
+  /* 点击目录项后收起目录 */
+  document.querySelectorAll('.toc-items a').forEach(function(a){
+    a.addEventListener('click', function(){
+      tocPanel.classList.remove('show');
+      btnToc.classList.remove('open');
+    });
+  });
+
+  /* ============== 回到顶部按钮 ============== */
+  var backtop = document.getElementById('backtop');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 400) backtop.classList.add('show');
+    else backtop.classList.remove('show');
+  }, { passive: true });
+
+  backtop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ============== 当前章节高亮 ============== */
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.toc-items a');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    sections.forEach(function(sec){
+      var top = sec.offsetTop;
+      var bot = top + sec.offsetHeight;
+      if (pos >= top && pos < bot) {
+        links.forEach(function(a){
+          a.style.background = '';
+          a.style.color = '';
+        });
+        var id = sec.getAttribute('id');
+        var active = document.querySelector('.toc-items a[href="#' + id + '"]');
+        if (active) {
+          active.style.background = 'var(--blue-100)';
+          active.style.color = 'var(--orange)';
+        }
+      }
+    });
+  }, { passive: true });
+})();
+</script><script>
+(function () {
+  'use strict';
+
+  /* 通用分步演示驱动：上一步 / 下一步 / 重置，翻到本页时自动复位 */
+  function bind(root, steps, paint) {
+    var note = root.querySelector('.demo-note');
+    var prog = root.querySelector('.demo-prog');
+    var hint = root.getAttribute('data-hint') || '点击“下一步”开始。';
+    var total = steps.length;
+    var idx = -1;
+
+    function render() {
+      var s = idx >= 0 ? steps[idx] : null;
+      paint(s);
+      note.textContent = s ? s.note : hint;
+      prog.textContent = (idx + 1) + ' / ' + total;
+    }
+
+    var bn = root.querySelector('[data-act="next"]');
+    var bp = root.querySelector('[data-act="prev"]');
+    var br = root.querySelector('[data-act="reset"]');
+    if (bn) bn.onclick = function (e) { e.stopPropagation(); if (idx < total - 1) { idx += 1; render(); } };
+    if (bp) bp.onclick = function (e) { e.stopPropagation(); if (idx >= 0) { idx -= 1; render(); } };
+    if (br) br.onclick = function (e) { e.stopPropagation(); idx = -1; render(); };
+
+    root.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    render();
+  }
+
+  /* ---------- 成绩表：逐行填入 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="score"]');
+    if (!root) return;
+    var cells = root.querySelectorAll('.ac');
+    var data = [[1,78,92,65,235],[2,85,90,88,263],[3,72,78,80,230]];
+    var steps = [
+      { r:0, note:'读入第 0 行：学号 1，三门成绩 78、92、65；score[0][4] 累加得 235。' },
+      { r:1, note:'读入第 1 行：score[1][4] 先清零，再依次加上 85、90、88，得 263。' },
+      { r:2, note:'读入第 2 行：三门成绩 72、78、80，总分 score[2][4] 得 230。' },
+      { r:2, done:true, note:'三行填满。第 4 列始终由循环累加得出，不需要额外输入。' }
+    ];
+    bind(root, steps, function (s) {
+      for (var i = 0; i < cells.length; i++) {
+        var row = Math.floor(i / 5), col = i % 5;
+        var c = cells[i];
+        if (!s || row > s.r) {
+          c.textContent = '?';
+          c.style.background = '';
+          c.style.borderColor = '';
+          continue;
+        }
+        c.textContent = data[row][col];
+        c.style.background = (s.done && col === 4) ? '#eaf7ef'
+                           : (row === s.r ? '#fff3e0' : '');
+        c.style.borderColor = (s.done && col === 4) ? '#2e8b57'
+                            : (row === s.r ? '#e8720c' : '');
+      }
+    });
+  })();
+
+  /* ---------- 矩阵转置：六次对称交换 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="transpose"]');
+    if (!root) return;
+    var cells = root.querySelectorAll('.ac');
+    var base = [1,2,3,4, 5,6,7,8, 9,10,11,12, 13,14,15,16];
+    var steps = [
+      { m:[1,5,3,4, 2,6,7,8, 9,10,11,12, 13,14,15,16], p:[4,1],
+        note:'i=1, j=0：交换 a[1][0]=5 与 a[0][1]=2。' },
+      { m:[1,5,9,4, 2,6,7,8, 3,10,11,12, 13,14,15,16], p:[8,2],
+        note:'i=2, j=0：交换 a[2][0]=9 与 a[0][2]=3。' },
+      { m:[1,5,9,4, 2,6,10,8, 3,7,11,12, 13,14,15,16], p:[9,6],
+        note:'i=2, j=1：交换 a[2][1]=10 与 a[1][2]=7。' },
+      { m:[1,5,9,13, 2,6,10,8, 3,7,11,12, 4,14,15,16], p:[12,3],
+        note:'i=3, j=0：交换 a[3][0]=13 与 a[0][3]=4。' },
+      { m:[1,5,9,13, 2,6,10,14, 3,7,11,12, 4,8,15,16], p:[13,7],
+        note:'i=3, j=1：交换 a[3][1]=14 与 a[1][3]=8。' },
+      { m:[1,5,9,13, 2,6,10,14, 3,7,11,15, 4,8,12,16], p:[14,11],
+        note:'i=3, j=2：交换 a[3][2]=15 与 a[2][3]=12。六次交换后转置完成。' }
+    ];
+    bind(root, steps, function (s) {
+      var m = s ? s.m : base;
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].textContent = m[i];
+        var hot = s && (i === s.p[0] || i === s.p[1]);
+        cells[i].style.background = hot ? '#fff3e0' : '';
+        cells[i].style.borderColor = hot ? '#e8720c' : '';
+      }
+    });
+  })();
+
+})();
+
+</script></body>
+</html>

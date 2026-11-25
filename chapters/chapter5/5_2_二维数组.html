@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C 程序设计基础 · 第 5 章（二）二维数组</title>
+<style>
+  :root{
+    --fs-title: 48px;
+    --fs-body:  32px;
+    --fs-other: 30px;
+    --fs-list:  30px;
+    --blue-900:#0a3d63;
+    --blue-700:#124f83;
+    --blue-600:#1a6fb5;
+    --blue-400:#4a97d4;
+    --blue-100:#e8f2fb;
+    --orange:#e8720c;
+    --orange-soft:#fdf1e4;
+    --green:#2e8b57;
+    --green-soft:#eaf7ef;
+    --purple:#8e44ad;
+    --purple-soft:#f5ecfa;
+    --red:#c0392b;
+    --red-soft:#fdeceb;
+    --ink:#1d2b36;
+    --muted:#4d6376;
+    --line:#d6e2ee;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  html,body{
+    height:100%;overflow:hidden;background:var(--blue-900);
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  #stage{
+    position:fixed;left:50%;top:50%;
+    width:1600px;height:900px;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    transform-origin:center center;
+    background:#fff;overflow:hidden;
+    transition:opacity .22s ease;
+  }
+  body.blackout #stage{opacity:0;}
+
+  .slide{
+    position:absolute;inset:0;
+    display:none;flex-direction:column;
+    padding:30px 64px 60px;
+    background:linear-gradient(180deg,#ffffff 0%,#f4faff 100%);
+  }
+  .slide.active{display:flex;animation:fadeUp .26s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  @keyframes itemIn{
+    from{opacity:0;transform:translateY(18px);}
+    to{opacity:1;transform:none;}
+  }
+  .slide.active .s-title{animation:itemIn .42s ease both;}
+  .slide.active .s-body > *{animation:itemIn .42s ease both;}
+  .slide.active .s-body > *:nth-child(1){animation-delay:.08s;}
+  .slide.active .s-body > *:nth-child(2){animation-delay:.16s;}
+  .slide.active .s-body > *:nth-child(3){animation-delay:.24s;}
+  .slide.active .s-body > *:nth-child(4){animation-delay:.32s;}
+  .slide.active .s-body > *:nth-child(5){animation-delay:.40s;}
+  .slide.active .s-body > *:nth-child(6){animation-delay:.48s;}
+
+  .slide.cover.active .s-title,
+  .slide.cover.active .s-body > *,
+  .slide.end.active .s-title,
+  .slide.end.active .s-body > *{animation:none;}
+
+  .slide::after{
+    content:"";position:absolute;right:-90px;bottom:-90px;
+    width:300px;height:300px;border-radius:50%;
+    background:radial-gradient(circle,rgba(26,111,181,.10) 0%,rgba(26,111,181,0) 70%);
+    pointer-events:none;
+  }
+
+  .s-title{
+    flex:0 0 auto;align-self:flex-start;
+    background:linear-gradient(135deg,#1a6fb5 0%,#124f83 100%);
+    color:#fff;font-size:48px;font-weight:700;
+    letter-spacing:1.5px;line-height:1.15;
+    padding:14px 30px 14px 24px;
+    border-left:10px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    margin-bottom:18px;
+    box-shadow:0 6px 16px rgba(18,79,131,.18);
+  }
+  .s-title .act{
+    display:inline-block;vertical-align:8px;
+    font-size:22px;font-weight:600;letter-spacing:1px;line-height:1;
+    color:#ffd9b3;border:1px solid rgba(255,217,179,.55);
+    border-radius:999px;padding:8px 16px;margin-left:22px;
+  }
+  .s-sub{
+    font-size:var(--fs-body);font-weight:700;color:var(--blue-700);
+    border-left:7px solid var(--orange);
+    padding:2px 0 2px 14px;margin:14px 0 10px;
+  }
+  .s-sub:first-child{margin-top:0;}
+  .s-sub.blue{border-left-color:var(--blue-600);}
+
+  .s-body{
+    flex:1 1 auto;min-height:0;overflow:hidden;
+    font-size:32px;line-height:1.5;color:var(--ink);
+  }
+  .s-body p{margin:8px 0;}
+  .s-body p:first-child{margin-top:0;}
+  .s-body ul,.s-body ol{padding-left:1.5em;margin:8px 0;}
+  .s-body li{margin:4px 0;}
+  .s-body ul>li::marker{color:var(--blue-600);}
+  .s-body ol>li::marker{color:var(--orange);font-weight:800;}
+  b,strong{color:var(--blue-700);}
+
+  table.tb{
+    width:100%;border-collapse:separate;border-spacing:0;
+    font-size:var(--fs-other);line-height:1.45;margin:6px 0;
+    border-radius:12px;overflow:hidden;
+    box-shadow:0 4px 14px rgba(18,79,131,.08);
+  }
+  table.tb thead th{
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-weight:600;font-size:var(--fs-other);
+    padding:12px 18px;text-align:left;
+  }
+  table.tb td,table.tb tbody th{
+    padding:11px 18px;background:#fff;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.tb tbody tr:last-child td,
+  table.tb tbody tr:last-child th{border-bottom:none;}
+  table.tb tbody th{
+    background:#eaf3fb;color:var(--blue-700);
+    font-weight:600;text-align:left;white-space:nowrap;
+  }
+  table.tb tbody tr:nth-child(even) td{background:#f7fafd;}
+  .c-red{color:var(--red);font-weight:600;}
+  .c-green{color:var(--green);font-weight:700;}
+  .c-blue{color:var(--blue-600);font-weight:700;}
+
+  .box{
+    border-left:7px solid var(--blue-600);
+    background:var(--blue-100);
+    border-radius:0 10px 10px 0;
+    padding:16px 28px;margin:10px 0;
+    font-size:32px;line-height:1.65;
+  }
+  .box .label{
+    display:inline-block;font-weight:800;color:var(--blue-700);
+    margin-right:8px;
+  }
+  .box.tip{border-left-color:var(--green);background:var(--green-soft);}
+  .box.tip .label{color:var(--green);}
+  .box.warn{border-left-color:var(--orange);background:var(--orange-soft);}
+  .box.warn .label{color:#b95a05;}
+  .box.key{border-left-color:var(--purple);background:var(--purple-soft);}
+  .box.key .label{color:var(--purple);}
+  .box.red{border-left-color:var(--red);background:var(--red-soft);}
+  .box.red .label{color:var(--red);}
+  .box.tight{padding:9px 26px;line-height:1.55;}
+
+  pre.code{
+    background:#0d2b45;color:#d8e9f5;
+    border-left:6px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    padding:12px 20px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:30px;line-height:1.40;
+    white-space:pre;overflow:hidden;
+    box-shadow:0 8px 22px rgba(13,43,69,.22);
+  }
+  /* 代码密集页：进一步收紧一档，仍不低于 28px */
+  .dense pre.code{font-size:30px;line-height:1.32;padding:8px 16px;margin:6px 0;}
+  .dense .out{font-size:27px;line-height:1.42;padding:8px 18px;margin:6px 0;}
+  .dense .box{font-size:29px;line-height:1.48;padding:9px 22px;margin:7px 0;}
+  .dense table.tb{font-size:28px;}
+  .dense table.tb td,.dense table.tb tbody th,.dense table.tb thead th{padding:7px 14px;}
+  .dense table.tb.slim td,.dense table.tb.slim tbody th,.dense table.tb.slim thead th{padding:5px 13px;}
+  pre.code .kw{color:#6ec1ff;}
+  pre.code .str{color:#ffc17a;}
+  pre.code .cmt{color:#7fa5c0;font-style:italic;}
+  pre.code .num{color:#ff9d6b;}
+
+  code.inline{
+    font-family:Consolas,"Courier New",monospace;
+    background:var(--blue-100);color:#c0392b;
+    padding:1px 7px;font-size:30px;border-radius:5px;
+    white-space:nowrap;
+  }
+  .card p code.inline{white-space:normal;}
+
+  .out{
+    background:#0d2b45;color:#bfe4ff;
+    border-left:6px solid var(--blue-400);
+    border-radius:0 12px 12px 0;
+    padding:12px 22px;margin:8px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:30px;line-height:1.5;white-space:pre;
+  }
+
+  .steps{display:flex;gap:10px;align-items:stretch;}
+  .step{
+    flex:1;background:#fff;border:1px solid var(--line);
+    border-top:7px solid var(--blue-600);
+    border-radius:0 0 14px 14px;
+    padding:14px 12px;text-align:center;
+    box-shadow:0 6px 16px rgba(18,79,131,.08);
+  }
+  .step.orange{border-top-color:var(--orange);}
+  .step.green{border-top-color:var(--green);}
+  .step.purple{border-top-color:var(--purple);}
+  .step .n{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:46px;height:46px;border-radius:50%;
+    background:linear-gradient(135deg,var(--orange),#c55807);
+    color:#fff;font-size:30px;font-weight:700;margin-bottom:8px;
+  }
+  .step .t{font-size:30px;font-weight:700;color:var(--blue-700);line-height:1.2;}
+  .step .d{font-size:30px;color:var(--muted);margin-top:6px;line-height:1.35;}
+
+  .steps-vertical{display:flex;flex-direction:column;align-items:stretch;gap:0;}
+  .steps-vertical .step{
+    flex:0 0 auto;padding:18px 24px;text-align:left;
+    border-radius:0 14px 14px 0;border-top:none;
+    border-left:7px solid var(--blue-600);
+  }
+  .steps-vertical .step.orange{border-left-color:var(--orange);border-top:none;}
+  .steps-vertical .step.green{border-left-color:var(--green);border-top:none;}
+  .steps-vertical.tight .step{padding:11px 24px;}
+  .steps-vertical.tight .step-head{margin-bottom:4px;}
+  .steps-vertical.tight .step .d{line-height:1.32;}
+  .steps-vertical .step-head{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+  .steps-vertical .step .n{margin-bottom:0;flex:0 0 auto;}
+  .steps-vertical .step .t{font-size:30px;font-weight:700;color:var(--blue-700);line-height:1.2;text-align:left;}
+  .steps-vertical .step.orange .t{color:#b95a05;}
+  .steps-vertical .step.green .t{color:var(--green);}
+  .steps-vertical .step .d{font-size:30px;color:var(--muted);line-height:1.4;text-align:left;margin-top:0;}
+  .arrow-down{
+    display:flex;align-items:center;justify-content:center;
+    font-size:32px;font-weight:700;color:var(--orange);line-height:1;padding:2px 0;
+  }
+  .arrow{
+    display:flex;align-items:center;justify-content:center;
+    color:var(--orange);font-size:32px;font-weight:700;
+  }
+
+  .grid{display:grid;gap:26px 14px;}
+  .grid.c2{grid-template-columns:1fr 1fr;}
+  .grid.c3{grid-template-columns:repeat(3,1fr);}
+  .card{
+    background:#fff;border:1px solid var(--line);
+    border-top:7px solid var(--blue-600);
+    border-radius:0 0 16px 16px;
+    padding:22px 28px;
+    box-shadow:0 6px 16px rgba(18,79,131,.08);
+  }
+  .card.orange{border-top-color:var(--orange);}
+  .card.green{border-top-color:var(--green);}
+  .card.purple{border-top-color:var(--purple);}
+  .card.red{border-top-color:var(--red);}
+  .card h4{
+    font-size:32px;color:var(--blue-700);
+    margin-bottom:8px;display:flex;align-items:center;gap:10px;line-height:1.2;
+  }
+  .card.orange h4{color:#b95a05;}
+  .card.green h4{color:var(--green);}
+  .card.purple h4{color:var(--purple);}
+  .card.red h4{color:var(--red);}
+  .card p{font-size:30px;color:var(--muted);line-height:1.6;margin:0;}
+  .card .ico{font-size:30px;line-height:1;}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+  .two.wide{grid-template-columns:1.15fr 1fr;}
+  .two.narrow{grid-template-columns:0.82fr 1.18fr;}
+  .two.narrow2{grid-template-columns:0.78fr 1.22fr;}
+  .two > div{min-width:0;}
+
+  .feat{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
+  .feat li{
+    display:flex;align-items:center;gap:22px;
+    background:#fff;border:1px solid var(--line);
+    border-left:7px solid var(--blue-600);
+    border-radius:0 12px 12px 0;
+    padding:12px 24px;
+    box-shadow:0 4px 10px rgba(18,79,131,.06);
+  }
+  .feat li:nth-child(even){border-left-color:var(--orange);}
+  .feat .k{flex:0 0 auto;width:300px;font-size:32px;font-weight:700;color:var(--blue-700);line-height:1.25;}
+  .feat .v{font-size:30px;color:var(--muted);line-height:1.5;}
+
+  .mem-diagram{
+    display:flex;justify-content:center;align-items:center;
+    gap:20px;margin:20px 0;
+    font-family:Consolas,"Courier New",monospace;
+  }
+  .mem-item{text-align:center;}
+  .mem-item .addr{font-size:30px;color:var(--muted);margin-bottom:8px;font-family:"Microsoft YaHei",sans-serif;font-weight:600;}
+  .mem-item .cell{
+    min-width:200px;height:110px;padding:0 18px;
+    border:4px solid var(--blue-600);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:40px;font-weight:800;
+  }
+  .mem-arrow{font-size:44px;color:var(--orange);font-weight:800;}
+
+  .slide.cover{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    padding:0 110px 60px;justify-content:center;
+  }
+  .slide.cover::before{
+    content:"";position:absolute;right:-100px;top:-100px;
+    width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.18) 0%,rgba(232,114,12,0) 70%);
+  }
+  .slide.cover::after{
+    content:"";position:absolute;left:-100px;bottom:-120px;
+    width:440px;height:440px;border-radius:50%;
+    background:radial-gradient(circle,rgba(74,151,212,.18) 0%,rgba(74,151,212,0) 70%);
+  }
+  .cover-inner{position:relative;z-index:2;}
+  .cover-kicker{
+    display:inline-block;font-size:var(--fs-other);letter-spacing:3px;
+    color:#ffd9b3;border:1px solid rgba(255,217,179,.55);
+    padding:8px 24px;margin-bottom:28px;border-radius:999px;
+  }
+  .cover h1{font-size:82px;font-weight:800;color:#fff;letter-spacing:5px;line-height:1.15;margin-bottom:16px;}
+  .cover-bar{width:650px;height:8px;border-radius:4px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:22px;}
+  .cover-sub{font-size:40px;color:#a9d8f5;letter-spacing:3px;margin-bottom:36px;}
+  .cover-meta{font-size:var(--fs-other);color:#7fb2dd;letter-spacing:2px;}
+
+  .slide.end{
+    background:linear-gradient(135deg,#1a6fb5 0%,#0d4a7a 58%,#0a3d63 100%);
+    padding:0 110px 60px;justify-content:center;
+  }
+  .slide.end::before{
+    content:"";position:absolute;right:-100px;bottom:-120px;
+    width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(232,114,12,.16) 0%,rgba(232,114,12,0) 70%);
+  }
+  .end-inner{position:relative;z-index:2;}
+  .end h2{font-size:82px;font-weight:800;color:#fff;letter-spacing:10px;margin-bottom:22px;}
+  .end p{font-size:var(--fs-body);color:#a9d8f5;letter-spacing:2px;}
+
+  .pageinfo{
+    position:absolute;right:40px;top:22px;z-index:20;
+    font-size:var(--fs-other);color:var(--blue-600);letter-spacing:1px;
+    background:rgba(255,255,255,.95);
+    border:1px solid var(--line);border-radius:999px;
+    padding:5px 20px;
+    box-shadow:0 4px 10px rgba(18,79,131,.08);
+  }
+  .pageinfo b{font-size:var(--fs-other);color:var(--orange);}
+
+  .nav{position:absolute;right:36px;bottom:14px;z-index:20;display:flex;align-items:center;gap:10px;}
+  .nav button{
+    height:50px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,#1a6fb5,#124f83);
+    color:#fff;font-size:var(--fs-other);line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .18s;font-family:inherit;
+    border-radius:12px;width:50px;
+    box-shadow:0 5px 12px rgba(18,79,131,.28);
+  }
+  .nav button:hover{background:linear-gradient(135deg,#e8720c,#c55807);transform:translateY(-2px);}
+  .nav button:disabled{background:#b9cfe4;cursor:not-allowed;box-shadow:none;transform:none;}
+  .nav .tocbtn{width:auto;padding:0 22px;font-weight:700;letter-spacing:1px;}
+
+  .progress{
+    position:absolute;left:0;bottom:0;height:6px;width:0;z-index:20;
+    background:linear-gradient(90deg,#1a6fb5,#e8720c);
+    transition:width .3s ease;
+  }
+
+  .keyhint{
+    position:absolute;left:36px;bottom:18px;
+    z-index:20;font-size:30px;color:#7fa8c4;letter-spacing:1px;
+    background:rgba(255,255,255,.85);border:1px solid var(--line);
+    border-radius:999px;padding:4px 16px;white-space:nowrap;
+    transition:opacity .6s ease;
+  }
+  .keyhint.hide{opacity:0;}
+
+  .toc{
+    position:absolute;inset:0;z-index:40;
+    background:rgba(10,61,99,.96);
+    display:none;padding:36px 52px 44px;overflow-y:auto;
+  }
+  .toc.show{display:block;}
+  .toc h3{font-size:40px;color:#fff;letter-spacing:4px;margin-bottom:6px;}
+  .toc .toc-bar{width:110px;height:6px;border-radius:3px;background:linear-gradient(90deg,#e8720c,#ffb26b);margin-bottom:18px;}
+  .toc-list{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;align-items:start;}
+  .toc-col{display:flex;flex-direction:column;gap:10px;min-width:0;}
+  .toc-group{
+    background:rgba(255,255,255,.05);
+    border-radius:14px;padding:10px 10px 12px;
+    border-top:5px solid var(--blue-400);
+  }
+  .toc-group:nth-child(2){border-top-color:var(--orange);}
+  .toc-group:nth-child(3){border-top-color:var(--green);}
+  .toc-group:nth-child(4){border-top-color:var(--purple);}
+  .toc-group-title{
+    font-size:30px;color:#ffc17a;font-weight:800;
+    letter-spacing:1px;margin-bottom:6px;padding-bottom:6px;
+    border-bottom:1px dashed rgba(255,255,255,.18);line-height:1.2;
+  }
+  .toc-group a{
+    display:block;color:#cfe6f7;font-size:22px;
+    padding:4px 9px;border-radius:8px;
+    cursor:pointer;margin-bottom:1px;
+    text-decoration:none;line-height:1.24;
+    transition:all .16s;
+  }
+  .toc-group a:hover{background:linear-gradient(90deg,#e8720c,#c55807);color:#fff;}
+  .toc-close{
+    position:absolute;right:40px;top:22px;
+    background:none;border:1px solid #7fb2dd;color:#cfe6f7;
+    font-size:var(--fs-other);padding:7px 22px;cursor:pointer;font-family:inherit;
+    border-radius:12px;
+  }
+  .toc-close:hover{background:#e8720c;border-color:#e8720c;color:#fff;}
+
+  /* ===== 数组方格：静态图与动画共用 ===== */
+  .ar{display:flex;flex-direction:column;gap:5px;}
+  .ar-row{display:grid;grid-template-columns:repeat(5,132px);gap:10px;justify-content:start;}
+  .ar-row.r7{grid-template-columns:repeat(7,88px);gap:8px;}
+  .ar-row.r8{grid-template-columns:repeat(8,84px);gap:8px;}
+  .ar-row.c5s{grid-template-columns:repeat(5,112px);gap:10px;}
+  .ar-row.c6s{grid-template-columns:repeat(6,98px);gap:9px;}
+  .ac{height:100px;border:3px solid #b9d3e8;border-radius:10px;background:#f4f9fd;
+      display:flex;align-items:center;justify-content:center;
+      font-family:Consolas,"Courier New",monospace;font-size:42px;font-weight:700;color:#124f83;
+      transition:border-color .25s,background .25s,color .25s,box-shadow .25s;}
+  .ar-row.r7 .ac,.ar-row.r8 .ac{height:84px;font-size:34px;}
+  .ar-row.c6s .ac{height:88px;font-size:36px;}
+  .ar.defsmall .ac{height:70px;font-size:26px;white-space:nowrap;}
+  .ac.on{background:#e8f2fb;border-color:#4a97d4;}
+  .ac.cur{border-color:#e8720c;background:#fdf1e4;color:#a9601a;box-shadow:0 0 0 4px rgba(232,114,12,.16);}
+  .ac.new{border-color:#2e8b57;background:#eaf7ef;color:#1e6b42;box-shadow:0 0 0 4px rgba(46,139,87,.16);}
+  .ac.oob{border-color:#c0392b;background:#fdeceb;color:#c0392b;border-style:dashed;}
+  .ac.q{color:#b9d3e8;}
+  .ar-row.c5s .ar-tag{font-size:22px;}
+  .ar-tag{font-family:Consolas,"Courier New",monospace;font-size:28px;line-height:1.2;
+          color:#4d6376;text-align:center;white-space:nowrap;}
+  .ar-tag.cur{color:#a9601a;font-weight:700;}
+  .ar-tag.oob{color:#c0392b;font-weight:700;}
+  .ar-off{font-family:Consolas,"Courier New",monospace;font-size:30px;line-height:1.2;
+          color:#8aa2b6;text-align:center;white-space:nowrap;}
+  .ar-lead{font-size:30px;color:#4d6376;line-height:1.45;}
+  .ar-wrap{display:flex;align-items:center;gap:16px;}
+  .ar-lab{font-size:28px;color:#124f83;font-weight:700;width:130px;flex:0 0 auto;line-height:1.3;}
+
+  /* ===== 演示容器（逐步推进） ===== */
+  .demo{
+    background:#fff;border:1px solid var(--line);border-top:7px solid var(--purple);
+    border-radius:0 0 16px 16px;padding:16px 22px;
+    box-shadow:0 6px 16px rgba(18,79,131,.08);
+    display:flex;flex-direction:column;
+  }
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+  .demo-title{font-size:30px;font-weight:700;color:var(--purple);}
+  .demo-btn{
+    font-size:30px;line-height:1.2;padding:6px 22px;border-radius:10px;border:none;
+    background:#1a6fb5;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;
+    box-shadow:0 4px 12px rgba(26,111,181,.22);transition:background .16s;
+  }
+  .demo-btn:hover{background:#155d99;}
+  .demo-btn.ghost{background:#e8f1f9;color:#124f83;border:3px solid #b9d3e8;box-shadow:none;}
+  .demo-btn.ghost:hover{background:#d8e8f5;}
+  .demo-note{margin-top:12px;font-size:30px;line-height:1.4;color:#41627c;min-height:84px;}
+  .demo-ctl{display:flex;align-items:center;gap:12px;margin-top:8px;}
+  .demo-prog{margin-left:auto;font-size:28px;color:#5a7a9a;font-family:Consolas,monospace;}
+
+  /* ===== 随堂检测：按钮 + 弹窗解析 ===== */
+  .qbtn{
+    font-family:inherit;font-size:28px;padding:6px 18px;border-radius:9px;border:none;
+    background:var(--purple);color:#fff;cursor:pointer;font-weight:600;
+    box-shadow:0 4px 10px rgba(142,68,173,.28);
+  }
+  .qbtn:hover{background:#7a3a96;}
+  .qans{
+    display:none;position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    width:1280px;max-width:90%;max-height:76%;overflow:auto;
+    background:#fff;border:3px solid var(--blue-600);border-radius:16px;
+    padding:26px 34px 24px;
+    box-shadow:0 20px 60px rgba(8,28,52,.35);z-index:80;
+    font-size:32px;line-height:1.55;color:#12344f;
+  }
+  .qans .qans-t{font-size:34px;font-weight:800;color:var(--blue-700);margin-bottom:10px;}
+  .qans pre.code{font-size:30px;margin:10px 0;}
+
+  /* ===== 选择与复制增强 ===== */
+  ::selection{background:#ffb74d;color:#0d2b45;}
+  pre.code::selection,pre.code *::selection{background:#ffcc80;color:#0d2b45;}
+  .out::selection,.out *::selection{background:#ffb74d;color:#0d2b45;}
+  .nav,.pageinfo,.keyhint,.progress,.toc,.copy-toast{-webkit-user-select:none;-moz-user-select:none;user-select:none;}
+  #stage .slide{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
+  .copy-toast{
+    position:absolute;left:50%;bottom:78px;z-index:60;
+    transform:translateX(-50%) translateY(12px);
+    background:rgba(13,43,69,.95);color:#fff;
+    font-size:30px;letter-spacing:1px;line-height:1.35;
+    padding:12px 30px;border-radius:999px;white-space:nowrap;
+    box-shadow:0 10px 26px rgba(13,43,69,.32);
+    opacity:0;pointer-events:none;
+    transition:opacity .22s ease,transform .22s ease;}
+  .copy-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  /* ===== 数组格：地址 + 值 + 下标 ===== */
+  .cellwrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .cellwrap .ac{width:100%;height:86px;font-size:38px;}
+  .cellwrap .ca{
+    font-family:Consolas,"Courier New",monospace;
+    font-size:19px;line-height:1.15;color:#5f7d94;letter-spacing:0;white-space:nowrap;
+  }
+  .cellwrap .cn{
+    font-family:Consolas,"Courier New",monospace;
+    font-size:30px;line-height:1.1;color:#41627c;white-space:nowrap;
+  }
+  .cellwrap.cur .cn{color:#a9601a;font-weight:700;}
+
+  /* ===== 传参示意：两个名字，一组存储单元 ===== */
+  .pass{
+    display:grid;grid-template-columns:250px 34px 1fr 34px 250px;
+    align-items:center;gap:8px;margin:6px 0;
+  }
+  .pass-side{
+    background:#fff;border:2px solid var(--line);border-radius:14px;
+    padding:10px 16px;
+    transition:opacity .3s ease,border-color .3s ease;
+  }
+  .pass-side.off{opacity:.26;}
+  .pass-side .pn{font-size:30px;font-weight:700;color:var(--blue-700);line-height:1.2;}
+  .pass-side .pd{
+    font-family:Consolas,"Courier New",monospace;
+    font-size:30px;color:#41627c;margin-top:3px;line-height:1.2;
+  }
+  .pass-side .pv{
+    font-family:Consolas,"Courier New",monospace;
+    font-size:30px;color:#0d2b45;margin-top:6px;line-height:1.2;
+  }
+  .pass-side .pv b{color:var(--orange);font-size:30px;}
+  .pass-side pre.code{font-size:30px;line-height:1.34;margin:6px 0 0;padding:8px 12px;}
+  .pass-side .copy{font-size:28px;color:#a9601a;font-weight:700;margin-top:4px;line-height:1.25;}
+  .pass-arrow{
+    text-align:center;font-size:30px;font-weight:800;color:var(--orange);
+    opacity:0;transition:opacity .3s ease;
+  }
+  .pass-arrow.on{opacity:1;}
+  .pass-mid{min-width:0;}
+  .pass-banner{
+    text-align:center;font-size:22px;color:#8aa2b6;
+    letter-spacing:1px;margin-bottom:4px;line-height:1.2;
+  }
+
+  /* 演示区高度约束：保证 900px 画布内不溢出 */
+  .demo .demo-note{min-height:78px;}
+  .demo .pass{margin:0;}
+
+  /* ===== 排序与查找：标记行与区间淡出 ===== */
+  .ar-row.s5{grid-template-columns:repeat(5,104px);gap:10px;}
+  .ar-mark{
+    display:grid;gap:10px;align-items:center;justify-items:center;justify-content:center;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:19px;font-weight:700;line-height:1;margin-bottom:5px;
+  }
+  .ar-mark > div{display:flex;align-items:center;justify-content:center;gap:5px;height:24px;white-space:nowrap;}
+  .mk{display:inline-block;padding:2px 6px;border-radius:6px;}
+  .mk.low{color:#124f83;background:#e8f2fb;border:1px solid #b9d3e8;}
+  .mk.mid{color:#a9601a;background:#fdf1e4;border:1px solid #f0cba6;}
+  .mk.high{color:#1e6b42;background:#eaf7ef;border:1px solid #b6dcc6;}
+  .ac.dim{opacity:.3;}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+<section class="slide cover" data-g="开场" data-t="封面">
+    <div class="cover-inner">
+      <div class="cover-kicker">武汉理工大学 人工智能学院</div>
+      <h1>二维数组</h1>
+      <div class="cover-bar"></div>
+      <div class="cover-sub">第 5 章（二）数组 · 二维数组</div>
+      <div class="cover-meta">主讲：李　民</div>
+    </div>
+  </section>
+
+  <section class="slide" data-g="开场" data-t="本讲内容">
+    <div class="s-title">本讲内容</div>
+    <div class="s-body">
+      <div class="steps-vertical tight">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><span class="t">定义与存储</span></div>
+          <div class="d">由四组并列的一维数组归并为一张二维表，明确行下标与列下标的含义。</div>
+        </div>
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><span class="t">遍历与转置</span></div>
+          <div class="d">外层控行、内层控列；只在主对角线一侧交换，每对元素恰好交换一次。</div>
+        </div>
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><span class="t">数组作函数形参</span></div>
+          <div class="d">列数必须写明并与实参一致；行数另设参数传入。</div>
+        </div>
+      </div>
+      <div class="box tip tight">
+        <span class="label">贯穿例子</span>
+        本讲以 <code class="inline">int a[2][3]</code> 讲存储，以 <code class="inline">int score[30][5]</code> 讲应用；鞍点一节标为选学，不作为考核内容。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="1" data-t="引例：一张成绩表">
+    <div class="s-title">引例：三十个学生，三门课程</div>
+    <div class="s-body">
+      <p>某班 30 名学生，每人有学号和 C 语言、高数、英语三门成绩。需要按编号输出每人的四列数据。</p>
+<pre class="code" style="margin-top:0;"><span class="cmt">/* 四组并列的一维数组 */</span>
+<span class="kw">int</span> id[<span class="num">30</span>], c[<span class="num">30</span>], math[<span class="num">30</span>], eng[<span class="num">30</span>];
+
+<span class="cmt">/* 一张二维表：30 行，4 列 */</span>
+<span class="kw">int</span> score[<span class="num">30</span>][<span class="num">4</span>];</pre>
+      <div class="box warn tight">
+        <span class="label">改用二维数组的原因</span>
+        四组一维数组彼此独立，遍历时要同时维护四个下标，也难以保证四组数据属于同一名学生。写成 <code class="inline">score[i][j]</code> 后，行下标 <code class="inline">i</code> 表示学生，列下标 <code class="inline">j</code> 表示课程，同一名学生的记录落在同一行上。
+      </div>
+      <div class="box tip tight">
+        <span class="label">适用场合</span>
+        行数与列数都固定的数据适合用二维数组组织。本讲后续统一以二行三列的小表演示，便于在一页内完整呈现。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-g="1" data-t="二维数组的定义">
+    <div class="s-title">二维数组的定义</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;">类型说明符　数组名[整型常量表达式1][整型常量表达式2];
+<span class="kw">int</span> a[<span class="num">2</span>][<span class="num">3</span>];</pre>
+      <table class="tb" style="margin-top:8px;">
+        <tbody>
+          <tr><th style="width:150px;">第一维</th><td>行数，此处为 2，行下标取 0、1。</td></tr>
+          <tr><th>第二维</th><td>列数，此处为 3，列下标取 0、1、2。</td></tr>
+          <tr><th>元素总数</th><td>2 × 3 = 6 个 <code class="inline">int</code>，共 24 字节。</td></tr>
+        </tbody>
+      </table>
+      <div class="ar defsmall" style="margin-top:10px;">
+        <div class="ar-row" style="grid-template-columns:repeat(3,110px);gap:8px;justify-content:center;">
+          <div class="ac">a[0][0]</div><div class="ac">a[0][1]</div><div class="ac">a[0][2]</div>
+        </div>
+        <div class="ar-row" style="grid-template-columns:repeat(3,110px);gap:8px;justify-content:center;">
+          <div class="ac">a[1][0]</div><div class="ac">a[1][1]</div><div class="ac">a[1][2]</div>
+        </div>
+      </div>
+      <div class="box key tight">
+        <span class="label">读法</span>
+        <code class="inline">a[2][3]</code> 读作「2 行 3 列」。写下标时先写行、后写列，顺序与定义一致。二维数组常被叫作矩阵，但它在内存中仍是一段连续空间。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="1" data-t="按行连续存放">
+    <div class="s-title">按行连续存放</div>
+    <div class="s-body">
+      <p>设 <code class="inline">int a[2][3] = {{1,2,3},{4,5,6}};</code>，六个元素在内存中的排列如下。</p>
+      <div class="ar">
+        <div class="ar-row" style="grid-template-columns:repeat(3,150px);gap:8px;justify-content:center;">
+          <div class="cellwrap"><div class="ca">0x61FE20</div><div class="ac">1</div><div class="cn">a[0][0]</div></div>
+          <div class="cellwrap"><div class="ca">0x61FE24</div><div class="ac">2</div><div class="cn">a[0][1]</div></div>
+          <div class="cellwrap"><div class="ca">0x61FE28</div><div class="ac">3</div><div class="cn">a[0][2]</div></div>
+        </div>
+        <div class="ar-row" style="grid-template-columns:repeat(3,150px);gap:8px;justify-content:center;margin-top:6px;">
+          <div class="cellwrap"><div class="ca">0x61FE2C</div><div class="ac">4</div><div class="cn">a[1][0]</div></div>
+          <div class="cellwrap"><div class="ca">0x61FE30</div><div class="ac">5</div><div class="cn">a[1][1]</div></div>
+          <div class="cellwrap"><div class="ca">0x61FE34</div><div class="ac">6</div><div class="cn">a[1][2]</div></div>
+        </div>
+      </div>
+      <div class="box warn tight">
+        <span class="label">地址以实际运行为准</span>
+        每个 <code class="inline">int</code> 占 4 字节，相邻元素地址相差 4。第 0 行末尾 <code class="inline">0x61FE28</code> 与第 1 行开头 <code class="inline">0x61FE2C</code> 仍然相邻，中间没有空隙。地址由系统运行时分配，具体数值每次可能不同，此处取某次实际运行的结果。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="1" data-t="数组名、行名与元素地址">
+    <div class="s-title">数组名、行名与元素地址</div>
+    <div class="s-body">
+      <table class="tb">
+        <thead><tr><th style="width:130px;">写法</th><th style="width:170px;">地址值</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code class="inline">a</code></td><td>0x61FE20</td><td>整个二维数组的首地址，也就是第 0 行的首地址。</td></tr>
+          <tr><td><code class="inline">a[0]</code></td><td>0x61FE20</td><td>第 0 行的名字，代表这一行首元素的地址。</td></tr>
+          <tr><td><code class="inline">&amp;a[0][0]</code></td><td>0x61FE20</td><td>第 0 行第 0 列元素的地址。</td></tr>
+          <tr><td><code class="inline">a[1]</code></td><td>0x61FE2C</td><td>第 1 行的名字，代表第 1 行首元素的地址。</td></tr>
+        </tbody>
+      </table>
+      <div class="box key tight">
+        <span class="label">数值相同，含义不同</span>
+        前三行地址值都是 <code class="inline">0x61FE20</code>，但 <code class="inline">a</code> 指整张表，<code class="inline">a[0]</code> 指一行，<code class="inline">&amp;a[0][0]</code> 指一个元素。跨过一行要加 12 字节，跨过一个元素只加 4 字节。
+      </div>
+      <div class="box tip tight">
+        <span class="label">与一维数组的联系</span>
+        <code class="inline">a[i]</code> 是二维数组第 <code class="inline">i</code> 行的名字，用法与一维数组名一致；<code class="inline">a[i][j]</code> 才是该行中的第 <code class="inline">j</code> 个元素。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-g="1" data-t="下标到偏移的映射">
+    <div class="s-title">下标到偏移的映射</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;">a[i][j]　等价于　a[0][列数 * i + j]
+本例列数为 3：a[1][2]　等价于　a[0][3 * 1 + 2]，即 a[0][5]</pre>
+      <table class="tb" style="margin-top:8px;">
+        <tbody>
+          <tr><th style="width:120px;">要定位的元素</th><td><code class="inline">a[1][2]</code>，值 6。</td></tr>
+          <tr><th>换算</th><td>先跳过第 0 行的 3 个元素，再在本行走到第 2 个，偏移为 5。</td></tr>
+          <tr><th>地址</th><td>0x61FE20 + 5 × 4 = 0x61FE34，与表中第六格一致。</td></tr>
+        </tbody>
+      </table>
+      <div class="box key tight">
+        <span class="label">结论</span>
+        编译器按此公式定位元素，其中<strong>列数决定每行的步长</strong>；这也是函数形参必须写明第二维的原因。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="2" data-t="三种初始化方式">
+    <div class="s-title">初始化的三种方式</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">2</span>][<span class="num">3</span>] = {{<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>}, {<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>}};  <span class="cmt">/* 按行 */</span>
+<span class="kw">int</span> b[<span class="num">2</span>][<span class="num">3</span>] = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>};       <span class="cmt">/* 按存放顺序 */</span>
+<span class="kw">int</span> c[<span class="num">2</span>][<span class="num">3</span>] = {{<span class="num">1</span>}, {<span class="num">4</span>, <span class="num">5</span>}};             <span class="cmt">/* 部分赋初值 */</span></pre>
+      <table class="tb" style="margin-top:8px;">
+        <tbody>
+          <tr><th style="width:120px;">a</th><td>每对内层大括号对应一行，共两行。</td></tr>
+          <tr><th>b</th><td>不写内层括号，按内存排列顺序依次填入。</td></tr>
+          <tr><th>c</th><td>第一行为 1、0、0，第二行为 4、5、0；未写出的元素补 0。</td></tr>
+        </tbody>
+      </table>
+      <div class="box warn tight">
+        <span class="label">补零的条件</span>
+        只要给出了初始化列表，未写出的元素就自动补 0。若写成 <code class="inline">int d[2][3];</code> 而不给列表，局部变量的元素内容不确定。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-g="2" data-t="行可省，列不可省">
+    <div class="s-title">行可省，列不可省</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> a[][<span class="num">3</span>] = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>};   <span class="cmt">/* 合法 */</span>
+<span class="kw">int</span> b[<span class="num">2</span>][] = {{<span class="num">1</span>, <span class="num">2</span>}, {<span class="num">3</span>, <span class="num">4</span>}};   <span class="cmt">/* 错误 */</span></pre>
+      <div class="box key tight">
+        <span class="label">原因</span>
+        编译器必须知道<strong>第二维</strong>才能计算 <code class="inline">a[i][j]</code> 的偏移。第一维可以由初值个数推得：本例 6 个初值除以每行 3 个，得 2 行。
+      </div>
+      <div class="box tip tight">
+        <span class="label">与一维数组对照</span>
+        一维数组 <code class="inline">int x[] = {1,2,3};</code> 省略的是唯一的一维，编译器直接数出长度；二维数组只能省行数，不能省列数。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="2" data-t="用 sizeof 求行列">
+    <div class="s-title">用 sizeof 求行数和列数</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> a[][<span class="num">3</span>] = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>};
+<span class="kw">int</span> rows = <span class="kw">sizeof</span>(a) / <span class="kw">sizeof</span>(a[<span class="num">0</span>]);      <span class="cmt">/* 2 */</span>
+<span class="kw">int</span> cols = <span class="kw">sizeof</span>(a[<span class="num">0</span>]) / <span class="kw">sizeof</span>(<span class="kw">int</span>);    <span class="cmt">/* 3 */</span></pre>
+      <table class="tb" style="margin-top:8px;">
+        <thead><tr><th style="width:200px;">表达式</th><th style="width:120px;">结果</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code class="inline">sizeof(a)</code></td><td>24</td><td>整张表占用的字节数。</td></tr>
+          <tr><td><code class="inline">sizeof(a[0])</code></td><td>12</td><td>一行占用的字节数。</td></tr>
+          <tr><td><code class="inline">sizeof(a[0][0])</code></td><td>4</td><td>一个元素占用的字节数。</td></tr>
+        </tbody>
+      </table>
+      <div class="box warn tight">
+        <span class="label">适用场合</span>
+        <code class="inline">sizeof</code> 只在数组定义仍可见的范围内有效。数组作函数形参后，它退化为地址，<code class="inline">sizeof</code> 不再给出整表长度，因此行列数要另外传参。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-g="2" data-t="二重循环遍历">
+    <div class="s-title">二重循环遍历</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">2</span>][<span class="num">3</span>], i, j;
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">2</span>; i++) {
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[i][j]);
+}
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">2</span>; i++) {
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">printf</span>(<span class="str">"%4d"</span>, a[i][j]);
+    <span class="kw">printf</span>(<span class="str">"\n"</span>);
+}</pre>
+      <div class="box key tight">
+        <span class="label">循环的分工</span>
+        外层变量 <code class="inline">i</code> 控制行，内层变量 <code class="inline">j</code> 控制列。固定一行后走完该行所有列，再进入下一行。输出时内层结束后打印一个换行，才能排成矩阵。
+      </div>
+    </div>
+  </section>
+
+<section class="slide dense" data-g="2" data-t="三种引用的写法">
+    <div class="s-title">三种引用写法</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;"><span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">2</span>; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[i][j]);          <span class="cmt">/* 按行列位置 */</span>
+
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">2</span>; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[<span class="num">0</span>][<span class="num">3</span> * i + j]);  <span class="cmt">/* 按偏移量 */</span>
+
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">6</span>; i++)
+    <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[<span class="num">0</span>][i]);             <span class="cmt">/* 一层循环 */</span></pre>
+      <div class="box key tight">
+        <span class="label">三种写法等价</span>
+        第二种把二维下标换算成一维偏移，第三种直接用一层循环走完六个连续单元。它们访问的是同一段内存，顺序与按行存放一致。
+      </div>
+      <div class="box tip tight">
+        <span class="label">选择依据</span>
+        需要区分行列时用 <code class="inline">a[i][j]</code>，例如求每行的和；只按存放顺序处理全部元素时用一层循环，代码更短。若第二维改变，第二种的常数 3 必须同步修改。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="3" data-t="成绩表：按行填入">
+    <div class="s-title">成绩表：按行读入并累计总分</div>
+    <div class="s-body">
+      <div class="two wide" style="align-items:start;">
+        <div>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> score[<span class="num">3</span>][<span class="num">5</span>], i, j;
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {
+    score[i][<span class="num">0</span>] = i + <span class="num">1</span>;      <span class="cmt">/* 学号 */</span>
+    score[i][<span class="num">4</span>] = <span class="num">0</span>;         <span class="cmt">/* 总分清零 */</span>
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">3</span>; j++) {
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;score[i][j]);
+        score[i][<span class="num">4</span>] += score[i][j];
+    }
+}</pre>
+          <div class="box warn tight" style="margin-top:8px;">
+            <span class="label">列的含义</span>
+            第 0 列放学号，第 1 至 3 列放三门成绩，第 4 列放总分。<code class="inline">score[i][4]</code> 在读入前必须清零。
+          </div>
+        </div>
+        <div class="demo" data-demo="score" data-hint="点击“下一步”，逐行填入成绩表。" style="margin-top:0;">
+          <div class="demo-head">
+            <div class="demo-title">三行四列：逐行填入</div>
+            <div class="demo-prog"></div>
+          </div>
+          <div class="ar">
+            <div class="ar-row" style="grid-template-columns:repeat(5,88px);gap:6px;justify-content:center;">
+              <div class="ar-tag">学号</div><div class="ar-tag">C语言</div><div class="ar-tag">高数</div><div class="ar-tag">英语</div><div class="ar-tag">总分</div>
+            </div>
+            <div class="ar-row" style="grid-template-columns:repeat(5,88px);gap:6px;justify-content:center;margin-top:4px;">
+              <div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div>
+            </div>
+            <div class="ar-row" style="grid-template-columns:repeat(5,88px);gap:6px;justify-content:center;margin-top:4px;">
+              <div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div>
+            </div>
+            <div class="ar-row" style="grid-template-columns:repeat(5,88px);gap:6px;justify-content:center;margin-top:4px;">
+              <div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div><div class="ac">?</div>
+            </div>
+          </div>
+          <div class="demo-note" style="min-height:70px;"></div>
+          <div class="demo-ctl">
+            <button class="demo-btn" data-act="next">下一步</button>
+            <button class="demo-btn ghost" data-act="reset">重置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="3" data-t="成绩表：完整程序">
+    <div class="s-title">成绩表：输入、计算、输出</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> score[<span class="num">30</span>][<span class="num">5</span>], i, j, m, n = <span class="num">3</span>;
+<span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;m);
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; m; i++) {
+    score[i][<span class="num">0</span>] = i + <span class="num">1</span>;  score[i][<span class="num">4</span>] = <span class="num">0</span>;
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= n; j++) {
+        <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;score[i][j]);  score[i][<span class="num">4</span>] += score[i][j];
+    }
+}
+<span class="kw">printf</span>(<span class="str">"学号\tC语言\t高数\t英语\t总分\n"</span>);
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; m; i++) {
+    <span class="kw">printf</span>(<span class="str">"%d\t"</span>, score[i][<span class="num">0</span>]);
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= n; j++) <span class="kw">printf</span>(<span class="str">"%d\t"</span>, score[i][j]);
+    <span class="kw">printf</span>(<span class="str">"%d\n"</span>, score[i][<span class="num">4</span>]);
+}</pre>
+      <div class="box tip tight">
+        <span class="label">容量与实际个数分离</span>
+        数组按 30 人声明，实际人数 <code class="inline">m</code> 由键盘输入，所有循环边界用 <code class="inline">m</code> 而非 30。这与一维数组的做法一致。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="3" data-t="转置：思路演示">
+    <div class="s-title">矩阵转置：只走上三角</div>
+    <div class="s-body">
+      <div class="two wide" style="align-items:start;">
+        <div>
+<pre class="code" style="margin-top:0;"><span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; i; j++) {
+        t = a[i][j];
+        a[i][j] = a[j][i];
+        a[j][i] = t;
+    }</pre>
+          <div class="box warn tight" style="margin-top:8px;">
+            <span class="label">为什么 j 小于 i</span>
+            <code class="inline">a[i][j]</code> 与 <code class="inline">a[j][i]</code> 成对交换。若内层从 0 走到 n−1，每对会交换两次，矩阵回到原样。只走上三角，每对恰好交换一次；主对角线不用动。
+          </div>
+        </div>
+        <div class="demo" data-demo="transpose" data-hint="点击“下一步”，观察每一对对称元素如何交换。" style="margin-top:0;">
+          <div class="demo-head">
+            <div class="demo-title">四阶矩阵的六次交换</div>
+            <div class="demo-prog"></div>
+          </div>
+          <div class="ar" style="margin-top:4px;">
+            <div class="ar-row" style="grid-template-columns:repeat(4,74px);gap:6px;justify-content:center;"><div class="ac">1</div><div class="ac">2</div><div class="ac">3</div><div class="ac">4</div></div>
+            <div class="ar-row" style="grid-template-columns:repeat(4,74px);gap:6px;justify-content:center;margin-top:4px;"><div class="ac">5</div><div class="ac">6</div><div class="ac">7</div><div class="ac">8</div></div>
+            <div class="ar-row" style="grid-template-columns:repeat(4,74px);gap:6px;justify-content:center;margin-top:4px;"><div class="ac">9</div><div class="ac">10</div><div class="ac">11</div><div class="ac">12</div></div>
+            <div class="ar-row" style="grid-template-columns:repeat(4,74px);gap:6px;justify-content:center;margin-top:4px;"><div class="ac">13</div><div class="ac">14</div><div class="ac">15</div><div class="ac">16</div></div>
+          </div>
+          <div class="demo-note" style="min-height:70px;"></div>
+          <div class="demo-ctl">
+            <button class="demo-btn" data-act="next">下一步</button>
+            <button class="demo-btn ghost" data-act="reset">重置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="3" data-t="矩阵转置：完整函数">
+    <div class="s-title">矩阵转置：完整程序</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> a[<span class="num">10</span>][<span class="num">10</span>], n, i, j, t;
+<span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;n);
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; n; j++) <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;a[i][j]);
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; i; j++) {
+        t = a[i][j];
+        a[i][j] = a[j][i];
+        a[j][i] = t;
+    }
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n; i++) {
+    <span class="kw">for</span> (j = <span class="num">0</span>; j &lt; n; j++)
+        <span class="kw">printf</span>(<span class="str">"%5d"</span>, a[i][j]);
+    <span class="kw">printf</span>(<span class="str">"\n"</span>);
+}</pre>
+      <div class="box tip tight">
+        <span class="label">对齐输出</span>
+        <code class="inline">%5d</code> 让每个元素占 5 列，不足时补空格，各列才能对齐，与一维数组用制表符是同一目的。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="4" data-t="二维数组作形参">
+    <div class="s-title">二维数组作函数形参：成绩表拆分</div>
+    <div class="s-body">
+      <div class="two wide" style="align-items:start;">
+        <div>
+<pre class="code" style="margin-top:0;"><span class="cmt">/* 函数原型：第二维必须写明 */</span>
+<span class="kw">void</span> readScore(<span class="kw">int</span> s[][<span class="num">5</span>], <span class="kw">int</span> m);
+<span class="kw">void</span> output(<span class="kw">int</span> s[][<span class="num">5</span>], <span class="kw">int</span> m);
+
+<span class="kw">int</span> main(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> score[<span class="num">30</span>][<span class="num">5</span>], m;
+    <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;m);
+    readScore(score, m);
+    output(score, m);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+        </div>
+        <div>
+<pre class="code" style="margin-top:0;"><span class="kw">void</span> readScore(<span class="kw">int</span> s[][<span class="num">5</span>], <span class="kw">int</span> m)
+{
+    <span class="kw">int</span> i, j;
+    <span class="kw">for</span> (i = <span class="num">0</span>; i &lt; m; i++) {
+        s[i][<span class="num">0</span>] = i + <span class="num">1</span>;
+        s[i][<span class="num">4</span>] = <span class="num">0</span>;
+        <span class="kw">for</span> (j = <span class="num">1</span>; j &lt;= <span class="num">3</span>; j++) {
+            <span class="kw">scanf</span>(<span class="str">"%d"</span>, &amp;s[i][j]);
+            s[i][<span class="num">4</span>] += s[i][j];
+        }
+    }
+}</pre>
+        </div>
+      </div>
+      <div class="box key tight" style="margin-top:10px;">
+        <span class="label">形参与实参</span>
+        第二维 <code class="inline">5</code> 不可省，编译器据此计算每行步长，且须与实参 <code class="inline">score[30][5]</code> 一致；第一维可省，行数由 <code class="inline">m</code> 传入。<code class="inline">s</code> 收到的是 <code class="inline">score</code> 的首地址，函数内对 <code class="inline">s[i][j]</code> 的改动会写回实参数组。<code class="inline">output</code> 的实现与第 14 页的输出循环相同，只需把 <code class="inline">score</code> 换成形参 <code class="inline">s</code>。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="4" data-t="列数为什么不能省">
+    <div class="s-title">列数为什么不能省</div>
+    <div class="s-body">
+<pre class="code" style="margin-top:0;">地址(a[i][j]) = 首地址 + i × 列数 × sizeof(int) + j × sizeof(int)
+实参：int m[4][4]　形参：int a[][3]　　<span class="cmt">/* 列数不一致 */</span></pre>
+      <div class="box red tight">
+        <span class="label">实际后果</span>
+        本机编译给出 <code class="inline">incompatible pointer type</code> 警告。函数仍按每行 3 个元素计算偏移，第 1 行才读入 4 个整数就被当作跨行，转置结果出现一个随机值。
+      </div>
+      <div class="box warn tight">
+        <span class="label">两条规则</span>
+        其一，形参第二维必须是编译期确定的常量；其二，实参数组的第二维必须与它相同。写成 <code class="inline">void f(int a[][3])</code> 就只能接收第二维为 3 的数组。
+      </div>
+      <div class="box tip tight">
+        <span class="label">可选路径</span>
+        C99 起可用可变长数组作形参，写作 <code class="inline">void f(int n, int a[][n])</code>，要求 <code class="inline">n</code> 在数组参数之前声明。这一写法留待指针一章展开，本讲不采用。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="4" data-t="选学：鞍点">
+    <div class="s-title">选学：找出矩阵的鞍点</div>
+    <div class="s-body">
+      <p>鞍点指某个元素既是所在行的最大值，又是所在列的最小值。矩阵可以没有鞍点。</p>
+<pre class="code" style="margin-top:0;"><span class="kw">int</span> x[<span class="num">4</span>][<span class="num">3</span>] = {{<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>},{<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>},{<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>},{<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>}};
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; <span class="num">4</span>; i++) {
+    max = x[i][<span class="num">0</span>];
+    row = i;
+    column = <span class="num">0</span>;
+    <span class="kw">for</span> (j = <span class="num">1</span>; j &lt; <span class="num">3</span>; j++)
+        <span class="kw">if</span> (x[i][j] &gt; max) { max = x[i][j]; column = j; }
+    <span class="kw">for</span> (k = <span class="num">0</span>; k &lt; <span class="num">4</span>; k++)
+        <span class="kw">if</span> (x[k][column] &lt; max) { row = column = -<span class="num">1</span>; <span class="kw">break</span>; }
+    <span class="kw">if</span> (row &gt; -<span class="num">1</span>) <span class="kw">printf</span>(<span class="str">"鞍点 x[%d][%d]=%d\n"</span>, row, column, max);
+}</pre>
+      <div class="box tip tight">
+        <span class="label">本例结果</span>
+        鞍点为 <code class="inline">x[3][2] = 1</code>：第 3 行最大值是 1，第 2 列最小值也是 1。求行最大值与列最小值各用一层循环，外层仍是遍历行的循环。此页不作为考核要求。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-g="收尾" data-t="随堂检测">
+    <div class="s-title">随堂检测</div>
+    <div class="s-body">
+      <div class="grid c3" style="min-height:330px;">
+        <div class="card">
+          <h4><span class="ico">1</span>行列与个数</h4>
+          <p><code class="inline">int a[3][4];</code> 有多少个元素？最大合法下标是什么？</p>
+          <button class="qbtn" data-q="db1" style="margin-top:10px;">看解析</button>
+        </div>
+        <div class="card green">
+          <h4><span class="ico">2</span>省略第一维</h4>
+          <p><code class="inline">int a[][3] = {1,2,3,4,5,6};</code> 有几行？</p>
+          <button class="qbtn" data-q="db2" style="margin-top:10px;">看解析</button>
+        </div>
+        <div class="card red">
+          <h4><span class="ico">3</span>形参写法</h4>
+          <p><code class="inline">void f(int a[][])</code> 为什么不能通过编译？</p>
+          <button class="qbtn" data-q="db3" style="margin-top:10px;">看解析</button>
+        </div>
+      </div>
+      <div class="box tip tight" style="margin-top:18px;">
+        <span class="label">考点分布</span>
+        第 1 题考下标范围，第 2 题考初始化推断，第 3 题考地址步长；三题都依据按行连续存放的规则。
+      </div>
+    </div>
+    <div class="qans" id="db1">
+      <div class="qans-t">第 1 题　元素个数</div>
+      <p>3 × 4 = <b>12</b> 个元素。行下标范围 0 至 2，列下标范围 0 至 3，最后一个元素是 <code class="inline">a[2][3]</code>。</p>
+      <p style="margin-top:10px;">写成 <code class="inline">a[3][4]</code> 会越过整张表的末尾，编译时没有提示。</p>
+    </div>
+    <div class="qans" id="db2">
+      <div class="qans-t">第 2 题　行数推断</div>
+      <p><b>2</b> 行。6 个初值，每行 3 个，编译器据此推得第一维为 2。</p>
+      <pre class="code">int rows = sizeof(a) / sizeof(a[0]);   <span class="cmt">/* 2 */</span></pre>
+    </div>
+    <div class="qans" id="db3">
+      <div class="qans-t">第 3 题　形参的第二维</div>
+      <p>编译器计算 <code class="inline">a[i][j]</code> 的地址时必须知道列数，否则无法求出每行的步长。第二维不可省略，应写成 <code class="inline">void f(int a[][4])</code>，并保证实参数组的列数也是 4。</p>
+    </div>
+  </section>
+
+  <section class="slide dense" data-g="收尾" data-t="本讲小结">
+    <div class="s-title">本讲小结</div>
+    <div class="s-body">
+      <table class="tb">
+        <thead><tr><th style="width:180px;">要点</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr><td>逻辑结构</td><td><code class="inline">a[i][j]</code>，先行后列，下标均从 0 起。</td></tr>
+          <tr><td>存储结构</td><td>按行连续存放，相邻元素相差 4 字节，行与行之间没有空隙。</td></tr>
+          <tr><td>初始化</td><td>可省第一维，不可省第二维；部分赋初值时其余元素补 0。</td></tr>
+          <tr><td>遍历</td><td>外层控行、内层控列；一层循环按偏移量访问同样有效。</td></tr>
+          <tr><td>函数形参</td><td>第一维可省，第二维必须写明且与实参一致。</td></tr>
+        </tbody>
+      </table>
+      <div class="box key tight">
+        <span class="label">总述</span>
+        二维数组在逻辑上是矩阵，在内存中仍是一段连续空间；列数决定每行的长度，二维下标据此换算成一维偏移。
+      </div>
+    </div>
+  </section>
+
+  <section class="slide end" data-g="收尾">
+    <div class="end-inner">
+      <p>行下标与列下标共同确定一个元素的位置。</p>
+    </div>
+  </section>
+
+
+  <!-- 导航 UI -->
+  <div class="pageinfo"><b id="cur">1</b> / <span id="total">0</span></div>
+
+  <div class="nav">
+    <button class="tocbtn" id="btnCopy" title="复制本页全部代码（按 C 键）">复制代码</button>
+    <button class="tocbtn" id="btnToc" title="目录（按 O 键）">目录</button>
+    <button id="btnPrev" title="上一页（←）">‹</button>
+    <button id="btnNext" title="下一页（→ / 空格）">›</button>
+  </div>
+
+  <div class="keyhint" id="keyhint">← → 翻页　·　空格下一页　·　C 复制代码　·　O 目录　·　B 黑屏</div>
+  <div class="progress" id="progress"></div>
+
+  <div class="toc" id="toc">
+    <button class="toc-close" id="btnTocClose">关闭 ✕</button>
+    <h3>目录</h3>
+    <div class="toc-bar"></div>
+    <div class="toc-list" id="tocList"></div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* 通用分步演示驱动：上一步 / 下一步 / 重置，翻到本页时自动复位 */
+  function bind(root, steps, paint) {
+    var note = root.querySelector('.demo-note');
+    var prog = root.querySelector('.demo-prog');
+    var hint = root.getAttribute('data-hint') || '点击“下一步”开始。';
+    var total = steps.length;
+    var idx = -1;
+
+    function render() {
+      var s = idx >= 0 ? steps[idx] : null;
+      paint(s);
+      note.textContent = s ? s.note : hint;
+      prog.textContent = (idx + 1) + ' / ' + total;
+    }
+
+    var bn = root.querySelector('[data-act="next"]');
+    var bp = root.querySelector('[data-act="prev"]');
+    var br = root.querySelector('[data-act="reset"]');
+    if (bn) bn.onclick = function (e) { e.stopPropagation(); if (idx < total - 1) { idx += 1; render(); } };
+    if (bp) bp.onclick = function (e) { e.stopPropagation(); if (idx >= 0) { idx -= 1; render(); } };
+    if (br) br.onclick = function (e) { e.stopPropagation(); idx = -1; render(); };
+
+    root.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    var slide = root;
+    while (slide && String(slide.className).indexOf('slide') < 0) slide = slide.parentNode;
+    if (slide && window.MutationObserver) {
+      new MutationObserver(function () {
+        if (slide.classList.contains('active')) { idx = -1; render(); }
+      }).observe(slide, { attributes: true, attributeFilter: ['class'] });
+    }
+    render();
+  }
+
+  /* ---------- 成绩表：逐行填入 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="score"]');
+    if (!root) return;
+    var cells = root.querySelectorAll('.ac');
+    var data = [[1,78,92,65,235],[2,85,90,88,263],[3,72,78,80,230]];
+    var steps = [
+      { r:0, note:'读入第 0 行：学号 1，三门成绩 78、92、65；score[0][4] 累加得 235。' },
+      { r:1, note:'读入第 1 行：score[1][4] 先清零，再依次加上 85、90、88，得 263。' },
+      { r:2, note:'读入第 2 行：三门成绩 72、78、80，总分 score[2][4] 得 230。' },
+      { r:2, done:true, note:'三行填满。第 4 列始终由循环累加得出，不需要额外输入。' }
+    ];
+    bind(root, steps, function (s) {
+      for (var i = 0; i < cells.length; i++) {
+        var row = Math.floor(i / 5), col = i % 5;
+        var c = cells[i];
+        if (!s || row > s.r) {
+          c.textContent = '?';
+          c.style.background = '';
+          c.style.borderColor = '';
+          continue;
+        }
+        c.textContent = data[row][col];
+        c.style.background = (s.done && col === 4) ? '#eaf7ef'
+                           : (row === s.r ? '#fff3e0' : '');
+        c.style.borderColor = (s.done && col === 4) ? '#2e8b57'
+                            : (row === s.r ? '#e8720c' : '');
+      }
+    });
+  })();
+
+  /* ---------- 矩阵转置：六次对称交换 ---------- */
+  (function () {
+    var root = document.querySelector('[data-demo="transpose"]');
+    if (!root) return;
+    var cells = root.querySelectorAll('.ac');
+    var base = [1,2,3,4, 5,6,7,8, 9,10,11,12, 13,14,15,16];
+    var steps = [
+      { m:[1,5,3,4, 2,6,7,8, 9,10,11,12, 13,14,15,16], p:[4,1],
+        note:'i=1, j=0：交换 a[1][0]=5 与 a[0][1]=2。' },
+      { m:[1,5,9,4, 2,6,7,8, 3,10,11,12, 13,14,15,16], p:[8,2],
+        note:'i=2, j=0：交换 a[2][0]=9 与 a[0][2]=3。' },
+      { m:[1,5,9,4, 2,6,10,8, 3,7,11,12, 13,14,15,16], p:[9,6],
+        note:'i=2, j=1：交换 a[2][1]=10 与 a[1][2]=7。' },
+      { m:[1,5,9,13, 2,6,10,8, 3,7,11,12, 4,14,15,16], p:[12,3],
+        note:'i=3, j=0：交换 a[3][0]=13 与 a[0][3]=4。' },
+      { m:[1,5,9,13, 2,6,10,14, 3,7,11,12, 4,8,15,16], p:[13,7],
+        note:'i=3, j=1：交换 a[3][1]=14 与 a[1][3]=8。' },
+      { m:[1,5,9,13, 2,6,10,14, 3,7,11,15, 4,8,12,16], p:[14,11],
+        note:'i=3, j=2：交换 a[3][2]=15 与 a[2][3]=12。六次交换后转置完成。' }
+    ];
+    bind(root, steps, function (s) {
+      var m = s ? s.m : base;
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].textContent = m[i];
+        var hot = s && (i === s.p[0] || i === s.p[1]);
+        cells[i].style.background = hot ? '#fff3e0' : '';
+        cells[i].style.borderColor = hot ? '#e8720c' : '';
+      }
+    });
+  })();
+
+})();
+
+</script>
+
+<script>
+(function(){
+  var stage   = document.getElementById('stage');
+  var slides  = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total   = slides.length;
+  var cur     = 0;
+  var curEl   = document.getElementById('cur');
+  var bar     = document.getElementById('progress');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+  var toc     = document.getElementById('toc');
+  var tocList = document.getElementById('tocList');
+  var keyhint = document.getElementById('keyhint');
+
+  document.getElementById('total').textContent = total;
+
+  /* 目录直接从各页的 data-g / data-t 生成，避免手写下标对不上 */
+  var NAMES = {'开场':'开场', '1':'一、定义与存储', '2':'二、初始化遍历', '3':'三、应用', '4':'四、数组与函数', '收尾':'收尾'};
+  var BAR   = {'开场':'#4a97d4', '1':'#e8720c', '2':'#2e8b57', '3':'#8e44ad', '4':'#c0392b', '收尾':'#4a97d4'};
+  var groups = {};
+
+  slides.forEach(function(s, i){
+    var g = s.getAttribute('data-g');
+    if (!g) return;
+    var t = s.getAttribute('data-t');
+    if (!t){
+      var cls = String(s.className);
+      if (cls.indexOf('cover') >= 0) t = '封面';
+      else if (cls.indexOf('end') >= 0) t = '结束页';
+      else {
+        var el = s.querySelector('.s-title');
+        t = el ? el.textContent.trim() : ('第 ' + (i + 1) + ' 页');
+      }
+    }
+    (groups[g] = groups[g] || []).push({ i:i, t:t });
+  });
+
+  function addGroup(col, k, items, cont){
+    if (!items || !items.length) return;
+    var d = document.createElement('div');
+    d.className = 'toc-group';
+    d.style.borderTopColor = BAR[k] || '#4a97d4';
+    var h = document.createElement('div');
+    h.className = 'toc-group-title';
+    h.textContent = (NAMES[k] || k) + (cont ? '（续）' : '');
+    d.appendChild(h);
+    items.forEach(function(item){
+      var a = document.createElement('a');
+      a.textContent = item.t;
+      a.onclick = function(){ go(item.i); closeToc(); };
+      d.appendChild(a);
+    });
+    col.appendChild(d);
+  }
+
+  /* 六列：开场与收尾共一列，五个知识块各占一列 */
+  var COLS = [ [{'k':'开场'},{'k':'收尾'}], [{'k':'1'}], [{'k':'2'}], [{'k':'3'}], [{'k':'4'}] ];
+
+  COLS.forEach(function(spec){
+    var col = document.createElement('div');
+    col.className = 'toc-col';
+    spec.forEach(function(g){
+      addGroup(col, g.k, g.items || groups[g.k], g.cont);
+    });
+    tocList.appendChild(col);
+  });
+
+  function resize(){
+    var s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+    stage.style.setProperty('--s', s);
+  }
+  window.addEventListener('resize', resize);
+
+  function closeAns(){
+    var cs = document.querySelectorAll('.qans');
+    for (var i = 0; i < cs.length; i++) cs[i].style.display = 'none';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.qbtn'), function(btn){
+    btn.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      var card = document.getElementById(btn.getAttribute('data-q'));
+      if (!card) return;
+      var open = card.style.display === 'block';
+      closeAns();
+      if (!open) card.style.display = 'block';
+    });
+  });
+
+  function go(i){
+    closeAns();
+    cur = Math.max(0, Math.min(total - 1, i));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === cur); });
+    curEl.textContent = cur + 1;
+    bar.style.width = ((cur + 1) / total * 100) + '%';
+    btnPrev.disabled = (cur === 0);
+    btnNext.disabled = (cur === total - 1);
+  }
+
+  btnPrev.onclick = function(){ go(cur - 1); this.blur(); hideHint(); };
+  btnNext.onclick = function(){ go(cur + 1); this.blur(); hideHint(); };
+
+  /* ===== 复制本页代码 ===== */
+  var copyToast = document.createElement('div');
+  copyToast.className = 'copy-toast';
+  stage.appendChild(copyToast);
+  var toastTimer = null;
+  function toast(msg){
+    copyToast.textContent = msg;
+    copyToast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ copyToast.classList.remove('show'); }, 2000);
+  }
+
+  function pageCodeText(){
+    var pres = slides[cur].querySelectorAll('pre');
+    var blocks = [];
+    for (var i = 0; i < pres.length; i++) {
+      var t = pres[i].innerText.replace(/\u00a0/g, ' ').replace(/\s+$/, '');
+      if (t.replace(/\s/g, '').length > 0) blocks.push(t);
+    }
+    if (blocks.length === 0) return '';
+    if (blocks.length === 1) return blocks[0];
+    var out = [];
+    for (var j = 0; j < blocks.length; j++) {
+      out.push('/* ---- 本页第 ' + (j + 1) + ' 段代码 ---- */');
+      out.push(blocks[j]);
+    }
+    return out.join('\n\n');
+  }
+
+  function writeClipboard(txt, done){
+    var ok = false;
+    var ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    if (ok) { done(true); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function(){ done(true); },
+                                             function(){ done(false); });
+    } else { done(false); }
+  }
+
+  function copyPageCode(){
+    var txt = pageCodeText();
+    if (!txt) { toast('本页没有可复制的代码'); return; }
+    var lines = txt.split('\n').length;
+    var segs = slides[cur].querySelectorAll('pre').length;
+    writeClipboard(txt, function(ok){
+      if (ok) {
+        toast('已复制 ' + lines + ' 行代码' + (segs > 1 ? '（本页共 ' + segs + ' 段，已用注释分隔）' : ''));
+      } else {
+        toast('复制失败，请直接拖选后按 Ctrl+C');
+      }
+    });
+  }
+  document.getElementById('btnCopy').onclick = function(){ copyPageCode(); this.blur(); };
+
+  function openToc(){ toc.classList.add('show'); }
+  function closeToc(){ toc.classList.remove('show'); }
+  document.getElementById('btnToc').onclick = function(){
+    toc.classList.contains('show') ? closeToc() : openToc();
+    this.blur();
+  };
+  document.getElementById('btnTocClose').onclick = function(){
+    closeToc(); this.blur();
+  };
+
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+
+    if (toc.classList.contains('show')) {
+      if (k === 'Escape' || k === 'o' || k === 'O') { e.preventDefault(); closeToc(); }
+      return;
+    }
+
+    if ((k === ' ' || k === 'Enter') &&
+        String(window.getSelection()).replace(/\s/g, '').length > 0) {
+      return;
+    }
+
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' ||
+        k === ' ' || k === 'Enter') {
+      e.preventDefault(); go(cur + 1); hideHint();
+    } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' ||
+               k === 'Backspace') {
+      e.preventDefault(); go(cur - 1); hideHint();
+    } else if (k === 'Home') {
+      e.preventDefault(); go(0); hideHint();
+    } else if (k === 'End') {
+      e.preventDefault(); go(total - 1); hideHint();
+    } else if (k === 'o' || k === 'O') {
+      e.preventDefault(); openToc();
+    } else if (k === 'b' || k === 'B' || k === '.') {
+      e.preventDefault();
+      document.body.classList.toggle('blackout');
+    } else if ((k === 'c' || k === 'C') && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault(); copyPageCode();
+    }
+  });
+
+  var wheelLock = false;
+  document.addEventListener('wheel', function(e){
+    if (toc.classList.contains('show')) return;
+    if (wheelLock) return;
+    wheelLock = true;
+    setTimeout(function(){ wheelLock = false; }, 420);
+    if (e.deltaY > 0) go(cur + 1); else go(cur - 1);
+    hideHint();
+  }, { passive: true });
+
+  var downX = 0, downY = 0, dragged = false;
+  document.addEventListener('mousedown', function(e){
+    downX = e.clientX; downY = e.clientY; dragged = false;
+  });
+  document.addEventListener('mouseup', function(e){
+    if (Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6) dragged = true;
+  });
+
+  document.addEventListener('click', function(e){
+    if (toc.classList.contains('show')) return;
+    if (e.target.closest('.nav')) return;
+    if (e.target.closest('.toc')) return;
+    if (e.target.closest('a')) return;
+    if (e.target.closest('.demo')) return;
+    if (e.target.closest('.qbtn')) return;
+    if (e.target.closest('.qans')) return;
+    if (dragged) { dragged = false; return; }
+    var sel = window.getSelection();
+    if (sel && String(sel).replace(/\s/g, '').length > 0) return;
+    if (e.clientX > window.innerWidth / 2) go(cur + 1);
+    else go(cur - 1);
+    hideHint();
+  });
+
+  var tx = 0, ty = 0;
+  document.addEventListener('touchstart', function(e){
+    tx = e.changedTouches[0].clientX;
+    ty = e.changedTouches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - tx;
+    var dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+      go(dx < 0 ? cur + 1 : cur - 1);
+      hideHint();
+    }
+  }, { passive: true });
+
+  var hintTimer = null;
+  function hideHint(){
+    if (keyhint.classList.contains('hide')) return;
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 500);
+  }
+  hintTimer = setTimeout(function(){ keyhint.classList.add('hide'); }, 6000);
+
+  resize();
+  go(0);
+})();
+</script>
+
+</body>
+</html>
