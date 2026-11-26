@@ -1174,12 +1174,12 @@ n++;</pre>
 <div class="s-sub" style="margin-top:0;">每删一个：左移 + n--，i 原地复查（x = 5）</div>
 <pre class="code" style="margin-top:0;"><span class="cmt">/* del：已删个数 */</span>
 <span class="kw">int</span> del = <span class="num">0</span>;
-<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n - del; ) {
+<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n ; ) {
     <span class="kw">if</span> (a[i] != x) {
         i++;  <span class="kw">continue</span>;
     }
     <span class="cmt">/* 后面元素左移一位 */</span>
-    <span class="kw">for</span> (j = i; j &lt; n - del - <span class="num">1</span>; j++)
+    <span class="kw">for</span> (j = i; j &lt; n - <span class="num">1</span>; j++)
         a[j] = a[j + <span class="num">1</span>];
     n--;  del++;
     <span class="cmt">/* i 不动，原地复查 */</span>
